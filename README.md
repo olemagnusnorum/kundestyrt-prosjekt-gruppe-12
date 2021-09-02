@@ -1,7 +1,7 @@
 # kundestyrt-prosjekt-guppe-12
 Kundestyrt prosjekt  gruppe 12
 
-Gruppemedlemmer:
+Gruppemedlemmer:  
 Forbord, Ole Marius (omforbor@stud.ntnu.no)  
 Kristoffersen, Markus Hvidsten (markushk@stud.ntnu.no)  
 Langli, Karoline Lillevestre (karolill@stud.ntnu.no)  
