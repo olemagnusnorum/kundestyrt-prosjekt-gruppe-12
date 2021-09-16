@@ -13,6 +13,8 @@ plugins {
 group = "com.backend"
 version = "0.0.1"
 application {
+    // If the project is run from IntelliJ IDEA, pass the flag '-Dio.ktor.development=true' to VM options to enable development mode.
+    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=true")
     mainClass.set("com.backend.ApplicationKt")
 }
 
