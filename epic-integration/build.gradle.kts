@@ -32,4 +32,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0-RC")
     //this is for serialization with kotlin
     implementation("io.ktor:ktor-serialization:$ktor_version")
+    // FreeMarker for easy frontend templating
+    implementation("io.ktor:ktor-freemarker:$ktor_version")
 }

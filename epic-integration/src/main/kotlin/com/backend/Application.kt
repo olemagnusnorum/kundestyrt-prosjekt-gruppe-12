@@ -7,6 +7,7 @@ import io.ktor.server.netty.*
 import com.backend.plugins.*
 import io.ktor.application.*
 import io.ktor.features.*
+import io.ktor.freemarker.*
 import io.ktor.serialization.*
 import kotlinx.serialization.json.Json
 
@@ -18,6 +19,10 @@ fun main() {
                 prettyPrint = true
                 isLenient = true
             })
+        }
+
+        install(FreeMarker) {
+
         }
 
         personRoute()
