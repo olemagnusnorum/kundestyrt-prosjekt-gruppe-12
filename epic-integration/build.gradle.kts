@@ -13,6 +13,8 @@ plugins {
 group = "com.backend"
 version = "0.0.1"
 application {
+    // If the project is run from IntelliJ IDEA, pass the flag '-Dio.ktor.development=true' to VM options to enable development mode.
+    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=true")
     mainClass.set("com.backend.ApplicationKt")
 }
 
@@ -32,4 +34,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0-RC")
     //this is for serialization with kotlin
     implementation("io.ktor:ktor-serialization:$ktor_version")
+    // FreeMarker for easy frontend templating
+    implementation("io.ktor:ktor-freemarker:$ktor_version")
 }
