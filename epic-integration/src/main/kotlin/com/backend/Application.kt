@@ -5,6 +5,7 @@ import com.backend.plugins.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import com.backend.plugins.*
+import freemarker.cache.ClassTemplateLoader
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.freemarker.*
@@ -22,7 +23,7 @@ fun main() {
         }
 
         install(FreeMarker) {
-
+            templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
         }
 
         personRoute()
