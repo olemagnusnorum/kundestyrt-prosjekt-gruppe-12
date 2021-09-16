@@ -32,6 +32,11 @@ fun Application.personRoute() {
         get("/") {
             call.respondTemplate("index.ftl")
         }
+
+        post("/request-sykepenger") {
+            val params = call.receiveParameters()
+            print("Received message from frontend!\n")
+        }
     }
 
 }
