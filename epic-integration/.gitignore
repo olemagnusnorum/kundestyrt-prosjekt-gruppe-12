@@ -1,0 +1,15 @@
+# The following will be created when starting/building the project locally
+/build
+/.gradle
+
+# User-specific files
+.idea/**/workspace.xml
+.idea/**/usage.statistics.xml
+.idea/**/shelf
+
+# Generated on import for Gradle based projects
+.idea/modules.xml
+*.iml
+
+# Can contain local paths
+.idea/gradle.xml
