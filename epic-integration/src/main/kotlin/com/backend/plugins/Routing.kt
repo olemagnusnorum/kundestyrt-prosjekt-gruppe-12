@@ -3,6 +3,7 @@ package com.backend.plugins
 import io.ktor.routing.*
 import io.ktor.http.*
 import io.ktor.application.*
+import io.ktor.freemarker.*
 import io.ktor.response.*
 import io.ktor.request.*
 import kotlinx.serialization.Serializable
@@ -28,6 +29,14 @@ fun Application.personRoute() {
             call.respondText(epicResponse)
         }
 
+        get("/") {
+            call.respondTemplate("index.ftl")
+        }
+
+        post("/request-sykepenger") {
+            val params = call.receiveParameters()
+            print("Received message from frontend!\n")
+        }
     }
 
 }
