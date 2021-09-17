@@ -37,10 +37,6 @@ dependencies {
     // FreeMarker for easy frontend templating
     implementation("io.ktor:ktor-freemarker:$ktor_version")
 
-    //jwt
-    implementation("io.ktor:ktor-auth:$ktor_version")
-    implementation("io.ktor:ktor-auth-jwt:$ktor_version")
-
     //jwtk
     implementation("io.jsonwebtoken:jjwt-api:0.11.2")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.2")

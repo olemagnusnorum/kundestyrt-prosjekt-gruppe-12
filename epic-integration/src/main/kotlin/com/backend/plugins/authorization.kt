@@ -88,6 +88,7 @@ fun generateJWT(): String {
 
 suspend fun getEpicAccessToken(): String {
     // posting the JWT and getting an access token in response
+    // to call the function it has to be inside launch{val token = getEpicAccessToken()}
     println("Response")
     val epicJWT : String = generateJWT()
     val client = HttpClient()

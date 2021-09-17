@@ -15,7 +15,7 @@ fun requestEpic() {
     with(url.openConnection() as HttpURLConnection){
         requestMethod = "GET"
         println("THIS IS THE RESPONSE from $serverURLString")
-        println("Respose code $responseCode")
+        println("Response code $responseCode")
 
         inputStream.bufferedReader().use {
             it.lines().forEach{ line ->

@@ -11,8 +11,6 @@ import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
 import freemarker.cache.ClassTemplateLoader
 import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.auth.jwt.*
 import io.ktor.features.*
 import io.ktor.freemarker.*
 import io.ktor.serialization.*
@@ -29,14 +27,6 @@ fun main() {
                 isLenient = true
             })
         }
-
-        install(Authentication) {
-            jwt {
-                // Configure jwt authentication
-            }
-        }
-
-        //launch { println(getEpicAccessToken()) }
 
 
 
