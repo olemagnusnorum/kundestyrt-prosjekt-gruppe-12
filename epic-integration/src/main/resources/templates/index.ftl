@@ -7,7 +7,6 @@
 <div>
     <h3>Navigasjonsside</h3>
     <br>
-    <br>
     <a href="/nav-camilla-lopez">Gå til siden til Camilla Lopez!</a>
     <br>
     <a href="/doctor">Gå til siden til Doctor!</a>
