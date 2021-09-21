@@ -25,9 +25,8 @@ fun generateJWT(): String {
     //private key er gjort om, men ikke public må være på dette formatet
     //RSA private key is reformated to fit the java library used to make private key class
     // openssl pkcs8 -topk8 -in private_key.pem -inform pem -out private_key_pkcs8.pem -outform pem -nocrypt
-    val myPrivateKey = """
-    dummy-private-key
-    """
+    val myPrivateKey = System.getenv("epic_private_key")
+    val clientId = System.getenv("epic_client_id")
 
     // removing white space
     val regexPrivateKey :String = myPrivateKey.replace("\\s".toRegex(), "")
@@ -43,8 +42,8 @@ fun generateJWT(): String {
     headers["typ"] = "JWT"
     // making body for JWT
     val claims : HashMap<String, Any?> = HashMap<String, Any?>()
-    claims["iss"] = "f89a9ce8-81e3-4455-b6a8-d22bf38324a7"
-    claims["sub"] = "f89a9ce8-81e3-4455-b6a8-d22bf38324a7"
+    claims["iss"] = clientId
+    claims["sub"] = clientId
     claims["aud"] = "https://fhir.epic.com/interconnect-fhir-oauth/oauth2/token"
     claims["jti"] = (System.currentTimeMillis() + 300000).toString()
     claims["exp"] = Date(System.currentTimeMillis() + 300000)
