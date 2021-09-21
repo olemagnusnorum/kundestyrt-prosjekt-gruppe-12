@@ -5,10 +5,8 @@
 </head>
 <body style="text-align: center; font-family: sans-serif">
 <div>
-    <h3>Rapporter fødsel for Camilla Lopez!</h3>
-    <form action="/report-child-birth" method="post">
-        <input type="submit">
-    </form>
+    <h3>Du har rapportert en fødsel!</h3>
+    <a href="/doctor">Gå tilbake til legesiden.</a>
     <a href="/">Gå tilbake til navigasjonsiden.</a>
 </div>
 </body>

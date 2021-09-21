@@ -5,10 +5,8 @@
 </head>
 <body style="text-align: center; font-family: sans-serif">
 <div>
-    <h3>Søk sykepenger!</h3>
-    <form action="/request-sykepenger" method="post">
-        <input type="submit">
-    </form>
+    <a href="/nav-camilla-lopez">Gå til siden til Camilla Lopez!</a>
+    <a href="/doctor">Gå til siden til Doctor!</a>
 </div>
 </body>
 </html>
