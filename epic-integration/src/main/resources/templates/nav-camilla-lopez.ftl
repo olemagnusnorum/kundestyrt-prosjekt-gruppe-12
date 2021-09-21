@@ -9,6 +9,8 @@
     <form action="/request-foreldrepenger" method="post">
         <input type="submit">
     </form>
+    <br>
+    <br>
     <a href="/">Gå tilbake til navigasjonsiden.</a>
 </div>
 </body>

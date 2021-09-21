@@ -44,6 +44,7 @@ fun Application.personRoute() {
         post("/request-foreldrepenger") {
             val params = call.receiveParameters()
             print("Received message from frontend!\n")
+            call.respondTemplate("nav-camilla-lopez-foreldrepenger.ftl")
         }
 
         post("/report-child-birth") {

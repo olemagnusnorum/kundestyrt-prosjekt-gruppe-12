@@ -9,6 +9,8 @@
     <form action="/report-child-birth" method="post">
         <input type="submit">
     </form>
+    <br>
+    <br>
     <a href="/">Gå tilbake til navigasjonsiden.</a>
 </div>
 </body>
