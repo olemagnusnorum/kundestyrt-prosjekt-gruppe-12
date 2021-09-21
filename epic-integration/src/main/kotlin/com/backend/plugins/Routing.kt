@@ -33,10 +33,21 @@ fun Application.personRoute() {
             call.respondTemplate("index.ftl")
         }
 
+        get("/doctor") {
+            call.respondTemplate("doctor.ftl")
+        }
+
         post("/request-sykepenger") {
             val params = call.receiveParameters()
             print("Received message from frontend!\n")
         }
+
+
+        post("/report-child-birth") {
+            val params = call.receiveParameters()
+            print("Received message from Doctor that Camilla Lopez has had a child!\n")
+        }
+
     }
 
 }
