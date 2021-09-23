@@ -1,46 +1,33 @@
 package com.backend.plugins
 
 import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.parser.IParser
+import org.hl7.fhir.r4.model.Bundle
 import org.hl7.fhir.r4.model.Patient
-import java.net.URL
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 fun requestEpic() : String {
+    return "1"
+}
 
-    val serverURLString: String = "https://fhir.epic.com/interconnect-fhir-oauth/"
-    val url = URL(serverURLString)
+//Maybe TODO: Find more general parsing. Ex.: From Bundle to whatever object is in it.
+fun parseBundleToPatient(xmlMessage: String): Patient {
 
     val ctx = FhirContext.forR4()
 
-    // Create a client
-    val client = ctx.newRestfulGenericClient(serverURLString)
+    // The hapi context object is used to create a new XML parser
+    // instance. The parser can then be used to parse (or unmarshall) the
+    // string message into a Patient object
+    val parser: IParser = ctx.newXmlParser()
+    parser.setPrettyPrint(true)
+    val jsonParser: IParser = ctx.newJsonParser()
+    jsonParser.setPrettyPrint(true)
 
-    val token = GlobalScope.launch { getEpicAccessToken() }.toString()
+    val bundle: Bundle = parser.parseResource(Bundle::class.java, xmlMessage)
 
-    val p = client
-        .read()
-        .resource(Patient::class.java)
-        .withId(123L)
-        .withAdditionalHeader("Bearer", token)
-        .execute()
+    val patient: Patient = bundle.entry[0].resource as Patient
 
-    //val patient = client.read().resource(Patient::class.java).withId("123").execute()
+    println(patient.name[0].family)
 
-    //println(patient)
-
-    return p.toString()
-
-//    with(url.openConnection() as HttpURLConnection){
-//        requestMethod = "GET"
-//        println("THIS IS THE RESPONSE from $serverURLString")
-//        println("Response code $responseCode")
-//
-//        inputStream.bufferedReader().use {
-//            it.lines().forEach{ line ->
-//                println(line)
-//            }
-//        }
-//    }
+    return patient
 }
 
