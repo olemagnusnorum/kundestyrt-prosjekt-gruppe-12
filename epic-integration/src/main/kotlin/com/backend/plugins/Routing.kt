@@ -1,7 +1,6 @@
 package com.backend.plugins
 
 import io.ktor.routing.*
-import io.ktor.http.*
 import io.ktor.application.*
 import io.ktor.freemarker.*
 import io.ktor.response.*
@@ -18,9 +17,6 @@ fun Application.personRoute() {
         get("/person") {
             val person = call.receive<Person>()
             call.respondText("this is a person from json: \n ${person.firstName} ${person.lastName} is ${person.age}")
-
-            //requesting dummy epic serever endpint
-            requestEpic()
         }
 
         //dummy epic server endpoint
