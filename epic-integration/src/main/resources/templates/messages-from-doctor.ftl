@@ -5,17 +5,16 @@
 </head>
 <body style="text-align: center; font-family: sans-serif">
 <div>
-    <h1>Legens meldinger</h1>
-    <h3>NAV har bedt om informasjon om Camila</h3>
-    <p>Hei! Vi trenger info om helsen til Camila.</p>
+    <h1>NAVs meldinger</h1>
+    <h3>Legen har send deg informasjon</h3>
     <h3>Send et svar:</h3>
     <input type="text">
     <form action="/messages-sent-from-doctor-confirmation" method="get">
-        <input type="submit" value="Send melding til NAV">
+        <input type="submit" value="Send melding til legen">
     </form>
     <br>
     <br>
-    <a href="/doctor">Gå tilbake til legesiden</a>
+    <a href="/nav">Gå tilbake til NAVs side</a>
     <br>
     <a href="/">Gå tilbake til navigasjonsiden.</a>
 </div>

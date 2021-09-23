@@ -5,9 +5,9 @@
 </head>
 <body style="text-align: center; font-family: sans-serif">
 <div>
-    <h3>Du har svart på meldingen til NAV</h3>
+    <h3>Du har svart på meldingen fra Legen</h3>
     <br>
-    <a href="/doctor">Gå tilbake til legesiden.</a>
+    <a href="/nav">Gå tilbake til NAVs side.</a>
     <br>
     <a href="/">Gå tilbake til navigasjonsiden.</a>
 </div>

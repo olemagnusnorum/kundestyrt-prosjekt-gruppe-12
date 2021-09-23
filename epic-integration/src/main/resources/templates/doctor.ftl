@@ -7,8 +7,8 @@
 <div>
     <h1>Lege</h1>
     <h3>Se melding fra NAV</h3>
-    <form action="/messeges-from-nav" method="get">
-        <input type="submit">
+    <form action="/messages-from-nav" method="get">
+        <input type="submit" value="Se melding">
     </form>
     <br>
     <br>
