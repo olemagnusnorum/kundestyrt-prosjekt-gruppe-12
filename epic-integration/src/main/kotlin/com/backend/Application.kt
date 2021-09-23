@@ -28,8 +28,6 @@ fun main() {
             })
         }
 
-
-
         install(FreeMarker) {
             templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
         }
