@@ -5,7 +5,6 @@ import io.ktor.application.*
 import io.ktor.freemarker.*
 import io.ktor.response.*
 import io.ktor.request.*
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 
 
@@ -49,8 +48,8 @@ fun Application.personRoute() {
             val params = call.receiveParameters()
             println("Created sykemelding for Derrick Lin!")
 
-            // TODO : Inappropriate blocking method call on the frontend
-            val response: String = runBlocking { requestEpicPatient("Derrick", "Lin", "1973-06-03") }
+            // TODO : Inappropriate blocking method call on the backend
+            val response: String = requestEpicPatient("Derrick", "Lin", "1973-06-03")
             val data = mapOf("response" to response)
 
             call.respondTemplate("doctor-create-sykemelding.ftl", data)
