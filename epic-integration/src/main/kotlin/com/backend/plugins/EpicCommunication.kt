@@ -33,15 +33,21 @@ suspend fun requestEpicPatient(given: String, family :String, birthdate : String
 }
 
 //Maybe TODO: Find more general parsing. Ex.: From Bundle to whatever object is in it.
-fun parseBundleToPatient(xmlMessage: String): Patient {
+/**
+ * Parse a bundle xml to Patient object using Hapi Parser.
+ * Intended to receive XML from requestEpicPatient()
+ *
+ * The hapi context object is used to create a new XML parser
+ * instance. The parser can then be used to parse (or unmarshall) the
+ * string message into a Patient object
+ */
+fun parseBundleXMLToPatient(xmlMessage: String): Patient {
 
     val ctx = FhirContext.forR4()
 
-    // The hapi context object is used to create a new XML parser
-    // instance. The parser can then be used to parse (or unmarshall) the
-    // string message into a Patient object
     val parser: IParser = ctx.newXmlParser()
     parser.setPrettyPrint(true)
+
     val jsonParser: IParser = ctx.newJsonParser()
     jsonParser.setPrettyPrint(true)
 
