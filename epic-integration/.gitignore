@@ -13,3 +13,5 @@
 
 # Can contain local paths
 .idea/gradle.xml
+
+.env
