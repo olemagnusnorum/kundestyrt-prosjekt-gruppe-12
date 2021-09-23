@@ -25,7 +25,7 @@ fun Application.personRoute() {
 
         //dummy epic server endpoint
         get("/epic") {
-            val epicResponse = "THIS IS EPICS RESPONSE"
+            val epicResponse = requestEpic()
             call.respondText(epicResponse)
         }
 

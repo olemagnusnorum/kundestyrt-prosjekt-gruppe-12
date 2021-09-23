@@ -34,6 +34,10 @@ fun main() {
             templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
         }
 
+        //launch { println(getEpicAccessToken()) }
+
+        //launch { requestEpic() }
+
         personRoute()
     }.start(wait = true)
 }

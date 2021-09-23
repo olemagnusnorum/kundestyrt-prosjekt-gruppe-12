@@ -46,5 +46,11 @@ dependencies {
     implementation("io.ktor:ktor-client-core:$ktor_version")
     implementation("io.ktor:ktor-client-cio:$ktor_version")
 
+    //HAPI
+    implementation("ca.uhn.hapi.fhir:hapi-fhir-base:5.4.0")
+    implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:5.4.0")
+    implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:5.4.0")
+    implementation("ca.uhn.hapi.fhir:hapi-fhir-client:5.4.0")
+
 
 }
