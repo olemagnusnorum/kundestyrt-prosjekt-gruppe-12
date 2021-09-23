@@ -29,8 +29,6 @@ fun main() {
             templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
         }
 
-        runBlocking { requestEpicPatient("Derek", "Lin", "1973-06-03") }
-
         personRoute()
     }.start(wait = true)
 }
