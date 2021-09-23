@@ -1,27 +1,35 @@
 package com.backend.plugins
 
-import java.net.HttpURLConnection
-import java.net.URI
-import java.net.URL
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
+import kotlinx.coroutines.runBlocking
 
-fun requestEpic() {
 
-    val serverURLString: String = "http://0.0.0.0:8080/epic"
-    val url = URL(serverURLString)
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.client.call.*
 
-    with(url.openConnection() as HttpURLConnection){
-        requestMethod = "GET"
-        println("THIS IS THE RESPONSE from $serverURLString")
-        println("Response code $responseCode")
 
-        inputStream.bufferedReader().use {
-            it.lines().forEach{ line ->
-                println(line)
-            }
+
+//this works for getting the xml from the epic server (use hapi fhir to make it a resource?)
+suspend fun requestEpicPatient(given: String, family :String, birthdate : String) :String {
+
+    // birthdate format yyyy-mm-dd
+    val token :String =  runBlocking { getEpicAccessToken() }
+    val client = HttpClient()
+
+    val response : HttpResponse = client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient?given=$given&family=$family&birthdate=$birthdate"){
+        headers{
+            append(HttpHeaders.Authorization, "Bearer $token")
         }
     }
+
+    val xmlString = response.receive<String>()
+    println(xmlString)
+
+    return xmlString
+
+
 }
+
 
