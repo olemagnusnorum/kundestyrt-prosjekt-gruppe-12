@@ -7,9 +7,9 @@
 <div>
     <h3>Navigasjonsside</h3>
     <br>
-    <a href="/nav-camilla-lopez">Gå til siden til Camilla Lopez!</a>
+    <a href="/nav-derrick-lin">Gå til NAV - Derrick Lin.</a>
     <br>
-    <a href="/doctor">Gå til siden til Doctor!</a>
+    <a href="/doctor">Gå til legesiden.</a>
 </div>
 </body>
 </html>
