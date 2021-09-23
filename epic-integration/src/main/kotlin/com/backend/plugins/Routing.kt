@@ -11,6 +11,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Person(val firstName: String?, val lastName: String?, val age: Int?)
 
+
 fun Application.personRoute() {
 
     routing {
@@ -33,20 +34,25 @@ fun Application.personRoute() {
             call.respondTemplate("doctor.ftl")
         }
 
-        get("/nav-camilla-lopez") {
-            call.respondTemplate("nav-camilla-lopez.ftl")
+        get("/nav-derrick-lin") {
+            call.respondTemplate("nav-derrick-lin.ftl")
         }
 
-        post("/request-foreldrepenger") {
+        post("/request-sykepenger") {
             val params = call.receiveParameters()
-            print("Received message from frontend!\n")
-            call.respondTemplate("nav-camilla-lopez-foreldrepenger.ftl")
+            println("Received request for sykepenger!")
+            call.respondTemplate("nav-derrick-lin-sykepenger.ftl")
         }
 
-        post("/report-child-birth") {
+        post("/create-sykemelding") {
             val params = call.receiveParameters()
-            print("Received message from Doctor that Camilla Lopez has had a child!\n")
-            call.respondTemplate("doctor-report-child-birth.ftl")
+            println("Created sykemelding for Derrick Lin!")
+
+            // TODO : Inappropriate blocking method call on the backend
+            val response: String = requestEpicPatient("Derrick", "Lin", "1973-06-03")
+            val data = mapOf("response" to response)
+
+            call.respondTemplate("doctor-create-sykemelding.ftl", data)
         }
 
     }
