@@ -6,7 +6,7 @@
 <body style="text-align: center; font-family: sans-serif">
 <div>
     <h1>NAV</h1>
-    <p>Camila Lopez har søkt om sykepenger.</p>
+    <p>Derrick Lin har søkt om sykepenger.</p>
     <h3>Be om helseinfo</h3>
     <input type="text">
     <form action="/request-health-information-confirmation" method="post">

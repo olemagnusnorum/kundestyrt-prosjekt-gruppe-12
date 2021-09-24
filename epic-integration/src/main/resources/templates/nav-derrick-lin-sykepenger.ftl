@@ -1,3 +1,4 @@
+<#ftl output_format="XML">
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +8,7 @@
 <div>
     <h3>Beklager, vi har ikke implementert denne funksjonaliteten enda!</h3>
     <br>
+    <p>${response}</p>
     <a href="/nav-derrick-lin">Gå tilbake til NAV - Derrick Lin.</a>
     <br>
     <a href="/">Gå tilbake til navigasjonsiden.</a>

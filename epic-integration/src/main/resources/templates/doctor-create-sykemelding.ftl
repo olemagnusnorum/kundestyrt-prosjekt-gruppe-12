@@ -1,4 +1,4 @@
-<#ftl output_format="XML">
+<#ftl output_format="HTML">
 <!DOCTYPE html>
 <html lang="en">
 <head>
