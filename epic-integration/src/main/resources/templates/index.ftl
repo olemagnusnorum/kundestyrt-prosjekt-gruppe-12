@@ -10,6 +10,8 @@
     <a href="/nav-derrick-lin">Gå til NAV - Derrick Lin.</a>
     <br>
     <a href="/doctor">Gå til legesiden.</a>
+    <br>
+    <a href="/nav">Gå til NAVs side</a>
 </div>
 </body>
 </html>
