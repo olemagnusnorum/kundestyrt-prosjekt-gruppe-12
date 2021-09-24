@@ -1,3 +1,4 @@
+<#ftl output_format="XML">
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,9 +8,10 @@
 <div>
     <h1>NAVs meldinger</h1>
     <h3>Legen har send deg informasjon</h3>
+    <p>${response}</p>
     <h3>Send et svar:</h3>
     <input type="text">
-    <form action="/messages-sent-from-doctor-confirmation" method="get">
+    <form action="/request-health-information-confirmation" method="post">
         <input type="submit" value="Send melding til legen">
     </form>
     <br>

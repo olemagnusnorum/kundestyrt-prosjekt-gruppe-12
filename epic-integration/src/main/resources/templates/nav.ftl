@@ -13,7 +13,7 @@
         <input type="submit">
     </form>
     <h3>Se melding fra lege</h3>
-    <form action="/messages-from-doctor" method="get">
+    <form action="/messages-from-doctor" method="post">
         <input type="submit">
     </form>
     <br>

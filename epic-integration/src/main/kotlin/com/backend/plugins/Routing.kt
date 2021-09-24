@@ -49,9 +49,11 @@ fun Application.personRoute() {
             call.respondTemplate("messages-sent-from-doctor-confirmation.ftl")
         }
 
-        get("/messages-from-doctor") {
+        post("/messages-from-doctor") {
             val params = call.receiveParameters()
-            call.respondTemplate("messages-from-doctor.ftl")
+            val response: String = requestEpicPatient("Derrick", "Lin", "1973-06-03")
+            val data = mapOf("response" to response)
+            call.respondTemplate("messages-from-doctor.ftl", data)
         }
 
         post("/request-health-information-confirmation") {
