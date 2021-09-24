@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
 import org.hl7.fhir.r4.model.Bundle
 import org.hl7.fhir.r4.model.Patient
+import org.hl7.fhir.r4.model.Communication
 
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -58,5 +59,17 @@ fun parseBundleXMLToPatient(xmlMessage: String): Patient {
     println(patient.name[0].family)
 
     return patient
+}
+
+fun parseCommunicationStringToJson(jsonMessage: String): Communication {
+
+    val ctx = FhirContext.forR4()
+
+    val jsonParser: IParser = ctx.newJsonParser()
+    jsonParser.setPrettyPrint(true)
+
+    val communication: Communication = jsonParser.parseResource(Communication::class.java, jsonMessage)
+
+    return communication
 }
 
