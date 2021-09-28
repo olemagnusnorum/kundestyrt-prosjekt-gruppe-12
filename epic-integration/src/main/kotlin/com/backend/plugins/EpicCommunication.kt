@@ -14,24 +14,61 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.client.call.*
 
-//this works for getting the xml from the epic server (use hapi fhir to make it a resource?)
-suspend fun requestEpicPatient(given: String, family :String, birthdate : String) :String {
+class EpicCommunication {
 
-    // birthdate format yyyy-mm-dd
-    val token :String =  runBlocking { getEpicAccessToken() }
-    val client = HttpClient()
 
-    val response : HttpResponse = client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient?given=$given&family=$family&birthdate=$birthdate"){
-        headers{
-            append(HttpHeaders.Authorization, "Bearer $token")
+    private val ctx: FhirContext = FhirContext.forR4()
+
+    //this works for getting the xml from the epic server (use hapi fhir to make it a resource?)
+    suspend fun patientSearch(given: String, family :String, birthdate : String) :String{
+        // birthdate format yyyy-mm-dd
+        val token :String =  runBlocking { getEpicAccessToken() }
+        val client = HttpClient()
+
+        val response : HttpResponse = client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient?given=$given&family=$family&birthdate=$birthdate&_format=json"){
+            headers{
+                append(HttpHeaders.Authorization, "Bearer $token")
+            }
         }
+        val xmlString = response.receive<String>()
+        println(xmlString)
+
+        return xmlString
     }
 
-    val xmlString = response.receive<String>()
-    println(xmlString)
+    fun parseBundleXMLToPatient(xmlMessage: String): Patient {
 
-    return xmlString
+
+        val parser: IParser = ctx.newXmlParser()
+        parser.setPrettyPrint(true)
+
+        val jsonParser: IParser = ctx.newJsonParser() //made
+        jsonParser.setPrettyPrint(true) //made
+
+        val bundle: Bundle = parser.parseResource(Bundle::class.java, xmlMessage)
+
+        val patient: Patient = bundle.entry[0].resource as Patient
+
+        println(patient.name[0].family)
+
+        return patient
+    }
+
+    fun parseCommunicationStringToJson(jsonMessage: String): Communication {
+
+        val jsonParser: IParser = ctx.newJsonParser()
+        jsonParser.setPrettyPrint(true)
+
+        val communication: Communication = jsonParser.parseResource(Communication::class.java, jsonMessage)
+
+        return communication
+    }
+
+
+
+
 }
+
 
 //Maybe TODO: Find more general parsing. Ex.: From Bundle to whatever object is in it.
 /**
@@ -42,34 +79,6 @@ suspend fun requestEpicPatient(given: String, family :String, birthdate : String
  * instance. The parser can then be used to parse (or unmarshall) the
  * string message into a Patient object
  */
-fun parseBundleXMLToPatient(xmlMessage: String): Patient {
 
-    val ctx = FhirContext.forR4()
 
-    val parser: IParser = ctx.newXmlParser()
-    parser.setPrettyPrint(true)
-
-    val jsonParser: IParser = ctx.newJsonParser()
-    jsonParser.setPrettyPrint(true)
-
-    val bundle: Bundle = parser.parseResource(Bundle::class.java, xmlMessage)
-
-    val patient: Patient = bundle.entry[0].resource as Patient
-
-    println(patient.name[0].family)
-
-    return patient
-}
-
-fun parseCommunicationStringToJson(jsonMessage: String): Communication {
-
-    val ctx = FhirContext.forR4()
-
-    val jsonParser: IParser = ctx.newJsonParser()
-    jsonParser.setPrettyPrint(true)
-
-    val communication: Communication = jsonParser.parseResource(Communication::class.java, jsonMessage)
-
-    return communication
-}
 
