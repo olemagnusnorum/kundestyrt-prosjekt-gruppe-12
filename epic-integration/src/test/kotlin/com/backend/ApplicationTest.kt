@@ -11,12 +11,15 @@ import com.backend.plugins.*
 import com.google.common.base.Predicates.instanceOf
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.jupiter.api.Assertions.assertAll
+import org.junit.jupiter.api.function.Executable
 
 class ApplicationTest {
 
     @Test
-    fun testAuthentication() = withTestApplication(Application::main) {
-        assertThat(runBlocking { getEpicAccessToken() }, instanceOf(String::class.java))
+    fun testAuthentication() {
+        // Asserts that getEpicAccessToken() runs without throwing any exceptions
+        assertAll(Executable { runBlocking { getEpicAccessToken() } })
     }
 
 }
