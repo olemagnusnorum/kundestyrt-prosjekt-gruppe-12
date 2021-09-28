@@ -18,12 +18,12 @@ class EpicCommunication {
 
 
     private val ctx: FhirContext = FhirContext.forR4()
+    private val client = HttpClient()
 
     //this works for getting the xml from the epic server (use hapi fhir to make it a resource?)
     suspend fun patientSearch(given: String, family :String, birthdate : String) :String{
         // birthdate format yyyy-mm-dd
         val token :String =  runBlocking { getEpicAccessToken() }
-        val client = HttpClient()
 
         val response : HttpResponse = client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient?given=$given&family=$family&birthdate=$birthdate&_format=json"){
             headers{
