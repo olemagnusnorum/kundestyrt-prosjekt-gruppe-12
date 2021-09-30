@@ -2,7 +2,7 @@ package com.backend
 
 import com.backend.plugins.EpicCommunication
 import org.hl7.fhir.r4.model.Patient
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.TestInstance
 
