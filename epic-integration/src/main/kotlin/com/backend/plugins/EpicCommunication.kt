@@ -30,6 +30,7 @@ class EpicCommunication {
                 append(HttpHeaders.Authorization, "Bearer $token")
             }
         }
+
         val xmlString = response.receive<String>()
         println(xmlString)
 

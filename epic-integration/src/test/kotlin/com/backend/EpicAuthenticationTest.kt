@@ -14,10 +14,10 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.function.Executable
 
-class ApplicationTest {
+class EpicAuthenticationTest {
 
     @Test
-    fun testAuthentication() {
+    fun `getEpicAccessToken should not throw any exceptions`() {
         // Asserts that getEpicAccessToken() runs without throwing any exceptions
         assertAll(Executable { runBlocking { getEpicAccessToken() } })
     }
