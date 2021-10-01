@@ -24,7 +24,13 @@ class EpicCommunicationTest {
 
         @Test
         fun `parseBundleXMLToPatient should parse an xml string to a patient object`() {
-            val patientXML = runBlocking { epicCommunication.patientSearch(given = "Derrick", family = "Lin", birthdate = "1973-06-03") }
+            val patientXML = runBlocking { epicCommunication.patientSearch(
+                given = "Derrick",
+                family = "Lin",
+                birthdate = "1973-06-03",
+                format = "xml"
+            )}
+            assert(patientXML is String)
             assert(epicCommunication.parseBundleXMLToPatient(patientXML) is Patient)
         }
     }
