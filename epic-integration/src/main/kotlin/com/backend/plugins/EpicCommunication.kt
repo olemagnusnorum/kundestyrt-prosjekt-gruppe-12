@@ -4,15 +4,13 @@ import kotlinx.coroutines.runBlocking
 
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
-import org.hl7.fhir.r4.model.Bundle
-import org.hl7.fhir.r4.model.Patient
-import org.hl7.fhir.r4.model.Communication
 
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.client.call.*
+import org.hl7.fhir.r4.model.*
 
 class EpicCommunication {
 
@@ -36,35 +34,27 @@ class EpicCommunication {
         return xmlString
     }
 
-    fun parseBundleXMLToPatient(xmlMessage: String): Patient {
-
-
-        val parser: IParser = ctx.newXmlParser()
+    /**
+     * General function to parse a Bundle string to the correct
+     * FHIR resource. When using this, one must always typecast
+     * the results to be able to get the attributes in the object.
+     * @param jsonMessage is a bundle as a String.
+     * @return a list containing all resources in the bundle
+     * as Resource objects.
+     */
+    fun parseBundleToResource(jsonMessage: String): MutableList<Resource> {
+        val parser: IParser = ctx.newJsonParser()
         parser.setPrettyPrint(true)
 
-        val jsonParser: IParser = ctx.newJsonParser() //made
-        jsonParser.setPrettyPrint(true) //made
+        val bundle: Bundle = parser.parseResource(Bundle::class.java, jsonMessage)
 
-        val bundle: Bundle = parser.parseResource(Bundle::class.java, xmlMessage)
+        val resources = mutableListOf<Resource>()
 
-        val patient: Patient = bundle.entry[0].resource as Patient
-
-        println(patient.name[0].family)
-
-        return patient
+        for(entry in bundle.entry) {
+            resources.add(entry.resource as Resource)
+        }
+        return resources
     }
-
-    fun parseCommunicationStringToJson(jsonMessage: String): Communication {
-
-        val jsonParser: IParser = ctx.newJsonParser()
-        jsonParser.setPrettyPrint(true)
-
-        val communication: Communication = jsonParser.parseResource(Communication::class.java, jsonMessage)
-
-        return communication
-    }
-
-
 
 
 }
