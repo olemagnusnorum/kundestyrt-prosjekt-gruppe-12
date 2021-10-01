@@ -19,16 +19,20 @@ class EpicCommunicationTest {
 
         @Test
         fun `Patient_Search should return a string`() {
-            assert(runBlocking { epicCommunication.patientSearch(given = "Derrick", family = "Lin", birthdate = "1973-06-03") } is String)
+            assert(runBlocking { epicCommunication.patientSearch(
+                givenName = "Derrick",
+                familyName = "Lin",
+                birthdate = "1973-06-03")
+            } is String)
         }
 
         @Test
         fun `parseBundleXMLToPatient should parse an xml string to a patient object`() {
             val patientXML = runBlocking { epicCommunication.patientSearch(
-                given = "Derrick",
-                family = "Lin",
+                givenName = "Derrick",
+                familyName = "Lin",
                 birthdate = "1973-06-03",
-                format = "xml"
+                outputFormat = "xml"
             )}
             assert(patientXML is String)
             assert(epicCommunication.parseBundleXMLToPatient(patientXML) is Patient)
