@@ -16,24 +16,28 @@ import io.ktor.client.call.*
 
 class EpicCommunication {
 
-
     private val ctx: FhirContext = FhirContext.forR4()
     private val client = HttpClient()
 
-    //this works for getting the xml from the epic server (use hapi fhir to make it a resource?)
-    suspend fun patientSearch(given: String, family :String, birthdate : String) :String{
-        // birthdate format yyyy-mm-dd
-        val token :String =  runBlocking { getEpicAccessToken() }
-
-        val response : HttpResponse = client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient?given=$given&family=$family&birthdate=$birthdate&_format=json"){
-            headers{
-                append(HttpHeaders.Authorization, "Bearer $token")
+    /**
+     * Makes an HTTP response request to the epic server at fhir.epic.com
+     * Returns a patient object on String format.
+     * As default the format returned is JSON (but XML can be returned by setting format to = "xml")
+     * Birthdate format yyyy-mm-dd
+     */
+    suspend fun patientSearch(givenName: String, familyName: String, birthdate: String, outputFormat: String = "json"): String {
+        val token: String = runBlocking { getEpicAccessToken() }
+        val response: HttpResponse =
+            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient?" +
+                    "given=$givenName&" +
+                    "family=$familyName&" +
+                    "birthdate=$birthdate&" +
+                    "_format=$outputFormat") {
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $token")
+                }
             }
-        }
-        val xmlString = response.receive<String>()
-        println(xmlString)
-
-        return xmlString
+        return response.receive()
     }
 
     fun parseBundleXMLToPatient(xmlMessage: String): Patient {
