@@ -16,6 +16,11 @@ import kotlinx.serialization.json.Json
 
 
 fun main() {
+    val epicCommunication = EpicCommunication()
+    //runBlocking { println(epicCommunication.patientSearch("Kari", "Nordmann", "2013-06-07")) }
+    //runBlocking { println(epicCommunication.getCondition()) }
+    runBlocking { println(epicCommunication.createCondition()) }
+
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", watchPaths = listOf("classes", "resources")) {
 
         install(ContentNegotiation){

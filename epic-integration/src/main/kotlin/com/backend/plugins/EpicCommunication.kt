@@ -13,6 +13,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.client.call.*
 import org.hl7.fhir.r4.model.*
+import org.hl7.fhir.r4.model.Annotation
 import java.util.Locale
 import java.text.SimpleDateFormat
 
@@ -36,6 +37,20 @@ class EpicCommunication {
                     "family=$familyName&" +
                     "birthdate=$birthdate&" +
                     "_format=$outputFormat") {
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $token")
+                }
+            }
+        return response.receive()
+    }
+
+    /**
+     * Function to get a Condition resource.
+     */
+    suspend fun getCondition(): String {
+        val token: String = runBlocking { getEpicAccessToken() }
+        val response: HttpResponse =
+            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Condition?category=encounter-diagnosis&patient=egqBHVfQlt4Bw3XGXoxVxHg3") {
                 headers {
                     append(HttpHeaders.Authorization, "Bearer $token")
                 }
@@ -69,6 +84,52 @@ class EpicCommunication {
         val communication: Communication = jsonParser.parseResource(Communication::class.java, jsonMessage)
 
         return communication
+    }
+
+    /**
+     * Function to create condition (encounter diagnosis)
+     */
+    suspend fun createCondition(): String {
+        val token: String = runBlocking { getEpicAccessToken() }
+        val condition = Condition()
+
+        // Set category to encounter-diagnosis
+        val coding = Coding()
+        val codingCode = coding.setCode("encounter-diagnosis")
+        condition.setCategory(mutableListOf(CodeableConcept(codingCode)))
+
+        // Set clinical status to active
+        val clinicalStatusCoding = Coding()
+        clinicalStatusCoding.setCode("active")
+        condition.setClinicalStatus(CodeableConcept(clinicalStatusCoding))
+
+        // Set code to pregnant
+        val code = CodeableConcept()
+        val thisCoding = Coding()
+        thisCoding.setCode("77386006")
+        thisCoding.setSystem("urn:oid:2.16.840.1.113883.6.96")
+        code.setCoding(mutableListOf(thisCoding))
+        condition.setCode(code)
+
+        // Set a note (optional)
+        condition.setNote(mutableListOf(Annotation(MarkdownType("Once upon a time..."))))
+
+        // Set subject/patient (Here: Camila Lopez)
+        condition.setSubject(Reference("erXuFYUfucBZaryVksYEcMg3"))
+
+        val patientJson = jsonParser.encodeResourceToString(condition)
+
+        // Post the patient to epic
+        val response: HttpResponse = client.post("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient") {
+            headers {
+                append(HttpHeaders.Authorization, "Bearer $token")
+            }
+            contentType(ContentType.Application.Json)
+            body = patientJson
+        }
+        val responseString = response.receive<String>()
+
+        return responseString
     }
 
     /**
