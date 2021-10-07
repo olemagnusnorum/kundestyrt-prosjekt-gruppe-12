@@ -113,7 +113,7 @@ fun Application.personRoute() {
             runBlocking { epicCommunication.createPatient(given, family, identifierValue) }
             val id = runBlocking { epicCommunication.getPatientIDFromDatabase(given, family, "2013-06-07")}
 
-            val data = mapOf("response" to family, "id" to id)
+            val data = mapOf("family" to family, "id" to id)
             call.respondTemplate("create-patient-confirmation.ftl", data)
         }
     }

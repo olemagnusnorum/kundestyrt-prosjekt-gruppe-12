@@ -6,7 +6,7 @@
 <body style="text-align: center; font-family: sans-serif">
 <div>
     <h3>Du har opprettet en pasient</h3>
-    <p>Familienavn: ${response}</p>
+    <p>Familienavn: ${family}</p>
     <br>
     <form action="/create-condition" method="post">
             <input name="note" type="text" placeholder="Kommentar">
