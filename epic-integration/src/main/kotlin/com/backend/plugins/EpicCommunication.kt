@@ -75,13 +75,16 @@ class EpicCommunication {
      * Function to create a patient and save the patient to epics server.
      * In the future, this function should take in parameters, for the
      * different values.
+     * @param givenName string
+     * @param familyName string
+     * @param identifierValue on the format "XXX-XX-XXXX" ("028-27-1234")
      * @return an http response as a string.
      */
-    suspend fun createPatient(): String {
+    suspend fun createPatient(givenName: String, familyName: String, identifierValue: String): String {
         val token: String = runBlocking { getEpicAccessToken() }
         val patient = Patient()
 
-        // Set date
+        // Set birthdate
         val formatter = SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH)
         val dateInString = "7-Jun-2013"
         val date = formatter.parse(dateInString)
@@ -92,15 +95,15 @@ class EpicCommunication {
 
         // Set identifier (have not figured out how to give the identifier a value)
         val identifier = Identifier()
-        identifier.setValue("028-27-1234")
+        identifier.setValue(identifierValue)
         identifier.setSystem("urn:oid:2.16.840.1.113883.4.1")
         identifier.setUse(Identifier.IdentifierUse.OFFICIAL)
         patient.setIdentifier(mutableListOf(identifier))
 
         // Set name
         val name = HumanName()
-        name.setFamily("Nordmann")
-        name.setGiven(mutableListOf(StringType("Kari")))
+        name.setFamily(familyName)
+        name.setGiven(mutableListOf(StringType(givenName)))
         name.setUse(HumanName.NameUse.USUAL)
         patient.setName(mutableListOf(name))
 
