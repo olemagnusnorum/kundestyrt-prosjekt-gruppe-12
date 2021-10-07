@@ -99,6 +99,18 @@ fun Application.personRoute() {
             call.respondTemplate("patient.ftl", data)
         }
 
+        post("/create-patient") {
+            val params = call.receiveParameters()
+
+            val given : String = params["given"]!!
+            val family : String = params["family"]!!
+            val identifierValue : String = params["identifierValue"]!!
+
+            runBlocking { epicCommunication.createPatient(given, family, identifierValue) }
+
+            val data = mapOf("response" to family)
+            call.respondTemplate("create-patient-confirmation.ftl", data)
+        }
     }
 
 }
