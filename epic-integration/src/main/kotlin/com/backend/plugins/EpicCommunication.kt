@@ -45,19 +45,18 @@ class EpicCommunication {
     /**
      * Function to get a Condition resource.
      */
-    suspend fun getCondition(): String {
+    suspend fun getCondition(location: String?): Condition {
         val token: String = runBlocking { getEpicAccessToken() }
         val response: HttpResponse =
-            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Condition?category=encounter-diagnosis&subject=erXuFYUfucBZaryVksYEcMg3") {
+            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/${location}?_format=json") {
                 headers {
                     append(HttpHeaders.Authorization, "Bearer $token")
                 }
             }
-        return response.receive()
+        return jsonParser.parseResource(Condition::class.java, response.receive<String>())
     }
 
     fun parseBundleXMLToPatient(xmlMessage: String): Patient {
-
 
         val parser: IParser = ctx.newXmlParser()
         parser.setPrettyPrint(true)
@@ -93,8 +92,9 @@ class EpicCommunication {
      * @param abatementDate is the date the condition ends/ended on the format "YYYY-MM-DD"
      * @return an http response as a string.
      */
-    suspend fun createCondition(subject: String, note: String, onsetDate: String, abatementDate: String): String {
+    suspend fun createCondition(subject: String, note: String, onsetDate: String, abatementDate: String): HttpResponse {
         val token: String = runBlocking { getEpicAccessToken() }
+
         val condition = Condition()
 
         // Set category to encounter-diagnosis
@@ -124,12 +124,12 @@ class EpicCommunication {
         condition.setSubject(Reference("Patient/$subject"))
 
         // Set onsetPeriod (when the condition began)
-        val onset = DateTimeType()
+        val onset = DateTimeType(onsetDate)
         onset.valueAsString = onsetDate
         condition.setOnset(onset)
 
         // Set abatement (when the condition ends)
-        val abatement = DateTimeType()
+        val abatement = DateTimeType(abatementDate)
         abatement.valueAsString = abatementDate
         condition.setAbatement(abatement)
 
@@ -151,7 +151,11 @@ class EpicCommunication {
         }
         val responseString = response.receive<String>()
 
-        return responseString
+        println("TOKEN: $token")
+        println("RESPONSE HEADER: ${response.headers["Location"]}")
+        println("JSON: $conditionJson")
+
+        return response
     }
 
     /**
@@ -198,8 +202,8 @@ class EpicCommunication {
             body = patientJson
         }
         val responseString = response.receive<String>()
+        println("HEADERS: ${response.headers}")
 
         return responseString
     }
-
 }
