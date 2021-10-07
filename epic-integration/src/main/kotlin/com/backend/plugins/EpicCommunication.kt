@@ -4,8 +4,6 @@ import kotlinx.coroutines.runBlocking
 
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
-import ca.uhn.fhir.rest.api.MethodOutcome
-import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor
 
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -41,6 +39,26 @@ class EpicCommunication {
                 }
             }
         return response.receive()
+    }
+
+    suspend fun readPatient(patientId: String, outputFormat: String = "json"): HttpResponse {
+        val token: String = runBlocking { getEpicAccessToken() }
+        val response: HttpResponse =
+            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient/" +
+                    patientId +
+                    "?_format=$outputFormat") {
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $token")
+                }
+            }
+        return response.receive()
+    }
+
+    fun parsePatientStringToObject(jsonMessage: String): Patient {
+        val jsonParser: IParser = ctx.newJsonParser()
+        jsonParser.setPrettyPrint(true)
+
+        return jsonParser.parseResource(Patient::class.java, jsonMessage)
     }
 
     fun parseBundleXMLToPatient(xmlMessage: String): Patient {
@@ -130,6 +148,16 @@ class EpicCommunication {
                 }
             }
         return response
+    }
+
+    fun parseConditionBundleStringToObject(jsonMessage: String): Condition {
+        val jsonParser: IParser = ctx.newJsonParser()
+        jsonParser.setPrettyPrint(true)
+
+        val bundle = jsonParser.parseResource(Bundle::class.java, jsonMessage)
+        val condition = bundle.entry[0].resource
+
+        return condition as Condition
     }
 
 

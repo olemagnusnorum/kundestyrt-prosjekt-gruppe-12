@@ -89,10 +89,14 @@ fun Application.personRoute() {
         }
 
         get("/patient") {
-            val epic = epicCommunication
-            val condition = runBlocking { epic.searchCondition("eq081-VQEgP8drUUqCWzHfw3", "json").receive<String>() }
+            val patientId = "eq081-VQEgP8drUUqCWzHfw3"
+            val responseCondition = runBlocking { epicCommunication.searchCondition(patientId, "json").receive<String>() }
+            val responsePatient = runBlocking { epicCommunication.readPatient(patientId, "json").receive<String>() }
+            val condition = epicCommunication.parseConditionBundleStringToObject(responseCondition)
+            val patient = epicCommunication.parsePatientStringToObject(responsePatient)
 
-            val data = mapOf()
+            val data = mapOf("condition" to condition, "due_date" to (condition.abatement ?: "Ingen termindato satt"), "name" to patient.name[0].text)
+            call.respondTemplate("patient.ftl", data)
         }
 
     }
