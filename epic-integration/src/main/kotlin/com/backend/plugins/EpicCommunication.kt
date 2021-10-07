@@ -4,8 +4,6 @@ import kotlinx.coroutines.runBlocking
 
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
-import ca.uhn.fhir.rest.api.MethodOutcome
-import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor
 
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -15,7 +13,6 @@ import io.ktor.client.call.*
 import org.hl7.fhir.r4.model.*
 import java.util.Locale
 import java.text.SimpleDateFormat
-import kotlin.reflect.typeOf
 
 class EpicCommunication {
 
