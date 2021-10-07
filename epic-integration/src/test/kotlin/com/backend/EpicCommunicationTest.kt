@@ -19,6 +19,33 @@ class EpicCommunicationTest {
     inner class PatientSearch {
 
         @Test
+        fun `getPatientID should return a string`() {
+            val JSONBundle = runBlocking {
+                epicCommunication.patientSearch("Derrick","Lin","1973-06-03")
+            }
+            val derrickThePatient = epicCommunication.parseBundleXMLToPatient(JSONBundle, isXML = false)
+            val returnVal = epicCommunication.getPatientID(derrickThePatient)
+            val derricksID = "eq081-VQEgP8drUUqCWzHfw3"
+
+            assert(derrickThePatient is Patient)
+            assert(returnVal is String)
+            assert(returnVal == derricksID)
+        }
+
+        @Test
+        fun `getPatientIDFromDatabase should return a string`() {
+            val returnVal = runBlocking { epicCommunication.getPatientIDFromDatabase(
+                givenName = "Derrick",
+                familyName = "Lin",
+                birthdate = "1973-06-03")
+            }
+            val derricksID = "eq081-VQEgP8drUUqCWzHfw3"
+
+            assert(returnVal is String)
+            assert(returnVal == derricksID)
+        }
+
+        @Test
         fun `Patient_Search should return a string`() {
             assert(runBlocking { epicCommunication.patientSearch(
                 givenName = "Derrick",

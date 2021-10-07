@@ -10,6 +10,14 @@
     <form action="/messages-from-nav" method="get">
         <input type="submit" value="Se melding">
     </form>
+
+    <h3>Registrer testpasient</h3>
+    <form action="/create-patient" method="post">
+        <input name="given" type="text" placeholder="Given name"><br><br>
+        <input name="family" type="text" placeholder="Family name"><br><br>
+        <input name="identifierValue" type="text" placeholder="xxx-xx-xxxx"><br><br>
+        <input type="submit" value="Registrer pasient">
+    </form>
     <br>
     <br>
     <a href="/">Gå tilbake til navigasjonsiden.</a>

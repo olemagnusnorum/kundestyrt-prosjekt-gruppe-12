@@ -5,6 +5,7 @@ import io.ktor.application.*
 import io.ktor.freemarker.*
 import io.ktor.response.*
 import io.ktor.request.*
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 
 
@@ -86,6 +87,24 @@ fun Application.personRoute() {
             call.respondTemplate("doctor-create-sykemelding.ftl", data)
         }
 
+        post("/create-patient") {
+            val params = call.receiveParameters()
+
+            val given : String = params["given"]!!
+            val family : String = params["family"]!!
+            val identifierValue : String = params["identifierValue"]!!
+
+            runBlocking { epicCommunication.createPatient(given, family, identifierValue) }
+
+            val data = mapOf("response" to family)
+            call.respondTemplate("create-patient-confirmation.ftl", data)
+        }
+
+//            val given = "GivenB"
+//            val family = "FamilyB"
+//            val p_number = "XXX-XX-XXXX"
+//
+//            epicCommunication.createPatient(given,family,p_number)
     }
 
 }

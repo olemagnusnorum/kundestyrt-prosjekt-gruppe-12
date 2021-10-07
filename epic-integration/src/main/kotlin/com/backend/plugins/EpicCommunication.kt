@@ -14,12 +14,32 @@ import org.hl7.fhir.r4.model.*
 import org.hl7.fhir.r4.model.Annotation
 import java.util.Locale
 import java.text.SimpleDateFormat
+import kotlin.reflect.typeOf
 
 class EpicCommunication {
 
     private val ctx: FhirContext = FhirContext.forR4()
     private val client = HttpClient()
     val jsonParser: IParser = ctx.newJsonParser()
+
+
+    /**
+     * Finds the patientID of a FHIR Patient object.
+     */
+    fun getPatientID(patient: Patient) : String {
+        val patientURL = patient.id // on the form "https://someaddress.com/theIdWeWant
+        return patientURL.substringAfterLast("/")
+    }
+
+    /**
+     * Searches the database for a Patient with the correct name and birthdate and returns their ID.
+     */
+    suspend fun getPatientIDFromDatabase(givenName: String, familyName: String, birthdate: String) : String {
+        val JSONBundle = patientSearch(givenName, familyName, birthdate)
+        val patient : Patient = parseBundleXMLToPatient(JSONBundle, isXML = false)
+        val patientID = getPatientID(patient)
+        return patientID
+    }
 
     /**
      * Makes an HTTP response request to the epic server at fhir.epic.com
@@ -56,13 +76,14 @@ class EpicCommunication {
         return jsonParser.parseResource(Condition::class.java, response.receive<String>())
     }
 
-    fun parseBundleXMLToPatient(xmlMessage: String): Patient {
-
-        val parser: IParser = ctx.newXmlParser()
+    fun parseBundleXMLToPatient(xmlMessage: String, isXML : Boolean = true ): Patient {
+        // Assume we are working with XML
+        val parser : IParser = if (isXML) {
+            ctx.newXmlParser()
+        } else { // If not XML then JSON
+            ctx.newJsonParser()
+        }
         parser.setPrettyPrint(true)
-
-        val jsonParser: IParser = ctx.newJsonParser() //made
-        jsonParser.setPrettyPrint(true) //made
 
         val bundle: Bundle = parser.parseResource(Bundle::class.java, xmlMessage)
 
@@ -162,13 +183,16 @@ class EpicCommunication {
      * Function to create a patient and save the patient to epics server.
      * In the future, this function should take in parameters, for the
      * different values.
+     * @param givenName string
+     * @param familyName string
+     * @param identifierValue on the format "XXX-XX-XXXX" ("028-27-1234")
      * @return an http response as a string.
      */
-    suspend fun createPatient(): String {
+    suspend fun createPatient(givenName: String, familyName: String, identifierValue: String): String {
         val token: String = runBlocking { getEpicAccessToken() }
         val patient = Patient()
 
-        // Set date
+        // Set birthdate
         val formatter = SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH)
         val dateInString = "7-Jun-2013"
         val date = formatter.parse(dateInString)
@@ -179,15 +203,15 @@ class EpicCommunication {
 
         // Set identifier (have not figured out how to give the identifier a value)
         val identifier = Identifier()
-        identifier.setValue("028-27-1234")
+        identifier.setValue(identifierValue)
         identifier.setSystem("urn:oid:2.16.840.1.113883.4.1")
         identifier.setUse(Identifier.IdentifierUse.OFFICIAL)
         patient.setIdentifier(mutableListOf(identifier))
 
         // Set name
         val name = HumanName()
-        name.setFamily("Nordmann")
-        name.setGiven(mutableListOf(StringType("Kari")))
+        name.setFamily(familyName)
+        name.setGiven(mutableListOf(StringType(givenName)))
         name.setUse(HumanName.NameUse.USUAL)
         patient.setName(mutableListOf(name))
 
