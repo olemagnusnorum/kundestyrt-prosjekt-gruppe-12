@@ -88,6 +88,17 @@ fun Application.personRoute() {
             call.respondTemplate("doctor-create-sykemelding.ftl", data)
         }
 
+        get("/patient") {
+            val patientId = epicCommunication.latestPatientId
+            val responseCondition = runBlocking { epicCommunication.searchCondition(patientId, "json").receive<String>() }
+            val responsePatient = runBlocking { epicCommunication.readPatient(patientId, "json").receive<String>() }
+            val condition = epicCommunication.parseConditionBundleStringToObject(responseCondition)
+            val patient = epicCommunication.parsePatientStringToObject(responsePatient)
+
+            val data = mapOf("condition" to condition, "due_date" to (condition?.abatement ?: "Ingen termindato satt"), "name" to patient.name[0].text)
+            call.respondTemplate("patient.ftl", data)
+        }
+
         post("/create-condition") {
             val params = call.receiveParameters()
 
@@ -113,12 +124,5 @@ fun Application.personRoute() {
             val data = mapOf("response" to family, "id" to id)
             call.respondTemplate("create-patient-confirmation.ftl", data)
         }
-
-//            val given = "GivenB"
-//            val family = "FamilyB"
-//            val p_number = "XXX-XX-XXXX"
-//
-//            epicCommunication.createPatient(given,family,p_number)
     }
-
 }
