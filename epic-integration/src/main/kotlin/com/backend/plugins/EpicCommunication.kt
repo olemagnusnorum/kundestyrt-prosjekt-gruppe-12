@@ -4,6 +4,8 @@ import kotlinx.coroutines.runBlocking
 
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
+import ca.uhn.fhir.rest.api.MethodOutcome
+import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor
 
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -13,6 +15,7 @@ import io.ktor.client.call.*
 import org.hl7.fhir.r4.model.*
 import java.util.Locale
 import java.text.SimpleDateFormat
+import kotlin.reflect.typeOf
 
 class EpicCommunication {
 
@@ -23,6 +26,25 @@ class EpicCommunication {
     // For demo purposes
     var latestPatientId: String = "eq081-VQEgP8drUUqCWzHfw3"
     var latestConditionId: String? = "eVGf2YljIMIk76IcfbNpjWQ3"  // Derrick Lin condition
+
+
+    /**
+     * Finds the patientID of a FHIR Patient object.
+     */
+    fun getPatientID(patient: Patient) : String {
+        val patientURL = patient.id // on the form "https://someaddress.com/theIdWeWant
+        return patientURL.substringAfterLast("/")
+    }
+
+    /**
+     * Searches the database for a Patient with the correct name and birthdate and returns their ID.
+     */
+    suspend fun getPatientIDFromDatabase(givenName: String, familyName: String, birthdate: String) : String {
+        val JSONBundle = patientSearch(givenName, familyName, birthdate)
+        val patient : Patient = parseBundleXMLToPatient(JSONBundle, isXML = false)
+        val patientID = getPatientID(patient)
+        return patientID
+    }
 
     /**
      * Makes an HTTP response request to the epic server at fhir.epic.com
@@ -66,14 +88,14 @@ class EpicCommunication {
         return jsonParser.parseResource(Patient::class.java, jsonMessage)
     }
 
-    fun parseBundleXMLToPatient(xmlMessage: String): Patient {
-
-
-        val parser: IParser = ctx.newXmlParser()
+    fun parseBundleXMLToPatient(xmlMessage: String, isXML : Boolean = true ): Patient {
+        // Assume we are working with XML
+        val parser : IParser = if (isXML) {
+            ctx.newXmlParser()
+        } else { // If not XML then JSON
+            ctx.newJsonParser()
+        }
         parser.setPrettyPrint(true)
-
-        val jsonParser: IParser = ctx.newJsonParser() //made
-        jsonParser.setPrettyPrint(true) //made
 
         val bundle: Bundle = parser.parseResource(Bundle::class.java, xmlMessage)
 
