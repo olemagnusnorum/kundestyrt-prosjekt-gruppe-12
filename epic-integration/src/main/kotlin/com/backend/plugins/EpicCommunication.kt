@@ -26,13 +26,14 @@ class EpicCommunication {
      * As default the format returned is JSON (but XML can be returned by setting format to = "xml")
      * Birthdate format yyyy-mm-dd
      */
-    suspend fun patientSearch(givenName: String, familyName: String, birthdate: String, outputFormat: String = "json"): String {
+    suspend fun patientSearch(givenName: String, familyName: String, birthdate: String? = null, identifier: String? = null, outputFormat: String = "json"): String {
         val token: String = runBlocking { getEpicAccessToken() }
         val response: HttpResponse =
             client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient?" +
                     "given=$givenName&" +
                     "family=$familyName&" +
-                    "birthdate=$birthdate&" +
+                    (if (birthdate != null) "birthdate=$identifier&" else "") +
+                    (if (identifier != null) "identifier=$identifier&" else "") +
                     "_format=$outputFormat") {
                 headers {
                     append(HttpHeaders.Authorization, "Bearer $token")
@@ -155,7 +156,7 @@ class EpicCommunication {
         jsonParser.setPrettyPrint(true)
 
         val bundle = jsonParser.parseResource(Bundle::class.java, jsonMessage)
-        val condition = bundle.entry[0].resource
+        val condition = bundle.entry[1].resource
 
         return condition as Condition
     }
