@@ -2,6 +2,7 @@ package com.backend.plugins
 
 import io.ktor.routing.*
 import io.ktor.application.*
+import io.ktor.client.call.*
 import io.ktor.freemarker.*
 import io.ktor.response.*
 import io.ktor.request.*
@@ -87,6 +88,18 @@ fun Application.personRoute() {
             call.respondTemplate("doctor-create-sykemelding.ftl", data)
         }
 
+        post("/create-condition") {
+            val params = call.receiveParameters()
+
+            val response = runBlocking { epicCommunication.createCondition(params["id"]!!, params["note"]!!, "2012-05-24", "2012-12-24") }
+
+            println("RESPONSE: ${response.receive<String>()}")
+
+            val condition = runBlocking { epicCommunication.getCondition(response.headers["Location"]) }
+
+            call.respondText("Du har impregnert pasienten. Kommentaren du sendte: ${condition.note[0].text}. ID-en er ${response.headers["Location"]}")
+        }
+
         post("/create-patient") {
             val params = call.receiveParameters()
 
@@ -95,8 +108,9 @@ fun Application.personRoute() {
             val identifierValue : String = params["identifierValue"]!!
 
             runBlocking { epicCommunication.createPatient(given, family, identifierValue) }
+            val id = runBlocking { epicCommunication.getPatientIDFromDatabase(given, family, "2013-06-07")}
 
-            val data = mapOf("response" to family)
+            val data = mapOf("response" to family, "id" to id)
             call.respondTemplate("create-patient-confirmation.ftl", data)
         }
 
