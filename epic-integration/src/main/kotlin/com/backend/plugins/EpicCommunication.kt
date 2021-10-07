@@ -4,8 +4,6 @@ import kotlinx.coroutines.runBlocking
 
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
-import ca.uhn.fhir.rest.api.MethodOutcome
-import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor
 
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -50,7 +48,7 @@ class EpicCommunication {
     suspend fun getCondition(): String {
         val token: String = runBlocking { getEpicAccessToken() }
         val response: HttpResponse =
-            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Condition?category=encounter-diagnosis&patient=egqBHVfQlt4Bw3XGXoxVxHg3") {
+            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Condition?category=encounter-diagnosis&subject=erXuFYUfucBZaryVksYEcMg3") {
                 headers {
                     append(HttpHeaders.Authorization, "Bearer $token")
                 }
@@ -87,45 +85,69 @@ class EpicCommunication {
     }
 
     /**
-     * Function to create condition (encounter diagnosis)
+     * Function to create a condition (encounter diagnosis) resource, and save it
+     * to epic.
+     * @param subject is a reference to a Patient resource (the id field in a Patient)
+     * @param note is a free text comment
+     * @param onsetDate is the date the condition occurred on the format "YYYY-MM-DD"
+     * @param abatementDate is the date the condition ends/ended on the format "YYYY-MM-DD"
+     * @return an http response as a string.
      */
-    suspend fun createCondition(): String {
+    suspend fun createCondition(subject: String, note: String, onsetDate: String, abatementDate: String): String {
         val token: String = runBlocking { getEpicAccessToken() }
         val condition = Condition()
 
         // Set category to encounter-diagnosis
-        val coding = Coding()
-        val codingCode = coding.setCode("encounter-diagnosis")
-        condition.setCategory(mutableListOf(CodeableConcept(codingCode)))
+        condition.setCategory(mutableListOf(CodeableConcept(Coding(
+            "http://terminology.hl7.org/CodeSystem/condition-category",
+            "encounter-diagnosis", "Encounter diagnosis"))))
 
         // Set clinical status to active
-        val clinicalStatusCoding = Coding()
-        clinicalStatusCoding.setCode("active")
-        condition.setClinicalStatus(CodeableConcept(clinicalStatusCoding))
+        condition.setClinicalStatus(CodeableConcept(Coding(
+            "http://terminology.hl7.org/CodeSystem/condition-clinical",
+            "active", "Active")))
+
+        // Set verification status
+        condition.setVerificationStatus(CodeableConcept(Coding(
+            "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+            "confirmed", "Confirmed")))
 
         // Set code to pregnant
-        val code = CodeableConcept()
-        val thisCoding = Coding()
-        thisCoding.setCode("77386006")
-        thisCoding.setSystem("urn:oid:2.16.840.1.113883.6.96")
-        code.setCoding(mutableListOf(thisCoding))
-        condition.setCode(code)
+        condition.setCode(CodeableConcept(Coding(
+            "urn:oid:2.16.840.1.113883.6.96",
+            "77386006", "Pregnant")))
 
         // Set a note (optional)
-        condition.setNote(mutableListOf(Annotation(MarkdownType("Once upon a time..."))))
+        condition.setNote(mutableListOf(Annotation(MarkdownType(note))))
 
         // Set subject/patient (Here: Camila Lopez)
-        condition.setSubject(Reference("erXuFYUfucBZaryVksYEcMg3"))
+        condition.setSubject(Reference("Patient/$subject"))
 
-        val patientJson = jsonParser.encodeResourceToString(condition)
+        // Set onsetPeriod (when the condition began)
+        val onset = DateTimeType()
+        onset.valueAsString = onsetDate
+        condition.setOnset(onset)
 
-        // Post the patient to epic
-        val response: HttpResponse = client.post("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient") {
+        // Set abatement (when the condition ends)
+        val abatement = DateTimeType()
+        abatement.valueAsString = abatementDate
+        condition.setAbatement(abatement)
+
+        // Set severity
+        condition.setSeverity(CodeableConcept(Coding(
+            "http://hl7.org/fhir/ValueSet/condition-severity",
+            "255604002", "Mild")))
+
+        val conditionJson = jsonParser.encodeResourceToString(condition)
+        println(conditionJson)
+
+        // Post the condition to epic
+        val response: HttpResponse = client.post("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Condition") {
             headers {
                 append(HttpHeaders.Authorization, "Bearer $token")
             }
             contentType(ContentType.Application.Json)
-            body = patientJson
+            body = conditionJson
         }
         val responseString = response.receive<String>()
 
@@ -181,17 +203,3 @@ class EpicCommunication {
     }
 
 }
-
-
-//Maybe TODO: Find more general parsing. Ex.: From Bundle to whatever object is in it.
-/**
- * Parse a bundle xml to Patient object using Hapi Parser.
- * Intended to receive XML from requestEpicPatient()
- *
- * The hapi context object is used to create a new XML parser
- * instance. The parser can then be used to parse (or unmarshall) the
- * string message into a Patient object
- */
-
-
-

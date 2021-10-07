@@ -19,7 +19,9 @@ fun main() {
     val epicCommunication = EpicCommunication()
     //runBlocking { println(epicCommunication.patientSearch("Kari", "Nordmann", "2013-06-07")) }
     //runBlocking { println(epicCommunication.getCondition()) }
-    runBlocking { println(epicCommunication.createCondition()) }
+    runBlocking { println("response string: ${epicCommunication.createCondition(
+        "erXuFYUfucBZaryVksYEcMg3", "My best note", 
+        "2015-01-01", "2015-08-30")}") }
 
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", watchPaths = listOf("classes", "resources")) {
 
