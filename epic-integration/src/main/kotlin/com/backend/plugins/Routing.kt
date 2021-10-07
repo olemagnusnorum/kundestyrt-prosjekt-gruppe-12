@@ -18,23 +18,18 @@ val epicCommunication = EpicCommunication()
 fun Application.personRoute() {
 
     routing {
-        get("/person") {
-            val person = call.receive<Person>()
-            call.respondText("this is a person from json: \n ${person.firstName} ${person.lastName} is ${person.age}")
-        }
-
-        //dummy epic server endpoint
-        get("/epic") {
-            val epicResponse = "Epic"
-            call.respondText(epicResponse)
-        }
-
         get("/") {
             call.respondTemplate("index.ftl")
         }
 
         get("/doctor") {
-            call.respondTemplate("doctor.ftl")
+            if (epicCommunication.patientCreated) {
+                val data = mapOf("patient" to epicCommunication.readPatient(epicCommunication.latestPatientId))
+                call.respondTemplate("doctor.ftl", data)
+            }
+            else {
+                call.respondTemplate("doctor.ftl")
+            }
         }
 
         get("/nav-derrick-lin") {
@@ -90,10 +85,8 @@ fun Application.personRoute() {
 
         get("/patient") {
             val patientId = epicCommunication.latestPatientId
-            val responseCondition = runBlocking { epicCommunication.searchCondition(patientId, "json").receive<String>() }
-            val responsePatient = runBlocking { epicCommunication.readPatient(patientId, "json").receive<String>() }
-            val condition = epicCommunication.parseConditionBundleStringToObject(responseCondition)
-            val patient = epicCommunication.parsePatientStringToObject(responsePatient)
+            val condition = runBlocking { epicCommunication.getCondition(epicCommunication.latestConditionId) }
+            val patient = runBlocking { epicCommunication.readPatient(patientId)}
 
             val data = mapOf("condition" to condition, "due_date" to (condition?.abatement ?: "Ingen termindato satt"), "name" to patient.name[0].text)
             call.respondTemplate("patient.ftl", data)
@@ -104,11 +97,10 @@ fun Application.personRoute() {
 
             val response = runBlocking { epicCommunication.createCondition(params["id"]!!, params["note"]!!, "2012-05-24", "2012-12-24") }
 
-            println("RESPONSE: ${response.receive<String>()}")
+            val condition = runBlocking { epicCommunication.getCondition(response.headers["Location"]!!.split("/")[1]) }
 
-            val condition = runBlocking { epicCommunication.getCondition(response.headers["Location"]) }
-
-            call.respondText("Du har impregnert pasienten. Kommentaren du sendte: ${condition.note[0].text}. ID-en er ${response.headers["Location"]}")
+            val data = mapOf("condition" to condition)
+            call.respondTemplate("impregnate.ftl", data)
         }
 
         post("/create-patient") {

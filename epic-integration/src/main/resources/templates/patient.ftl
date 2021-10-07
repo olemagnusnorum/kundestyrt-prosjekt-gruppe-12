@@ -2,15 +2,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Legeside</title>
+    <title>Min side</title>
 </head>
 <body style="text-align: center; font-family: sans-serif">
 <div>
-    <h1>Pasient Journal</h1>
+    <h1>Nav | Søk om foreldrepenger</h1>
     <h2>Hei ${name}!</h2>
-    <h3>Se melding fra NAV</h3>
     <#if condition??>
-        <p>${condition.code.text}</p>
+        <p><b>Condition:</b> ${condition.code.text}</p>
         <p><b>Termindato:</b> ${due_date}</p>
 
         <form action="/" method="get">

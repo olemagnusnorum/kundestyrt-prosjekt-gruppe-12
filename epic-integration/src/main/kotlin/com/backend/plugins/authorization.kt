@@ -16,8 +16,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
-
-
 @Serializable
 data class jsonAccessToken(val access_token :String, val token_type :String, val expires_in :Int, val scope :String)
 
@@ -56,14 +54,12 @@ fun generateJWT(): String {
         .signWith(newPrivateKey, SignatureAlgorithm.RS384)
         .compact()
 
-
     return myJWTToken
 }
 
 suspend fun getEpicAccessToken(): String {
     // posting the JWT and getting an access token in response
     // to call the function it has to be inside launch{val token = getEpicAccessToken()}
-    println("Response")
     val epicJWT : String = generateJWT()
     val client = HttpClient()
 

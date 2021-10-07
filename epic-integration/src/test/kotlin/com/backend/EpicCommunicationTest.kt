@@ -69,7 +69,7 @@ class EpicCommunicationTest {
         @Test
         fun `getCondition should return a condition resource for Derric Lin`() {
             val condition = runBlocking {
-                epicCommunication.getCondition("Condition/eY-LMUKgFarb5r10D5sXS7nGJO9qELcndS5oncvyDjPHp.lFiCEKE6mt2pIDbyFeBHvU6Z0XikLVgIqkXp8XV1Q3")
+                epicCommunication.getCondition("eY-LMUKgFarb5r10D5sXS7nGJO9qELcndS5oncvyDjPHp.lFiCEKE6mt2pIDbyFeBHvU6Z0XikLVgIqkXp8XV1Q3")
             }
             assert(condition is Condition)
             assert(condition.subject.reference == "Patient/eq081-VQEgP8drUUqCWzHfw3")
