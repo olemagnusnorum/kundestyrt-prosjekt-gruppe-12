@@ -23,7 +23,7 @@ class EpicCommunication {
     // For demo purposes
     var latestPatientId: String = "eq081-VQEgP8drUUqCWzHfw3"
     var latestConditionId: String? = "eVGf2YljIMIk76IcfbNpjWQ3"  // Derrick Lin condition
-
+    var patientCreated: Boolean = false
 
     /**
      * Finds the patientID of a FHIR Patient object.
@@ -88,10 +88,10 @@ class EpicCommunication {
     /**
      * Function to get a Condition resource.
      */
-    suspend fun getCondition(location: String?): Condition {
+    suspend fun getCondition(conditionId: String): Condition {
         val token: String = runBlocking { getEpicAccessToken() }
         val response: HttpResponse =
-            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/${location}?_format=json") {
+            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Condition/${conditionId}?_format=json") {
                 headers {
                     append(HttpHeaders.Authorization, "Bearer $token")
                 }
@@ -193,11 +193,10 @@ class EpicCommunication {
             contentType(ContentType.Application.Json)
             body = conditionJson
         }
-        val responseString = response.receive<String>()
 
-        println("TOKEN: $token")
-        println("RESPONSE HEADER: ${response.headers["Location"]}")
-        println("JSON: $conditionJson")
+        if (response.headers["Location"] != null) {
+            latestConditionId = response.headers["Location"]!!.split("/")[1]
+        }
 
         return response
     }
@@ -253,6 +252,8 @@ class EpicCommunication {
 
         if (response.headers["Location"] != null) {
             latestPatientId = response.headers["Location"]!!.split("/")[1]
+            latestConditionId = null
+            patientCreated = true
         }
 
         return responseString
