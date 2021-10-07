@@ -2,9 +2,11 @@ package com.backend.plugins
 
 import io.ktor.routing.*
 import io.ktor.application.*
+import io.ktor.client.call.*
 import io.ktor.freemarker.*
 import io.ktor.response.*
 import io.ktor.request.*
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 
 
@@ -84,6 +86,13 @@ fun Application.personRoute() {
             val data = mapOf("response" to response)
 
             call.respondTemplate("doctor-create-sykemelding.ftl", data)
+        }
+
+        get("/patient") {
+            val epic = epicCommunication
+            val condition = runBlocking { epic.searchCondition("eq081-VQEgP8drUUqCWzHfw3", "json").receive<String>() }
+
+            val data = mapOf()
         }
 
     }

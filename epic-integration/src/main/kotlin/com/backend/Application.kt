@@ -7,6 +7,7 @@ import io.ktor.server.netty.*
 
 import freemarker.cache.ClassTemplateLoader
 import io.ktor.application.*
+import io.ktor.client.call.*
 import io.ktor.features.*
 import io.ktor.freemarker.*
 import io.ktor.serialization.*
@@ -17,6 +18,8 @@ import kotlinx.serialization.json.Json
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", watchPaths = listOf("classes", "resources")) {
+
+
 
         install(ContentNegotiation){
             json(Json {

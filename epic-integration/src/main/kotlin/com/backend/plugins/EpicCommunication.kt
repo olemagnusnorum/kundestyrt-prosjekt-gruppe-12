@@ -119,6 +119,21 @@ class EpicCommunication {
         return responseString
     }
 
+    suspend fun searchCondition(patientId: String, outputFormat: String): HttpResponse {
+        val token: String = runBlocking { getEpicAccessToken() }
+        val response: HttpResponse =
+            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Condition?patient=$patientId" +
+                    "&category=problem-list-item" +
+                    "&_format=$outputFormat") {
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $token")
+                }
+            }
+        return response
+    }
+
+
+
 }
 
 
