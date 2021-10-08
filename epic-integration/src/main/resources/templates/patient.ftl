@@ -18,9 +18,6 @@
         </form>
     <#else>
         <p>Du kan ikke søke om foreldrepenger.</p>
-        <form action="/" method="get">
-            <input type="submit" value="Søk foreldrepenger">
-        </form>
     </#if>
     <br>
     <br>
