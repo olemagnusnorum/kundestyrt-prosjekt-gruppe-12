@@ -11,17 +11,19 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.client.call.*
 import org.hl7.fhir.r4.model.*
-import org.hl7.fhir.r4.model.Annotation
 import java.util.Locale
 import java.text.SimpleDateFormat
-import kotlin.reflect.typeOf
 
 class EpicCommunication {
 
     private val ctx: FhirContext = FhirContext.forR4()
     private val client = HttpClient()
-    val jsonParser: IParser = ctx.newJsonParser()
+    private val jsonParser: IParser = ctx.newJsonParser()
 
+    // For demo purposes
+    var latestPatientId: String = "eq081-VQEgP8drUUqCWzHfw3"
+    var latestConditionId: String? = "eVGf2YljIMIk76IcfbNpjWQ3"  // Derrick Lin condition
+    var patientCreated: Boolean = false
 
     /**
      * Finds the patientID of a FHIR Patient object.
@@ -43,17 +45,18 @@ class EpicCommunication {
 
     /**
      * Makes an HTTP response request to the epic server at fhir.epic.com
-     * Returns a patient object on String format.
+     * Returns an HttpResponse object with a bundle containing up to 1 patient object
      * As default the format returned is JSON (but XML can be returned by setting format to = "xml")
      * Birthdate format yyyy-mm-dd
      */
-    suspend fun patientSearch(givenName: String, familyName: String, birthdate: String, outputFormat: String = "json"): String {
+    suspend fun patientSearch(givenName: String, familyName: String, birthdate: String? = null, identifier: String? = null, outputFormat: String = "json"): String {
         val token: String = runBlocking { getEpicAccessToken() }
         val response: HttpResponse =
             client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient?" +
                     "given=$givenName&" +
                     "family=$familyName&" +
-                    "birthdate=$birthdate&" +
+                    (if (birthdate != null) "birthdate=$birthdate&" else "") +
+                    (if (identifier != null) "identifier=$identifier&" else "") +
                     "_format=$outputFormat") {
                 headers {
                     append(HttpHeaders.Authorization, "Bearer $token")
@@ -63,12 +66,41 @@ class EpicCommunication {
     }
 
     /**
-     * Function to get a Condition resource.
+     * Makes an HTTP response request to the epic server at fhir.epic.com
+     * Returns a HttpResponse object containing the patient resource.
+     * As default the format returned is JSON (but XML can be returned by setting format to = "xml")
+     * Birthdate format yyyy-mm-dd
+     *
+     * @property[patientId] the id of the patient resource
+     * @property[outputFormat] the requested response format. Either "json" or "xml"
      */
-    suspend fun getCondition(location: String?): Condition {
+    suspend fun readPatient(patientId: String, outputFormat: String = "json"): HttpResponse {
         val token: String = runBlocking { getEpicAccessToken() }
         val response: HttpResponse =
-            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/${location}?_format=json") {
+            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient/" +
+                    patientId +
+                    "?_format=$outputFormat") {
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $token")
+                }
+            }
+        return response.receive()
+    }
+
+    fun parsePatientStringToObject(jsonMessage: String): Patient {
+        val jsonParser: IParser = ctx.newJsonParser()
+        jsonParser.setPrettyPrint(true)
+
+        return jsonParser.parseResource(Patient::class.java, jsonMessage)
+    }
+
+    /**
+     * Function to get a Condition resource.
+     */
+    suspend fun getCondition(conditionId: String): Condition {
+        val token: String = runBlocking { getEpicAccessToken() }
+        val response: HttpResponse =
+            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Condition/${conditionId}?_format=json") {
                 headers {
                     append(HttpHeaders.Authorization, "Bearer $token")
                 }
@@ -170,11 +202,10 @@ class EpicCommunication {
             contentType(ContentType.Application.Json)
             body = conditionJson
         }
-        val responseString = response.receive<String>()
 
-        println("TOKEN: $token")
-        println("RESPONSE HEADER: ${response.headers["Location"]}")
-        println("JSON: $conditionJson")
+        if (response.headers["Location"] != null) {
+            latestConditionId = response.headers["Location"]!!.split("/")[1]
+        }
 
         return response
     }
@@ -228,6 +259,36 @@ class EpicCommunication {
         val responseString = response.receive<String>()
         println("HEADERS: ${response.headers}")
 
+        if (response.headers["Location"] != null) {
+            latestPatientId = response.headers["Location"]!!.split("/")[1]
+            latestConditionId = null
+            patientCreated = true
+        }
+
         return responseString
+    }
+
+    suspend fun searchCondition(patientId: String, outputFormat: String): HttpResponse {
+        val token: String = runBlocking { getEpicAccessToken() }
+        val response: HttpResponse =
+            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Condition?patient=$patientId" +
+                    "&category=problem-list-item" +
+                    "&_format=$outputFormat") {
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $token")
+                }
+            }
+        return response
+    }
+
+    fun parseConditionBundleStringToObject(jsonMessage: String): Condition? {
+        val jsonParser: IParser = ctx.newJsonParser()
+        jsonParser.setPrettyPrint(true)
+
+        val bundle = jsonParser.parseResource(Bundle::class.java, jsonMessage)
+        if (bundle.total > 0)
+            return bundle.entry[0].resource as Condition
+
+        return null
     }
 }

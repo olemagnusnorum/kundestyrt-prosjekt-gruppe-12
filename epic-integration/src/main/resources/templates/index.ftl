@@ -7,7 +7,7 @@
 <div>
     <h3>Navigasjonsside</h3>
     <br>
-    <a href="/nav-derrick-lin">Gå til NAV - Derrick Lin.</a>
+    <a href="/patient">Gå til pasientsiden.</a>
     <br>
     <a href="/doctor">Gå til legesiden.</a>
     <br>

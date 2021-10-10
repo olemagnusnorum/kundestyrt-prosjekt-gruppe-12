@@ -2,6 +2,7 @@ package com.backend.plugins
 
 import io.ktor.routing.*
 import io.ktor.application.*
+import io.ktor.client.call.*
 import io.ktor.freemarker.*
 import io.ktor.response.*
 import io.ktor.request.*
@@ -33,7 +34,16 @@ fun Application.personRoute() {
         }
 
         get("/doctor") {
-            call.respondTemplate("doctor.ftl")
+            var data = mapOf<String, String?>("patientId" to null)
+
+            if (epicCommunication.patientCreated) {
+                val responsePatient = runBlocking { epicCommunication.readPatient(epicCommunication.latestPatientId, "json").receive<String>() }
+                val patient = epicCommunication.parsePatientStringToObject(responsePatient)
+
+                data = mapOf("patientId" to epicCommunication.latestPatientId, "name" to patient.name[0].text, "pregnancy" to epicCommunication.latestConditionId)
+            }
+
+            call.respondTemplate("doctor.ftl", data)
         }
 
         get("/nav-derrick-lin") {
@@ -87,6 +97,26 @@ fun Application.personRoute() {
             call.respondTemplate("doctor-create-sykemelding.ftl", data)
         }
 
+        get("/patient") {
+            val patientId = epicCommunication.latestPatientId
+            val condition = runBlocking {
+                if (epicCommunication.latestConditionId != null) {
+                    epicCommunication.getCondition(epicCommunication.latestConditionId!!)
+                } else {
+                    val responseCondition = epicCommunication.searchCondition(patientId, "json").receive<String>()
+                    epicCommunication.parseConditionBundleStringToObject(responseCondition)
+                }
+            }
+
+            val responsePatient = runBlocking { epicCommunication.readPatient(patientId, "json").receive<String>() }
+            val patient = epicCommunication.parsePatientStringToObject(responsePatient)
+
+            // TODO : Rather compare condition.code == 77386006
+            val note = if (condition == null || condition.note.isEmpty()) null else condition.note[0].text
+            val data = mapOf("condition" to note, "due_date" to (condition?.abatement ?: "Ingen termindato satt"), "name" to patient.name[0].text)
+            call.respondTemplate("patient.ftl", data)
+        }
+
         post("/create-patient") {
             val params = call.receiveParameters()
 
@@ -100,11 +130,12 @@ fun Application.personRoute() {
             call.respondTemplate("create-patient-confirmation.ftl", data)
         }
 
-//            val given = "GivenB"
-//            val family = "FamilyB"
-//            val p_number = "XXX-XX-XXXX"
-//
-//            epicCommunication.createPatient(given,family,p_number)
+        post("/create-pregnancy") {
+            runBlocking { epicCommunication.createCondition(
+                epicCommunication.latestPatientId, "The patient is pregnant.",
+                "2015-01-01", "2015-08-30") }
+            call.respondRedirect("/doctor")
+        }
     }
 
 }
