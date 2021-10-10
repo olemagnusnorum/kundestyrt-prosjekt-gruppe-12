@@ -45,7 +45,7 @@ class EpicCommunication {
 
     /**
      * Makes an HTTP response request to the epic server at fhir.epic.com
-     * Returns a patient object on String format.
+     * Returns an HttpResponse object with a bundle containing up to 1 patient object
      * As default the format returned is JSON (but XML can be returned by setting format to = "xml")
      * Birthdate format yyyy-mm-dd
      */
@@ -65,6 +65,15 @@ class EpicCommunication {
         return response.receive()
     }
 
+    /**
+     * Makes an HTTP response request to the epic server at fhir.epic.com
+     * Returns a HttpResponse object containing the patient resource.
+     * As default the format returned is JSON (but XML can be returned by setting format to = "xml")
+     * Birthdate format yyyy-mm-dd
+     *
+     * @property[patientId] the id of the patient resource
+     * @property[outputFormat] the requested response format. Either "json" or "xml"
+     */
     suspend fun readPatient(patientId: String, outputFormat: String = "json"): HttpResponse {
         val token: String = runBlocking { getEpicAccessToken() }
         val response: HttpResponse =
