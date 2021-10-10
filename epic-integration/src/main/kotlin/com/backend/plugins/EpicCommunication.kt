@@ -55,7 +55,7 @@ class EpicCommunication {
             client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient?" +
                     "given=$givenName&" +
                     "family=$familyName&" +
-                    (if (birthdate != null) "birthdate=$identifier&" else "") +
+                    (if (birthdate != null) "birthdate=$birthdate&" else "") +
                     (if (identifier != null) "identifier=$identifier&" else "") +
                     "_format=$outputFormat") {
                 headers {
