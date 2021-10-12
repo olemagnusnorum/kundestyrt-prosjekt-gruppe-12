@@ -12,6 +12,7 @@ import io.ktor.client.call.*
 import io.ktor.http.Parameters
 import org.hl7.fhir.r4.model.*
 import org.hl7.fhir.r4.model.Parameters
+import org.hl7.fhir.r4.model.Type
 import java.util.Locale
 import java.text.SimpleDateFormat
 
@@ -364,10 +365,10 @@ class EpicCommunication {
     }
 
 //        QuestionnaireResponse
-//          - item
+//          - item (List<QuestionnaireResponse.QuestionnaireResponseItemComponent>)
 //              - linkid (pointer to item from Questionnaire)
 //              - text (name of question)
-//                  - answer
+//                  - answer (List<QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent>)
 //                      -value[x]
     /**
      * Javadoc is love, javadoc is life
@@ -376,143 +377,7 @@ class EpicCommunication {
      * @param questionnaire Questionnaire the response is related to
      * @return http response, not QuestionnaireResponse
      */
-    fun createQuestionnaireResponse(questionnaire: Questionnaire, params: Parameters): QuestionnaireResponse {
-
-        val questionnaireResponseJson = "{\n" +
-                "  \"resourceType\": \"QuestionnaireResponse\",\n" +
-                "  \"id\": \"2570031\",\n" +
-                "  \"meta\": {\n" +
-                "    \"versionId\": \"1\",\n" +
-                "    \"lastUpdated\": \"2021-10-05T16:11:15.195+00:00\",\n" +
-                "    \"source\": \"#3crgL1hoc2CQ3V5K\"\n" +
-                "  },\n" +
-                "  \"status\": \"completed\",\n" +
-                "  \"item\": [ {\n" +
-                "    \"linkId\": \"Q1\",\n" +
-                "    \"text\": \"IND2222\",\n" +
-                "    \"item\": [ {\n" +
-                "      \"linkId\": \"Q2\",\n" +
-                "      \"text\": \"Which city you are currently located ?\",\n" +
-                "      \"answer\": [ {\n" +
-                "        \"valueCoding\": {\n" +
-                "          \"code\": \"Mumbai\",\n" +
-                "          \"display\": \"Mumbai\"\n" +
-                "        }\n" +
-                "      } ]\n" +
-                "    }, {\n" +
-                "      \"linkId\": \"Q3\",\n" +
-                "      \"text\": \"What is your profession ?\",\n" +
-                "      \"answer\": [ {\n" +
-                "        \"valueCoding\": {\n" +
-                "          \"code\": \"dev ops\",\n" +
-                "          \"display\": \"dev ops\"\n" +
-                "        }\n" +
-                "      } ]\n" +
-                "    }, {\n" +
-                "      \"linkId\": \"Q4\",\n" +
-                "      \"text\": \"What is your year of birth ?\",\n" +
-                "      \"answer\": [ {\n" +
-                "        \"valueCoding\": {\n" +
-                "          \"code\": \"1992\",\n" +
-                "          \"display\": \"1992\"\n" +
-                "        }\n" +
-                "      } ]\n" +
-                "    }, {\n" +
-                "      \"linkId\": \"Q5\",\n" +
-                "      \"text\": \"Have you been in contact with someone who is recently infected with covid-19 ?\",\n" +
-                "      \"answer\": [ {\n" +
-                "        \"valueCoding\": {\n" +
-                "          \"code\": \"no\",\n" +
-                "          \"display\": \"no\"\n" +
-                "        }\n" +
-                "      } ]\n" +
-                "    }, {\n" +
-                "      \"linkId\": \"Q6\",\n" +
-                "      \"text\": \"Have you recently visited any place which is exposed to covid-19 ?\",\n" +
-                "      \"answer\": [ {\n" +
-                "        \"valueCoding\": {\n" +
-                "          \"code\": \"yes\",\n" +
-                "          \"display\": \"yes\"\n" +
-                "        }\n" +
-                "      } ]\n" +
-                "    }, {\n" +
-                "      \"linkId\": \"Q7\",\n" +
-                "      \"text\": \"Are you having any symptoms ?\",\n" +
-                "      \"answer\": [ {\n" +
-                "        \"valueCoding\": {\n" +
-                "          \"code\": \"Chills\",\n" +
-                "          \"display\": \"Chills\"\n" +
-                "        }\n" +
-                "      } ]\n" +
-                "    }, {\n" +
-                "      \"linkId\": \"Q8\",\n" +
-                "      \"text\": \"Have you been exposed to covid-19  ?\",\n" +
-                "      \"answer\": [ {\n" +
-                "        \"valueCoding\": {\n" +
-                "          \"code\": \"yes\",\n" +
-                "          \"display\": \"yes\"\n" +
-                "        }\n" +
-                "      } ]\n" +
-                "    }, {\n" +
-                "      \"linkId\": \"Q9\",\n" +
-                "      \"text\": \"Have you been tested for covid-19 ?\",\n" +
-                "      \"answer\": [ {\n" +
-                "        \"valueCoding\": {\n" +
-                "          \"code\": \"yes\",\n" +
-                "          \"display\": \"yes\"\n" +
-                "        }\n" +
-                "      } ]\n" +
-                "    }, {\n" +
-                "      \"linkId\": \"Q10\",\n" +
-                "      \"text\": \"What was your result ?\",\n" +
-                "      \"answer\": [ {\n" +
-                "        \"valueCoding\": {\n" +
-                "          \"code\": \"positive\",\n" +
-                "          \"display\": \"positive\"\n" +
-                "        }\n" +
-                "      } ]\n" +
-                "    }, {\n" +
-                "      \"linkId\": \"Q11\",\n" +
-                "      \"text\": \"In which state you are currently located ?\",\n" +
-                "      \"answer\": [ {\n" +
-                "        \"valueCoding\": {\n" +
-                "          \"code\": \"Maharashtra\",\n" +
-                "          \"display\": \"Maharashtra\"\n" +
-                "        }\n" +
-                "      } ]\n" +
-                "    }, {\n" +
-                "      \"linkId\": \"Q12\",\n" +
-                "      \"text\": \"What is your date of exposure ?\",\n" +
-                "      \"answer\": [ {\n" +
-                "        \"valueCoding\": {\n" +
-                "          \"code\": \"2020-10-29\",\n" +
-                "          \"display\": \"2020-10-29\"\n" +
-                "        }\n" +
-                "      } ]\n" +
-                "    }, {\n" +
-                "      \"linkId\": \"Q13\",\n" +
-                "      \"text\": \"What is your body temperature (in Farenihite) ?\",\n" +
-                "      \"answer\": [ {\n" +
-                "        \"valueCoding\": {\n" +
-                "          \"code\": \"97\",\n" +
-                "          \"display\": \"97\"\n" +
-                "        }\n" +
-                "      } ]\n" +
-                "    }, {\n" +
-                "      \"linkId\": \"Q14\",\n" +
-                "      \"text\": \"Your work eligibility ?\",\n" +
-                "      \"answer\": [ {\n" +
-                "        \"valueCoding\": {\n" +
-                "          \"code\": \"not_eligible\",\n" +
-                "          \"display\": \"not_eligible\"\n" +
-                "        }\n" +
-                "      } ]\n" +
-                "    } ]\n" +
-                "  } ]\n" +
-                "}"
-
-        val exampleQuestionnaireResponse = jsonParser.parseResource(QuestionnaireResponse::class.java, questionnaireResponseJson)
-        exampleQuestionnaireResponse.item[0]
+    fun createQuestionnaireResponse(questionnaire: Questionnaire, params: io.ktor.http.Parameters): QuestionnaireResponse {
 
         // Create empty template
         val questionnaireResponse = QuestionnaireResponse()
@@ -523,14 +388,20 @@ class EpicCommunication {
         //TODO: Link patient. Where to get patient id? New function parameter or send with params?
 
 
-        //Put answers in Items (BackboneElement) and add them to QR. TODO: Figure out how
-        val items = mutableListOf<QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent>()
+        //Put answers in Item and add them to QR
+        val item = mutableListOf<QuestionnaireResponse.QuestionnaireResponseItemComponent>()
 
-        for (param in params.parameter) {
-            val item = QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()
+        for (i in 0..questionnaire.item.size) {
 
-            item.value = param.value
-            items.add(item)
+            item[i].linkId = questionnaire.item[i].id
+            item[i].text = questionnaire.item[i].text
+
+            val answerComponent = mutableListOf<QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent>()
+            answerComponent[0].value = CodeableConcept(Coding(
+                "some.system",
+                params[i].toString(), params[i].toString())) //TODO: Retrieve answers from params
+
+            item[i].answer = answerComponent
         }
 
         /*//post the questionnaireResponse to the server
