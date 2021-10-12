@@ -40,7 +40,7 @@ fun Application.personRoute() {
                 val responsePatient = runBlocking { epicCommunication.readPatient(epicCommunication.latestPatientId, "json").receive<String>() }
                 val patient = epicCommunication.parsePatientStringToObject(responsePatient)
 
-                data = mapOf("patientId" to epicCommunication.latestPatientId, "name" to patient.name[0].text, "pregnancy" to epicCommunication.latestConditionId)
+                data = mapOf("patientId" to epicCommunication.latestPatientId, "name" to patient.name[0].family, "pregnancy" to epicCommunication.latestConditionId)
             }
 
             call.respondTemplate("doctor.ftl", data)
@@ -113,7 +113,7 @@ fun Application.personRoute() {
 
             // TODO : Rather compare condition.code == 77386006
             val note = if (condition == null || condition.note.isEmpty()) null else condition.note[0].text
-            val data = mapOf("condition" to note, "due_date" to (condition?.abatement ?: "Ingen termindato satt"), "name" to patient.name[0].text)
+            val data = mapOf("condition" to note, "due_date" to (condition?.abatement ?: "Ingen termindato satt"), "name" to patient.name[0].family)
             call.respondTemplate("patient.ftl", data)
         }
 

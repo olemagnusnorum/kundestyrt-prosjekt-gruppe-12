@@ -1,7 +1,5 @@
 package com.backend.plugins
 
-import kotlinx.coroutines.runBlocking
-
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
 
@@ -16,13 +14,16 @@ import java.text.SimpleDateFormat
 
 class EpicCommunication {
 
+    //the base of the fhir server
+    private val baseURL : String = "http://hapi.fhir.org/baseR4"
+
     private val ctx: FhirContext = FhirContext.forR4()
     private val client = HttpClient()
     private val jsonParser: IParser = ctx.newJsonParser()
 
     // For demo purposes
-    var latestPatientId: String = "eq081-VQEgP8drUUqCWzHfw3"
-    var latestConditionId: String? = "eVGf2YljIMIk76IcfbNpjWQ3"  // Derrick Lin condition
+    var latestPatientId: String = "2591228"
+    var latestConditionId: String? = "2591225"  // Georges condition
     var patientCreated: Boolean = false
 
     /**
@@ -50,17 +51,20 @@ class EpicCommunication {
      * Birthdate format yyyy-mm-dd
      */
     suspend fun patientSearch(givenName: String, familyName: String, birthdate: String? = null, identifier: String? = null, outputFormat: String = "json"): String {
-        val token: String = runBlocking { getEpicAccessToken() }
+        //val token: String = runBlocking { getEpicAccessToken() }
         val response: HttpResponse =
-            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient?" +
+            client.get(baseURL + "/Patient?" +
                     "given=$givenName&" +
                     "family=$familyName&" +
                     (if (birthdate != null) "birthdate=$birthdate&" else "") +
                     (if (identifier != null) "identifier=$identifier&" else "") +
                     "_format=$outputFormat") {
+                /*
                 headers {
                     append(HttpHeaders.Authorization, "Bearer $token")
                 }
+
+                 */
             }
         return response.receive()
     }
@@ -75,14 +79,11 @@ class EpicCommunication {
      * @property[outputFormat] the requested response format. Either "json" or "xml"
      */
     suspend fun readPatient(patientId: String, outputFormat: String = "json"): HttpResponse {
-        val token: String = runBlocking { getEpicAccessToken() }
         val response: HttpResponse =
-            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient/" +
+            client.get(baseURL + "/Patient/" +
                     patientId +
                     "?_format=$outputFormat") {
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $token")
-                }
+
             }
         return response.receive()
     }
@@ -98,12 +99,9 @@ class EpicCommunication {
      * Function to get a Condition resource.
      */
     suspend fun getCondition(conditionId: String): Condition {
-        val token: String = runBlocking { getEpicAccessToken() }
         val response: HttpResponse =
-            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Condition/${conditionId}?_format=json") {
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $token")
-                }
+            client.get(baseURL + "/Condition/${conditionId}?_format=json") {
+
             }
         return jsonParser.parseResource(Condition::class.java, response.receive<String>())
     }
@@ -146,7 +144,6 @@ class EpicCommunication {
      * @return an http response as a string.
      */
     suspend fun createCondition(subject: String, note: String, onsetDate: String, abatementDate: String): HttpResponse {
-        val token: String = runBlocking { getEpicAccessToken() }
 
         val condition = Condition()
 
@@ -195,16 +192,15 @@ class EpicCommunication {
         println(conditionJson)
 
         // Post the condition to epic
-        val response: HttpResponse = client.post("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Condition") {
-            headers {
-                append(HttpHeaders.Authorization, "Bearer $token")
-            }
+        val response: HttpResponse = client.post(baseURL + "/Condition") {
+
             contentType(ContentType.Application.Json)
             body = conditionJson
         }
 
         if (response.headers["Location"] != null) {
-            latestConditionId = response.headers["Location"]!!.split("/")[1]
+            println(response.headers["Location"])
+            latestConditionId = response.headers["Location"]!!.split("/")[5]
         }
 
         return response
@@ -220,7 +216,6 @@ class EpicCommunication {
      * @return an http response as a string.
      */
     suspend fun createPatient(givenName: String, familyName: String, identifierValue: String): String {
-        val token: String = runBlocking { getEpicAccessToken() }
         val patient = Patient()
 
         // Set birthdate
@@ -249,10 +244,8 @@ class EpicCommunication {
         val patientJson = jsonParser.encodeResourceToString(patient)
 
         // Post the patient to epic
-        val response: HttpResponse = client.post("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient") {
-            headers {
-                append(HttpHeaders.Authorization, "Bearer $token")
-            }
+        val response: HttpResponse = client.post(baseURL + "/Patient") {
+
             contentType(ContentType.Application.Json)
             body = patientJson
         }
@@ -260,7 +253,8 @@ class EpicCommunication {
         println("HEADERS: ${response.headers}")
 
         if (response.headers["Location"] != null) {
-            latestPatientId = response.headers["Location"]!!.split("/")[1]
+            println(response.headers["Location"])
+            latestPatientId = response.headers["Location"]!!.split("/")[5]
             latestConditionId = null
             patientCreated = true
         }
@@ -269,14 +263,11 @@ class EpicCommunication {
     }
 
     suspend fun searchCondition(patientId: String, outputFormat: String): HttpResponse {
-        val token: String = runBlocking { getEpicAccessToken() }
         val response: HttpResponse =
-            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Condition?patient=$patientId" +
+            client.get(baseURL + "/Condition?patient=$patientId" +
                     "&category=problem-list-item" +
                     "&_format=$outputFormat") {
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $token")
-                }
+
             }
         return response
     }
