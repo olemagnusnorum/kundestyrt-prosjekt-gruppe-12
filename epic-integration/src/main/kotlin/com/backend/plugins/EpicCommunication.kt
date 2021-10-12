@@ -1,7 +1,5 @@
 package com.backend.plugins
 
-import kotlinx.coroutines.runBlocking
-
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
 
@@ -17,7 +15,7 @@ import java.text.SimpleDateFormat
 class EpicCommunication {
 
     //the base of the fhir server
-    private val baseURl : String = "http://hapi.fhir.org/baseR4"
+    private val baseURL : String = "http://hapi.fhir.org/baseR4"
 
     private val ctx: FhirContext = FhirContext.forR4()
     private val client = HttpClient()
@@ -55,7 +53,7 @@ class EpicCommunication {
     suspend fun patientSearch(givenName: String, familyName: String, birthdate: String? = null, identifier: String? = null, outputFormat: String = "json"): String {
         //val token: String = runBlocking { getEpicAccessToken() }
         val response: HttpResponse =
-            client.get(baseURl + "/Patient?" +
+            client.get(baseURL + "/Patient?" +
                     "given=$givenName&" +
                     "family=$familyName&" +
                     (if (birthdate != null) "birthdate=$birthdate&" else "") +
@@ -82,7 +80,7 @@ class EpicCommunication {
      */
     suspend fun readPatient(patientId: String, outputFormat: String = "json"): HttpResponse {
         val response: HttpResponse =
-            client.get(baseURl + "/Patient/" +
+            client.get(baseURL + "/Patient/" +
                     patientId +
                     "?_format=$outputFormat") {
 
@@ -102,7 +100,7 @@ class EpicCommunication {
      */
     suspend fun getCondition(conditionId: String): Condition {
         val response: HttpResponse =
-            client.get(baseURl + "/Condition/${conditionId}?_format=json") {
+            client.get(baseURL + "/Condition/${conditionId}?_format=json") {
 
             }
         return jsonParser.parseResource(Condition::class.java, response.receive<String>())
@@ -194,7 +192,7 @@ class EpicCommunication {
         println(conditionJson)
 
         // Post the condition to epic
-        val response: HttpResponse = client.post(baseURl + "/Condition") {
+        val response: HttpResponse = client.post(baseURL + "/Condition") {
 
             contentType(ContentType.Application.Json)
             body = conditionJson
@@ -246,7 +244,7 @@ class EpicCommunication {
         val patientJson = jsonParser.encodeResourceToString(patient)
 
         // Post the patient to epic
-        val response: HttpResponse = client.post(baseURl + "/Patient") {
+        val response: HttpResponse = client.post(baseURL + "/Patient") {
 
             contentType(ContentType.Application.Json)
             body = patientJson
@@ -266,7 +264,7 @@ class EpicCommunication {
 
     suspend fun searchCondition(patientId: String, outputFormat: String): HttpResponse {
         val response: HttpResponse =
-            client.get(baseURl + "/Condition?patient=$patientId" +
+            client.get(baseURL + "/Condition?patient=$patientId" +
                     "&category=problem-list-item" +
                     "&_format=$outputFormat") {
 
