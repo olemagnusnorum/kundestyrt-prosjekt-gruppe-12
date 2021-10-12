@@ -6,6 +6,7 @@ import io.ktor.client.call.*
 import io.ktor.freemarker.*
 import io.ktor.response.*
 import io.ktor.request.*
+import io.ktor.util.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 
@@ -14,6 +15,10 @@ import kotlinx.serialization.Serializable
 data class Person(val firstName: String?, val lastName: String?, val age: Int?)
 
 val epicCommunication = EpicCommunication()
+
+//inboxes for keeping track of messages
+val navInbox = Inbox()
+val doctorInbox = Inbox()
 
 fun Application.personRoute() {
 
@@ -131,10 +136,52 @@ fun Application.personRoute() {
         }
 
         post("/create-pregnancy") {
-            runBlocking { epicCommunication.createCondition(
+            val response = runBlocking { epicCommunication.createCondition(
                 epicCommunication.latestPatientId, "The patient is pregnant.",
                 "2015-01-01", "2015-08-30") }
+
+            val conditionId = response.headers["Location"]!!.split("/")[5]
+            navInbox.addToInbox("Pregnancy", conditionId)
             call.respondRedirect("/doctor")
+        }
+
+        //new questionnaire site
+        post("/create-questionnaire"){
+            val params = call.receiveParameters()
+
+            val question1 = params["question1"]!!
+            val question2 = params["question2"]!!
+
+
+            val jsonResponse = runBlocking { epicCommunication.createQuestionnaire(params) }
+            val data = mapOf("response" to jsonResponse)
+            //testing inbox function
+
+            navInbox.addToInbox("Questionnaire", jsonResponse)
+            call.respondTemplate("create-questionnaire-confirmation.ftl", data)
+        }
+
+        //new questionnaire site
+        get("/questionnaire"){
+            call.respondTemplate("/questionnaire.ftl")
+        }
+
+        //new inbox site for nav
+        get("/nav-inbox"){
+            call.respondTemplate("nav-inbox.ftl", navInbox.getInbox())
+        }
+
+        //new inbox site for doctor
+        get("/doctor-inbox"){
+            call.respondTemplate("nav-inbox.ftl", doctorInbox.getInbox())
+        }
+
+        //get pregnancy information
+        get("/nav-inbox/pregnancy/{id}"){
+            val conditionId: String = call.parameters["id"]!!
+            val response = runBlocking { epicCommunication.searchPregnantPatient(conditionId) }
+            val data = mapOf("response" to response)
+            call.respondTemplate("show-info.ftl", data)
         }
     }
 
