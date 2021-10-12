@@ -183,6 +183,36 @@ fun Application.personRoute() {
             val data = mapOf("response" to response)
             call.respondTemplate("show-info.ftl", data)
         }
+
+        //functional analysis | Helseplattformen inbox
+        //Called when doctor is accessing inbox
+        post("/functional-analysis/doctor-inbox") {
+            val patientId = call.parameters["id"]!!
+
+            //TODO: Get all questionnaires associated with patientId, put them in a list and send them as "questionnaires"
+
+            val data = mapOf("patientId" to patientId)
+            call.respondTemplate("functional-analysis/doctor-inbox.ftl", data)
+        }
+
+        //functinal analysis  | Helseplattformen questionnaire
+        //Called when doctor opens a questionnaire
+        get("functional-analysis/doctor-inbox/{questionnaireId}") {
+            val questionnaireId: String = call.parameters["questionnaireId"]!!
+
+            val data = mapOf("questionnaireId" to questionnaireId)
+
+            call.respondTemplate("questionnaireResponse.ftl", data)
+        }
+
+        //functional analysis | Helseplattformen qestionnaire response
+        //Called when doctor respons to a questionnaire with a questionnaire response
+        post("functional-analysis/createQuestionnaireResponse") {
+            val params = call.receiveParameters()
+
+            //TODO: Extract answers properly from form
+            //TODO: Send them to EpicCommunication.createQuestionnaireResponse function
+        }
     }
 
 }
