@@ -2,12 +2,14 @@ package com.backend.plugins
 
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
+import ca.uhn.fhir.parser.JsonParser
 
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.client.call.*
+import io.ktor.http.Parameters
 import org.hl7.fhir.r4.model.*
 import java.util.Locale
 import java.text.SimpleDateFormat
@@ -281,5 +283,82 @@ class EpicCommunication {
             return bundle.entry[0].resource as Condition
 
         return null
+    }
+
+
+
+    /**
+     * Function to create a questionnaire and save the questionnaire to fhir server.
+     * In the future, this function should take in parameters, for the
+     * different values.
+     * @param questions Map<String, String> the questions
+     * @return id of
+     */
+    suspend fun createQuestionnaire(questions: Parameters): String{
+
+        val questionnaire = Questionnaire()
+
+        val formatter = SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH)
+        val dateInString = "7-Jun-2013"
+        val date = formatter.parse(dateInString)
+
+        questionnaire.setName("NavQuestionnaire")
+        questionnaire.setTitle("Nav questionaire: Sykemelding")
+        questionnaire.setStatus(Enumerations.PublicationStatus.ACTIVE)
+        questionnaire.setDate(date)
+        questionnaire.setPublisher("NAV")
+        questionnaire.setDescription("questions about sykemelding")
+
+        var number: Int = 0
+        var items = mutableListOf<Questionnaire.QuestionnaireItemComponent>()
+
+        questions.forEach { t, u ->
+            number++
+            var item = Questionnaire.QuestionnaireItemComponent()
+            item.setLinkId(number.toString())
+            println(u[0])
+            item.setText(u[0])
+            item.setType(Questionnaire.QuestionnaireItemType.STRING)
+            items.add(item)
+        }
+
+        questionnaire.setItem(items)
+
+        val questionnaireJson = jsonParser.encodeResourceToString(questionnaire)
+
+        //post the questionnaire to the server
+        val response: HttpResponse = client.post(baseURl + "/Questionnaire"){
+
+            contentType(ContentType.Application.Json)
+            body = questionnaireJson
+        }
+
+        val responseString = response.receive<String>()
+        println("HEADERS: ${response.headers}")
+
+
+        if (response.headers["Location"] != null) {
+            println(response.headers["Location"])
+            var responseId = response.headers["Location"]!!.split("/")[5]
+            return responseId
+        }
+
+        return "EMPTY"
+
+    }
+
+    /**
+     * Function to search a patient and pregnancy condition.
+     * @param conditionId String the id of pregnancy condition
+     * @return a http response as a string.
+     */
+    suspend fun searchPregnantPatient(conditionId: String, outputFormat: String = "json"): String{
+        val response: HttpResponse =
+            client.get(baseURl + "/Condition?" +
+                    "_id=$conditionId&" +
+                    "_include=Condition:patient&" +
+                    "_format=$outputFormat") {
+            }
+        return response.receive()
     }
 }
