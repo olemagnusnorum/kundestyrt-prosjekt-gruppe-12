@@ -21,7 +21,7 @@ fun Application.routingVenterBarn() {
             call.respondText(epicResponse)
         }
 
-        get("/venterb-arn/person") {
+        get("/venter-barn/person") {
             val person = call.receive<Person>()
             call.respondText("this is a person from json: \n ${person.firstName} ${person.lastName} is ${person.age}")
         }
