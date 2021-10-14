@@ -32,5 +32,23 @@ fun main() {
         personRoute()
         venterBarnRoute()
         funksjonsvurderingRoute()
+
+        // Create a default patient
+        createDefaultPatient()
     }.start(wait = true)
+}
+
+fun createDefaultPatient() {
+    // Check if a predetermined patient exists in the fhir server
+    val patient = runBlocking {
+        val response = epicCommunication.patientSearch("Kari", "Nordmann", "7-Jun-1990", "07069012345")
+        epicCommunication.parseBundleXMLToPatient(response, isXML = false)
+    }
+
+    // If the patient doesn't exist, create it
+    if (patient == null) {
+        runBlocking {
+            epicCommunication.createPatient("Kari", "Nordmann", "7-Jun-1990", "07069012345")
+        }
+    }
 }

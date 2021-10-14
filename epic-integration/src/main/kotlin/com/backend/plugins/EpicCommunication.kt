@@ -54,7 +54,7 @@ class EpicCommunication(server: String = "public") {
 
     /**
      * Makes an HTTP response request to the epic server at fhir.epic.com
-     * Returns an HttpResponse object with a bundle containing up to 1 patient object
+     * Returns an HttpResponse object with a bundle containing 0, 1 or more patient object(s)
      * As default the format returned is JSON (but XML can be returned by setting format to = "xml")
      * Birthdate format yyyy-mm-dd
      */
@@ -223,13 +223,12 @@ class EpicCommunication(server: String = "public") {
      * @param identifierValue on the format "XXX-XX-XXXX" ("028-27-1234")
      * @return an http response as a string.
      */
-    suspend fun createPatient(givenName: String, familyName: String, identifierValue: String): String {
+    suspend fun createPatient(givenName: String, familyName: String, identifierValue: String, birthdate: String = "7-Jun-2013"): String {
         val patient = Patient()
 
         // Set birthdate
         val formatter = SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH)
-        val dateInString = "7-Jun-2013"
-        val date = formatter.parse(dateInString)
+        val date = formatter.parse(birthdate)
         patient.birthDate = date
 
         // set gender
