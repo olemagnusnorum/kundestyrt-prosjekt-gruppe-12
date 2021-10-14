@@ -18,11 +18,6 @@ import kotlinx.serialization.json.Json
 
 
 fun main() {
-    val epicCommunication = EpicCommunication()
-    val qrString: String = runBlocking { epicCommunication.readQuestionnaireResponse("2644277") }
-    val qr = epicCommunication.parseQuestionnaireResponseStringToObject(qrString.toString())
-    println(qr.item[0].text)
-    println(qr.item[1].text)
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", watchPaths = listOf("classes", "resources")) {
         install(ContentNegotiation){
             json(Json {
