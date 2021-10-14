@@ -10,9 +10,9 @@
     <p>(Viser kun pasientinformasjon)</p>
     <p>${response}</p>
     <br>
-    <a href="/doctor">Gå tilbake til legesiden.</a>
+    <a href="/venter-barn/doctor">Gå tilbake til legesiden.</a>
     <br>
-    <a href="/">Gå tilbake til navigasjonsiden.</a>
+    <a href="/venter-barn">Gå tilbake til navigasjonsiden.</a>
 </div>
 </body>
 </html>

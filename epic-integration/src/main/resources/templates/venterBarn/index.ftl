@@ -7,11 +7,11 @@
 <div>
     <h3>Navigasjonsside</h3>
     <br>
-    <a href="/patient">Gå til pasientsiden.</a>
+    <a href="/venter-barn/patient">Gå til pasientsiden.</a>
     <br>
-    <a href="/doctor">Gå til legesiden.</a>
+    <a href="/venter-barn/doctor">Gå til legesiden.</a>
     <br>
-    <a href="/nav">Gå til NAVs side</a>
+    <a href="/venter-barn/nav">Gå til NAVs side</a>
 </div>
 </body>
 </html>

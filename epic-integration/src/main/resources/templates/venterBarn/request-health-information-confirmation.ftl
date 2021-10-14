@@ -7,9 +7,9 @@
 <div>
     <h3>NAV har bedt legen om helseinformasjon om Derrick!</h3>
     <br>
-    <a href="/nav">Gå tilbake til NAVs side.</a>
+    <a href="/venter-barn/nav">Gå tilbake til NAVs side.</a>
     <br>
-    <a href="/">Gå tilbake til navigasjonsiden.</a>
+    <a href="/venter-barn">Gå tilbake til navigasjonsiden.</a>
 </div>
 </body>
 </html>
