@@ -6,7 +6,7 @@ import io.ktor.freemarker.*
 import io.ktor.response.*
 
 
-fun Application.routingFunksjonsvurdering() {
+fun Application.funksjonsvurderingRoute() {
 
     routing {
 

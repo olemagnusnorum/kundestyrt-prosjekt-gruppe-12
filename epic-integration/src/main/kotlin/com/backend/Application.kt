@@ -30,7 +30,7 @@ fun main() {
         }
 
         personRoute()
-        routingFunksjonsvurdering()
-        routingVenterBarn()
+        venterBarnRoute()
+        funksjonsvurderingRoute()
     }.start(wait = true)
 }

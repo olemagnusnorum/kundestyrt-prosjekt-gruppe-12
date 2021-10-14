@@ -14,13 +14,14 @@ import kotlinx.serialization.Serializable
 fun Application.routingVenterBarn() {
 
     routing {
+        route("/venter-barn") {
+            get {
+                call.respondTemplate("/venter-barn/index.ftl")
+            }
 
-        //dummy epic server endpoint
-        get("/venter-barn/sometest") {
-            val epicResponse = "Aight her gjør vi venter barn ting"
-            call.respondText(epicResponse)
-        }
-
+            get("/patient-login") {
+                call.respondTemplate("/venter-barn/patient-login.ftl")
+            }
         get("/venter-barn/person") {
             val person = call.receive<Person>()
             call.respondText("this is a person from json: \n ${person.firstName} ${person.lastName} is ${person.age}")
@@ -184,4 +185,13 @@ fun Application.routingVenterBarn() {
 
     }
 
+            get("/patient") {
+                val params = call.receiveParameters()
+                val id = params["id"]
+                val patient = runBlocking { epicCommunication.parsePatientStringToObject(epicCommunication.readPatient(id!!).receive()) }
+                call.respondTemplate("/venter-barn/patient-login.ftl")
+            }
+        }
+
+    }
 }
