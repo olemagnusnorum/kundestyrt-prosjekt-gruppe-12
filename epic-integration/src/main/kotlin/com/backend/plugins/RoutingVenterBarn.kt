@@ -24,22 +24,18 @@ fun Application.venterBarnRoute() {
                 call.respondTemplate("/venterBarn/patient-login.ftl")
             }
 
-            get("/venter-barn/person") {
+            get("/person") {
                 val person = call.receive<Person>()
                 call.respondText("this is a person from json: \n ${person.firstName} ${person.lastName} is ${person.age}")
             }
 
             //dummy epic server endpoint
-            get("/venter-barn/epic") {
+            get("/epic") {
                 val epicResponse = "Epic"
                 call.respondText(epicResponse)
             }
 
-            get("/venter-barn") {
-                call.respondTemplate("venterBarn/index.ftl")
-            }
-
-            get("/venter-barn/doctor") {
+            get("/doctor") {
                 var data = mapOf<String, String?>("patientId" to null)
 
                 if (epicCommunication.patientCreated) {
@@ -52,23 +48,23 @@ fun Application.venterBarnRoute() {
                 call.respondTemplate("venterBarn/doctor.ftl", data)
             }
 
-            get("/venter-barn/nav-derrick-lin") {
+            get("/nav-derrick-lin") {
                 call.respondTemplate("venterBarn/nav-derrick-lin.ftl")
             }
 
-            get("/venter-barn/nav") {
+            get("/nav") {
                 call.respondTemplate("venterBarn/nav.ftl")
             }
 
-            get("/venter-barn/messages-from-nav") {
+            get("/messages-from-nav") {
                 call.respondTemplate("venterBarn/messages-from-nav.ftl")
             }
 
-            get("/venter-barn/messages-sent-from-doctor-confirmation") {
+            get("/messages-sent-from-doctor-confirmation") {
                 call.respondTemplate("venterBarn/messages-sent-from-doctor-confirmation.ftl")
             }
 
-            post("/venter-barn/messages-from-doctor") {
+            post("/messages-from-doctor") {
                 val params = call.receiveParameters()
                 val response = epicCommunication.parseCommunicationStringToJson("""{"resourceType": "Communication", "id": "eQtjP5dExSGL8QY3jIixZo0TrO52tQfNEGkoWTOJdWCU3", "basedOn": [{"reference": "ServiceRequest/eZykr93PG.4eADHuIA7x31kTgnBtaXdav57aDWVlvDWvi-TiVRQGvTBsmjwpvM8n73"}], "partOf": [{"reference": "Task/ebvg8Qy8tsSAz7oLPJgZXUN3gKXtUQEDEo-3.OI.uuPcHc7JRfVOphJCVs.wEo4DF3"}], "status": "in-progress", "subject": {"reference": "Patient/e5CmvJNKQAN-kUr-XDKfXSQ3", "display": "Patient, Bravo"}, "encounter": {"reference": "Encounter/ePsDBvsehVaICEzX4yNBTGig.9WVSJYHW-td1KddCl1k3"}, "sent": "2021-01-25T06:16:23Z", "recipient": [{"reference": "Organization/eXn64I93.1fbFG3bFDGaXbA3", "display": "Ven B Cbo Transport 5 (Fhir)"}], "sender": {"reference": "Practitioner/ectBdL9yLwfiRop1f5LsU6A3", "display": "Susanna Sammer, MSW"}, "payload": [{"contentString": "Dette er helsedataen du ba om."}]}""")
                 val data = mapOf("response" to response.payload[0].content)
@@ -76,12 +72,12 @@ fun Application.venterBarnRoute() {
                 call.respondTemplate("venterBarn/messages-from-doctor.ftl", data)
             }
 
-            post("/venter-barn/request-health-information-confirmation") {
+            post("/request-health-information-confirmation") {
                 val params = call.receiveParameters()
                 call.respondTemplate("venterBarn/request-health-information-confirmation.ftl")
             }
 
-            post("/venter-barn/request-sykepenger") {
+            post("/request-sykepenger") {
                 val params = call.receiveParameters()
                 println("Received request for sykepenger!")
 
@@ -92,7 +88,7 @@ fun Application.venterBarnRoute() {
                 call.respondTemplate("venterBarn/nav-derrick-lin-sykepenger.ftl", data)
             }
 
-            post("/venter-barn/create-sykemelding") {
+            post("/create-sykemelding") {
                 val params = call.receiveParameters()
                 println("Created sykemelding for Derrick Lin!")
 
@@ -103,7 +99,7 @@ fun Application.venterBarnRoute() {
                 call.respondTemplate("venterBarn/doctor-create-sykemelding.ftl", data)
             }
 
-            get("/venter-barn/patient") {
+            get("/patient") {
                 val patientId = epicCommunication.latestPatientId
                 val condition = runBlocking {
                     if (epicCommunication.latestConditionId != null) {
@@ -123,7 +119,7 @@ fun Application.venterBarnRoute() {
                 call.respondTemplate("venterBarn/patient.ftl", data)
             }
 
-            post("/venter-barn/create-patient") {
+            post("/create-patient") {
                 val params = call.receiveParameters()
 
                 val given : String = params["given"]!!
@@ -136,7 +132,7 @@ fun Application.venterBarnRoute() {
                 call.respondTemplate("venterBarn/create-patient-confirmation.ftl", data)
             }
 
-            post("/venter-barn/create-pregnancy") {
+            post("/create-pregnancy") {
                 val response = runBlocking { epicCommunication.createCondition(
                     epicCommunication.latestPatientId, "The patient is pregnant.",
                     "2015-01-01", "2015-08-30") }
@@ -147,7 +143,7 @@ fun Application.venterBarnRoute() {
             }
 
             //new questionnaire site
-            post("/venter-barn/create-questionnaire"){
+            post("/create-questionnaire"){
                 val params = call.receiveParameters()
 
                 val question1 = params["question1"]!!
@@ -163,22 +159,22 @@ fun Application.venterBarnRoute() {
             }
 
             //new questionnaire site
-            get("/venter-barn/questionnaire"){
+            get("/questionnaire"){
                 call.respondTemplate("venterBarn/questionnaire.ftl")
             }
 
             //new inbox site for nav
-            get("/venter-barn/nav-inbox"){
+            get("/nav-inbox"){
                 call.respondTemplate("venterBarn/nav-inbox.ftl", navInbox.getInbox())
             }
 
             //new inbox site for doctor
-            get("/venter-barn/doctor-inbox"){
+            get("/doctor-inbox"){
                 call.respondTemplate("venterBarn/nav-inbox.ftl", doctorInbox.getInbox())
             }
 
             //get pregnancy information
-            get("/venter-barn/nav-inbox/pregnancy/{id}"){
+            get("/nav-inbox/pregnancy/{id}"){
                 val conditionId: String = call.parameters["id"]!!
                 val response = runBlocking { epicCommunication.searchPregnantPatient(conditionId) }
                 val data = mapOf("response" to response)
