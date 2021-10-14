@@ -17,11 +17,11 @@ fun Application.venterBarnRoute() {
         route("/venter-barn") {
 
             get {
-                call.respondTemplate("/venterBarn/index.ftl")
+                call.respondTemplate("venterBarn/index.ftl")
             }
 
             get("/patient-login") {
-                call.respondTemplate("/venterBarn/patient-login.ftl")
+                call.respondTemplate("venterBarn/patient-login.ftl")
             }
 
             get("/person") {
