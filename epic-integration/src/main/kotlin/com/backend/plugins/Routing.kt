@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Person(val firstName: String?, val lastName: String?, val age: Int?)
 
-val epicCommunication = EpicCommunication()
+val epicCommunication = EpicCommunication("local")
 
 //inboxes for keeping track of messages
 val navInbox = Inbox()

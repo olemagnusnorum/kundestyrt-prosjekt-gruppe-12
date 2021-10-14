@@ -14,10 +14,14 @@ import org.hl7.fhir.r4.model.*
 import java.util.Locale
 import java.text.SimpleDateFormat
 
-class EpicCommunication {
+class EpicCommunication(server: String = "public") {
 
     //the base of the fhir server
-    private val baseURL : String = "http://hapi.fhir.org/baseR4"
+    private val baseURL: String = when (server) {
+        "public" -> "http://hapi.fhir.org/baseR4"
+        "local" -> "http://localhost:8000/fhir/"
+        else -> throw IllegalArgumentException("server parameter must be either \"public\" or \"local\"")
+    }
 
     private val ctx: FhirContext = FhirContext.forR4()
     private val client = HttpClient()
@@ -327,7 +331,7 @@ class EpicCommunication {
         val questionnaireJson = jsonParser.encodeResourceToString(questionnaire)
 
         //post the questionnaire to the server
-        val response: HttpResponse = client.post(baseURl + "/Questionnaire"){
+        val response: HttpResponse = client.post(baseURL + "/Questionnaire"){
 
             contentType(ContentType.Application.Json)
             body = questionnaireJson
@@ -354,7 +358,7 @@ class EpicCommunication {
      */
     suspend fun searchPregnantPatient(conditionId: String, outputFormat: String = "json"): String{
         val response: HttpResponse =
-            client.get(baseURl + "/Condition?" +
+            client.get(baseURL + "/Condition?" +
                     "_id=$conditionId&" +
                     "_include=Condition:patient&" +
                     "_format=$outputFormat") {
