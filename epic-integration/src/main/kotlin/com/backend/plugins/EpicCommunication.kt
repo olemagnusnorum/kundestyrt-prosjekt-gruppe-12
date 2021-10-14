@@ -1,28 +1,37 @@
 package com.backend.plugins
 
-import kotlinx.coroutines.runBlocking
-
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
+import ca.uhn.fhir.parser.JsonParser
 
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.client.call.*
+import io.ktor.http.Parameters
 import org.hl7.fhir.r4.model.*
-import java.util.Locale
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter.ofPattern
+import java.util.*
 
-class EpicCommunication {
+class EpicCommunication(server: String = "public") {
+
+    //the base of the fhir server
+    private val baseURL: String = when (server) {
+        "public" -> "http://hapi.fhir.org/baseR4"
+        "local" -> "http://localhost:8000/fhir/"
+        else -> throw IllegalArgumentException("server parameter must be either \"public\" or \"local\"")
+    }
 
     private val ctx: FhirContext = FhirContext.forR4()
     private val client = HttpClient()
     private val jsonParser: IParser = ctx.newJsonParser()
 
     // For demo purposes
-    var latestPatientId: String = "eq081-VQEgP8drUUqCWzHfw3"
-    var latestConditionId: String? = "eVGf2YljIMIk76IcfbNpjWQ3"  // Derrick Lin condition
+    var latestPatientId: String = "2591228"
+    var latestConditionId: String? = "2591225"  // Georges condition
     var patientCreated: Boolean = false
 
     /**
@@ -50,17 +59,20 @@ class EpicCommunication {
      * Birthdate format yyyy-mm-dd
      */
     suspend fun patientSearch(givenName: String, familyName: String, birthdate: String? = null, identifier: String? = null, outputFormat: String = "json"): String {
-        val token: String = runBlocking { getEpicAccessToken() }
+        //val token: String = runBlocking { getEpicAccessToken() }
         val response: HttpResponse =
-            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient?" +
+            client.get(baseURL + "/Patient?" +
                     "given=$givenName&" +
                     "family=$familyName&" +
                     (if (birthdate != null) "birthdate=$birthdate&" else "") +
                     (if (identifier != null) "identifier=$identifier&" else "") +
                     "_format=$outputFormat") {
+                /*
                 headers {
                     append(HttpHeaders.Authorization, "Bearer $token")
                 }
+
+                 */
             }
         return response.receive()
     }
@@ -75,14 +87,11 @@ class EpicCommunication {
      * @property[outputFormat] the requested response format. Either "json" or "xml"
      */
     suspend fun readPatient(patientId: String, outputFormat: String = "json"): HttpResponse {
-        val token: String = runBlocking { getEpicAccessToken() }
         val response: HttpResponse =
-            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient/" +
+            client.get(baseURL + "/Patient/" +
                     patientId +
                     "?_format=$outputFormat") {
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $token")
-                }
+
             }
         return response.receive()
     }
@@ -98,12 +107,9 @@ class EpicCommunication {
      * Function to get a Condition resource.
      */
     suspend fun getCondition(conditionId: String): Condition {
-        val token: String = runBlocking { getEpicAccessToken() }
         val response: HttpResponse =
-            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Condition/${conditionId}?_format=json") {
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $token")
-                }
+            client.get(baseURL + "/Condition/${conditionId}?_format=json") {
+
             }
         return jsonParser.parseResource(Condition::class.java, response.receive<String>())
     }
@@ -146,7 +152,6 @@ class EpicCommunication {
      * @return an http response as a string.
      */
     suspend fun createCondition(subject: String, note: String, onsetDate: String, abatementDate: String): HttpResponse {
-        val token: String = runBlocking { getEpicAccessToken() }
 
         val condition = Condition()
 
@@ -195,16 +200,15 @@ class EpicCommunication {
         println(conditionJson)
 
         // Post the condition to epic
-        val response: HttpResponse = client.post("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Condition") {
-            headers {
-                append(HttpHeaders.Authorization, "Bearer $token")
-            }
+        val response: HttpResponse = client.post(baseURL + "/Condition") {
+
             contentType(ContentType.Application.Json)
             body = conditionJson
         }
 
         if (response.headers["Location"] != null) {
-            latestConditionId = response.headers["Location"]!!.split("/")[1]
+            println(response.headers["Location"])
+            latestConditionId = response.headers["Location"]!!.split("/")[5]
         }
 
         return response
@@ -220,7 +224,6 @@ class EpicCommunication {
      * @return an http response as a string.
      */
     suspend fun createPatient(givenName: String, familyName: String, identifierValue: String): String {
-        val token: String = runBlocking { getEpicAccessToken() }
         val patient = Patient()
 
         // Set birthdate
@@ -249,10 +252,8 @@ class EpicCommunication {
         val patientJson = jsonParser.encodeResourceToString(patient)
 
         // Post the patient to epic
-        val response: HttpResponse = client.post("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient") {
-            headers {
-                append(HttpHeaders.Authorization, "Bearer $token")
-            }
+        val response: HttpResponse = client.post(baseURL + "/Patient") {
+
             contentType(ContentType.Application.Json)
             body = patientJson
         }
@@ -260,7 +261,8 @@ class EpicCommunication {
         println("HEADERS: ${response.headers}")
 
         if (response.headers["Location"] != null) {
-            latestPatientId = response.headers["Location"]!!.split("/")[1]
+            println(response.headers["Location"])
+            latestPatientId = response.headers["Location"]!!.split("/")[5]
             latestConditionId = null
             patientCreated = true
         }
@@ -269,14 +271,11 @@ class EpicCommunication {
     }
 
     suspend fun searchCondition(patientId: String, outputFormat: String): HttpResponse {
-        val token: String = runBlocking { getEpicAccessToken() }
         val response: HttpResponse =
-            client.get("https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Condition?patient=$patientId" +
+            client.get(baseURL + "/Condition?patient=$patientId" +
                     "&category=problem-list-item" +
                     "&_format=$outputFormat") {
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $token")
-                }
+
             }
         return response
     }
@@ -290,5 +289,89 @@ class EpicCommunication {
             return bundle.entry[0].resource as Condition
 
         return null
+    }
+
+    /**
+     * Function to create a questionnaire and save the questionnaire to fhir server.
+     * In the future, this function should take in parameters, for the
+     * different values.
+     * @param questions Params of the questions. Get these from navigation. When you click
+     * the "Register questionnaire" button you receive the params to send in.
+     * @return id of the created questionnaire or "EMPTY" if a questionnaire was not created.
+     */
+    suspend fun createQuestionnaire(questions: Parameters): String{
+
+        val questionnaire = Questionnaire()
+
+        // The date is set to the current date
+        val formatter = ofPattern("yyyy-MM-dd")
+        val dateString = LocalDate.now().format(formatter)
+        val date = SimpleDateFormat("yyyy-MM-dd").parse(dateString)
+
+        questionnaire.setName("NavQuestionnaire")
+        questionnaire.setTitle("Nav questionaire: Funksjonsvurdering")
+        questionnaire.setStatus(Enumerations.PublicationStatus.ACTIVE)
+        questionnaire.setDate(date)
+        questionnaire.setPublisher("NAV")
+        questionnaire.setDescription("Questions about funksjonsvurdering")
+
+        // Set the items for the questionnaire (the questions)
+        var number: Int = 0
+        var items = mutableListOf<Questionnaire.QuestionnaireItemComponent>()
+
+        questions.forEach { t, question ->
+            number++
+            var item = Questionnaire.QuestionnaireItemComponent()
+            item.setLinkId(number.toString())
+            println(question[0])
+            item.setText(question[0])
+            item.setType(Questionnaire.QuestionnaireItemType.STRING)
+            items.add(item)
+        }
+
+        questionnaire.setItem(items)
+
+        // Set the identifier. Should be on the format UUID/patientID.
+        // This allows us to connect a questionnaire to a patient.
+        // TODO: figure out how to search for a questionnaire, this might not work
+        val identifier = Identifier()
+        val uuid = UUID.randomUUID().toString()
+        identifier.setValue("$uuid/1244780")
+        questionnaire.setIdentifier(mutableListOf(identifier))
+
+        val questionnaireJson = jsonParser.encodeResourceToString(questionnaire)
+
+        //post the questionnaire to the server
+        val response: HttpResponse = client.post(baseURL + "/Questionnaire"){
+
+            contentType(ContentType.Application.Json)
+            body = questionnaireJson
+        }
+
+        val responseString = response.receive<String>()
+        println("HEADERS: ${response.headers}")
+
+        if (response.headers["Location"] != null) {
+            println(response.headers["Location"])
+            var responseId = response.headers["Location"]!!.split("/")[5]
+            return responseId
+        }
+
+        return "EMPTY"
+    }
+
+    /**
+     * Function to search a patient and pregnancy condition.
+     * @param conditionId String the id of pregnancy condition
+     * @return a http response as a string.
+     */
+    suspend fun searchPregnantPatient(conditionId: String, outputFormat: String = "json"): String{
+        val response: HttpResponse =
+            client.get(baseURL + "/Condition?" +
+                    "_id=$conditionId&" +
+                    "_include=Condition:patient&" +
+                    "_format=$outputFormat") {
+            }
+        return response.receive()
     }
 }
