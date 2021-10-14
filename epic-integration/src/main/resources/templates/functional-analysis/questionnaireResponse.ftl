@@ -6,10 +6,17 @@
 </head>
 <body style="text-align: center; font-family: sans-serif">
 <div>
-    <h1>Questionaire fra NAV</h1>
-    <!--
-    TODO: Print out each question and a partnering answer field in a nice form
-    -->
+    <h1>Questionnaire fra NAV</h1>
+
+    <form action="/functional-analysis/createQuestionnaireResponse/${questionnaire.id}" method="post">
+        <#list questionnaire.item as question>
+            <p> ${question.text} </p>
+            <input type="text" name="answer${question.linkId}">
+            <br>
+        </#list>
+        <br>
+        <input type="submit" value="Send svarene!">
+    </form>
 
     <br>
     <br>

@@ -8,11 +8,11 @@
 <div>
     <h1>Lege</h1>
 
-    <#if patient??>
+    <#if patientId??>
 
         <h3>Innboks</h3>
         <#list questionnaires as questionnaire>
-            <a href="/createQuestionnaireResponse/${questionnaire.id}"> ${questionnaire.name} </a>
+            <a href="/functional-analysis/doctor-inbox/${questionnaire.id}"> ${questionnaire.title} </a>
         </#list>
 
     <#else>

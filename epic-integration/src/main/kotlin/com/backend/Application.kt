@@ -17,7 +17,7 @@ import kotlinx.serialization.json.Json
 
 
 fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0", watchPaths = listOf("classes", "resources")) {
+    embeddedServer(Netty, port = 6060, host = "0.0.0.0", watchPaths = listOf("classes", "resources")) {
         install(ContentNegotiation){
             json(Json {
                 prettyPrint = true

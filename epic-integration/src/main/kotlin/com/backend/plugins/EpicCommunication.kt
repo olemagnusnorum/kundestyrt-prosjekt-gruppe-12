@@ -2,7 +2,6 @@ package com.backend.plugins
 
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
-import ca.uhn.fhir.parser.JsonParser
 
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -11,8 +10,6 @@ import io.ktor.http.*
 import io.ktor.client.call.*
 import io.ktor.http.Parameters
 import org.hl7.fhir.r4.model.*
-import org.hl7.fhir.r4.model.Parameters
-import org.hl7.fhir.r4.model.Type
 import java.util.Locale
 import java.text.SimpleDateFormat
 
@@ -196,7 +193,7 @@ class EpicCommunication {
         println(conditionJson)
 
         // Post the condition to epic
-        val response: HttpResponse = client.post(baseURL + "/Condition") {
+        val response: HttpResponse = client.post("$baseURL/Condition") {
 
             contentType(ContentType.Application.Json)
             body = conditionJson
@@ -248,7 +245,7 @@ class EpicCommunication {
         val patientJson = jsonParser.encodeResourceToString(patient)
 
         // Post the patient to epic
-        val response: HttpResponse = client.post(baseURL + "/Patient") {
+        val response: HttpResponse = client.post("$baseURL/Patient") {
 
             contentType(ContentType.Application.Json)
             body = patientJson
@@ -329,7 +326,7 @@ class EpicCommunication {
         val questionnaireJson = jsonParser.encodeResourceToString(questionnaire)
 
         //post the questionnaire to the server
-        val response: HttpResponse = client.post(baseURl + "/Questionnaire"){
+        val response: HttpResponse = client.post("$baseURL/Questionnaire"){
 
             contentType(ContentType.Application.Json)
             body = questionnaireJson
@@ -356,12 +353,20 @@ class EpicCommunication {
      */
     suspend fun searchPregnantPatient(conditionId: String, outputFormat: String = "json"): String{
         val response: HttpResponse =
-            client.get(baseURl + "/Condition?" +
+            client.get(baseURL + "/Condition?" +
                     "_id=$conditionId&" +
                     "_include=Condition:patient&" +
                     "_format=$outputFormat") {
             }
         return response.receive()
+    }
+
+    suspend fun getQuestionnaire(questionnaireId: String): Questionnaire {
+        val response: HttpResponse =
+            client.get("$baseURL/Questionnaire/$questionnaireId") {
+            }
+
+        return jsonParser.parseResource(Questionnaire::class.java, response.receive<String>())
     }
 
 //        QuestionnaireResponse
@@ -377,39 +382,48 @@ class EpicCommunication {
      * @param questionnaire Questionnaire the response is related to
      * @return http response, not QuestionnaireResponse
      */
-    fun createQuestionnaireResponse(questionnaire: Questionnaire, params: io.ktor.http.Parameters): QuestionnaireResponse {
+    suspend fun createQuestionnaireResponse(questionnaire: Questionnaire, questionsList: MutableList<String>): HttpResponse {
 
         // Create empty template
         val questionnaireResponse = QuestionnaireResponse()
 
         //Link Questionnaire
-        questionnaireResponse.questionnaire = questionnaire.id
+        questionnaireResponse.questionnaire = questionnaire.id.substringBeforeLast("/").substringBeforeLast("/")
 
-        //TODO: Link patient. Where to get patient id? New function parameter or send with params?
+        //TODO: Link patient. Where to get patient id? Probably send as new parameter
 
+        questionnaireResponse.subject = Reference("Patient/13")
 
         //Put answers in Item and add them to QR
         val item = mutableListOf<QuestionnaireResponse.QuestionnaireResponseItemComponent>()
 
-        for (i in 0..questionnaire.item.size) {
+        for (i in 0..questionnaire.item.size-1) {
 
+            item.add(QuestionnaireResponse.QuestionnaireResponseItemComponent())
             item[i].linkId = questionnaire.item[i].id
             item[i].text = questionnaire.item[i].text
 
             val answerComponent = mutableListOf<QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent>()
-            answerComponent[0].value = CodeableConcept(Coding(
+            answerComponent.add(QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent())
+            answerComponent[0].value = Coding(
                 "some.system",
-                params[i].toString(), params[i].toString())) //TODO: Retrieve answers from params
+                questionsList[i], questionsList[i])
 
             item[i].answer = answerComponent
         }
 
-        /*//post the questionnaireResponse to the server
-        val response: HttpResponse = client.post(baseURl + "/QuestionnaireResponse"){
-            contentType(ContentType.Application.Json)
-            body = questionnaireJson
-        }*/
+        questionnaireResponse.item = item
 
-        return questionnaireResponse //response
+        println(jsonParser.setPrettyPrint(true).encodeResourceToString(questionnaireResponse))
+
+        //post the questionnaireResponse to the server
+        val response: HttpResponse = client.post("$baseURL/QuestionnaireResponse"){
+            contentType(ContentType.Application.Json)
+            body = jsonParser.encodeResourceToString(questionnaireResponse)
+        }
+
+        println(response.headers["Location"])
+
+        return response
     }
 }

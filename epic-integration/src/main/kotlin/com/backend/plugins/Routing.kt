@@ -9,6 +9,7 @@ import io.ktor.request.*
 import io.ktor.util.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
+import org.hl7.fhir.r4.model.Questionnaire
 
 
 @Serializable
@@ -186,33 +187,53 @@ fun Application.personRoute() {
 
         //functional analysis | Helseplattformen inbox
         //Called when doctor is accessing inbox
-        post("/functional-analysis/doctor-inbox") {
-            val patientId = call.parameters["id"]!!
+        get("/functional-analysis/doctor-inbox") {
 
-            //TODO: Get all questionnaires associated with patientId, put them in a list and send them as "questionnaires"
+            /*if (call.parameters.isEmpty()) {
+                call.respondTemplate("functional-analysis/doctor-inbox.ftl")
+                println("HERERERRIJI")
+            }
+            else {
+                val patientId = call.parameters["id"]!!*/
 
-            val data = mapOf("patientId" to patientId)
-            call.respondTemplate("functional-analysis/doctor-inbox.ftl", data)
+                //TODO: Get all questionnaires associated with patientId, put them in a list and send them as "questionnaires"
+                //For now hardcoded for testing
+                val questionnaires = mutableListOf(epicCommunication.getQuestionnaire("2641197"))
+
+                println(questionnaires[0].text)
+
+                val data = mapOf("patientId" to "2641197", "questionnaires" to questionnaires)
+                call.respondTemplate("functional-analysis/doctor-inbox.ftl", data)
+            //}
         }
 
-        //functinal analysis  | Helseplattformen questionnaire
+        //functional analysis  | Helseplattformen questionnaire
         //Called when doctor opens a questionnaire
-        get("functional-analysis/doctor-inbox/{questionnaireId}") {
+        get("functional-analysis/doctor-inbox/Questionnaire/{questionnaireId}/_history/1") {
             val questionnaireId: String = call.parameters["questionnaireId"]!!
 
-            val data = mapOf("questionnaireId" to questionnaireId)
+            val data = mapOf("questionnaire" to epicCommunication.getQuestionnaire(questionnaireId))
 
-            call.respondTemplate("questionnaireResponse.ftl", data)
+            call.respondTemplate("functional-analysis/questionnaireResponse.ftl", data)
         }
 
-        //functional analysis | Helseplattformen qestionnaire response
-        //Called when doctor respons to a questionnaire with a questionnaire response
-        post("functional-analysis/createQuestionnaireResponse") {
+        //functional analysis | Helseplattformen questionnaire response
+        //Called when doctor response to a questionnaire with a questionnaire response
+        post("functional-analysis/createQuestionnaireResponse/Questionnaire/{questionnaireId}/_history/1") {
+            val questionnaireId: String = call.parameters["questionnaireId"]!!
             val params = call.receiveParameters()
+            val answerList = mutableListOf<String>()
 
-            //TODO: Extract answers properly from form
-            //TODO: Send them to EpicCommunication.createQuestionnaireResponse function
+            println("Creating qr...")
+            println("PARAMETERS ${params}")
+
+            //BAHHH frick it, will do it like this for now
+            answerList.add(params["answer1"]!!)
+            answerList.add(params["answer2"]!!)
+            //answerList.add(params["answer3"]!!)
+
+            epicCommunication.createQuestionnaireResponse(epicCommunication.getQuestionnaire(questionnaireId), answerList)
+            call.respondRedirect("/functional-analysis/doctor-inbox")
         }
     }
-
 }
