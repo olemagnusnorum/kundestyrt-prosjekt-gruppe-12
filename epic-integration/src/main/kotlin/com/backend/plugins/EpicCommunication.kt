@@ -19,7 +19,7 @@ class EpicCommunication(server: String = "public") {
     //the base of the fhir server
     private val baseURL: String = when (server) {
         "public" -> "http://hapi.fhir.org/baseR4"
-        "local" -> "http://localhost:8000/fhir/"
+        "local" -> "http://localhost:8000/fhir"
         else -> throw IllegalArgumentException("server parameter must be either \"public\" or \"local\"")
     }
 
@@ -45,23 +45,23 @@ class EpicCommunication(server: String = "public") {
      */
     suspend fun getPatientIDFromDatabase(givenName: String, familyName: String, birthdate: String) : String {
         val JSONBundle = patientSearch(givenName, familyName, birthdate)
-        val patient : Patient = parseBundleXMLToPatient(JSONBundle, isXML = false)
+        val patient : Patient = parseBundleXMLToPatient(JSONBundle, isXML = false)!!
         val patientID = getPatientID(patient)
         return patientID
     }
 
     /**
      * Makes an HTTP response request to the epic server at fhir.epic.com
-     * Returns an HttpResponse object with a bundle containing up to 1 patient object
+     * Returns an HttpResponse object with a bundle containing 0, 1 or more patient object(s)
      * As default the format returned is JSON (but XML can be returned by setting format to = "xml")
      * Birthdate format yyyy-mm-dd
      */
-    suspend fun patientSearch(givenName: String, familyName: String, birthdate: String? = null, identifier: String? = null, outputFormat: String = "json"): String {
+    suspend fun patientSearch(givenName: String? = null, familyName: String? = null, birthdate: String? = null, identifier: String? = null, outputFormat: String = "json"): String {
         //val token: String = runBlocking { getEpicAccessToken() }
         val response: HttpResponse =
             client.get(baseURL + "/Patient?" +
-                    "given=$givenName&" +
-                    "family=$familyName&" +
+                    (if (givenName != null) "given=$givenName&" else "") +
+                    (if (familyName != null) "family=$familyName&" else "") +
                     (if (birthdate != null) "birthdate=$birthdate&" else "") +
                     (if (identifier != null) "identifier=$identifier&" else "") +
                     "_format=$outputFormat") {
@@ -112,9 +112,9 @@ class EpicCommunication(server: String = "public") {
         return jsonParser.parseResource(Condition::class.java, response.receive<String>())
     }
 
-    fun parseBundleXMLToPatient(xmlMessage: String, isXML : Boolean = true ): Patient {
+    fun parseBundleXMLToPatient(xmlMessage: String, isXML: Boolean = true): Patient? {
         // Assume we are working with XML
-        val parser : IParser = if (isXML) {
+        val parser: IParser = if (isXML) {
             ctx.newXmlParser()
         } else { // If not XML then JSON
             ctx.newJsonParser()
@@ -122,12 +122,9 @@ class EpicCommunication(server: String = "public") {
         parser.setPrettyPrint(true)
 
         val bundle: Bundle = parser.parseResource(Bundle::class.java, xmlMessage)
+        if (bundle.entry.size == 0) return null
 
-        val patient: Patient = bundle.entry[0].resource as Patient
-
-        println(patient.name[0].family)
-
-        return patient
+        return bundle.entry[0].resource as Patient
     }
 
     fun parseCommunicationStringToJson(jsonMessage: String): Communication {
@@ -221,13 +218,12 @@ class EpicCommunication(server: String = "public") {
      * @param identifierValue on the format "XXX-XX-XXXX" ("028-27-1234")
      * @return an http response as a string.
      */
-    suspend fun createPatient(givenName: String, familyName: String, identifierValue: String): String {
+    suspend fun createPatient(givenName: String, familyName: String, identifierValue: String, birthdate: String = "7-Jun-2013"): String {
         val patient = Patient()
 
         // Set birthdate
         val formatter = SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH)
-        val dateInString = "7-Jun-2013"
-        val date = formatter.parse(dateInString)
+        val date = formatter.parse(birthdate)
         patient.birthDate = date
 
         // set gender

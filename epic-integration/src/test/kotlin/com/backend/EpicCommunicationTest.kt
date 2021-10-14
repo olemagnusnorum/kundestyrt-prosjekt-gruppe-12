@@ -24,7 +24,7 @@ class EpicCommunicationTest {
                 epicCommunication.patientSearch("Derrick","Lin","1973-06-03")
             }
             val derrickThePatient = epicCommunication.parseBundleXMLToPatient(JSONBundle, isXML = false)
-            val returnVal = epicCommunication.getPatientID(derrickThePatient)
+            val returnVal = epicCommunication.getPatientID(derrickThePatient!!)
             val derricksID = "eq081-VQEgP8drUUqCWzHfw3"
 
             assert(derrickThePatient is Patient)

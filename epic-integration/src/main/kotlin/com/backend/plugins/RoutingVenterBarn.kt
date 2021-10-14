@@ -17,12 +17,72 @@ fun Application.venterBarnRoute() {
         route("/venter-barn") {
 
             get {
-                call.respondTemplate("/venterBarn/index.ftl")
+                call.respondTemplate("venterBarn/index.ftl")
             }
 
             get("/patient-login") {
-                call.respondTemplate("/venterBarn/patient-login.ftl")
+                call.respondTemplate("venterBarn/patient-login.ftl")
             }
+
+            get("/patient") {
+                val id = call.parameters["id"]!!
+
+                val patient = runBlocking {
+                    val patientResponse = epicCommunication.patientSearch(identifier = id)
+                    epicCommunication.parseBundleXMLToPatient(patientResponse, isXML = false)
+                }
+                val condition = runBlocking {
+                    if (epicCommunication.latestConditionId != null) {
+                        epicCommunication.getCondition(epicCommunication.latestConditionId!!)
+                    } else {
+                        val responseCondition = epicCommunication.searchCondition(patient!!.idElement.idPart, "json").receive<String>()
+                        epicCommunication.parseConditionBundleStringToObject(responseCondition)
+                    }
+                }
+                val note = if (condition == null || condition.note.isEmpty()) null else condition.note[0].text
+                val patientName = if (patient == null) "no patient found" else patient.name[0].nameAsSingleString
+                val data = mapOf("patient" to patient, "condition" to note, "due_date" to (condition?.abatement ?: "Ingen termindato satt"), "name" to patientName)
+
+                call.respondTemplate("venterBarn/patient.ftl", data)
+            }
+
+            get("/doctor") {
+                call.respondTemplate("venterBarn/doctor.ftl")
+            }
+
+            get("/doctor-form-pregnant") {
+                call.respondTemplate("venterBarn/doctor-form-pregnant.ftl")
+            }
+
+            post("/doctor-form-pregnant") {
+                val params = call.receiveParameters()
+                val id = params["id"]!!
+                val note: String = params["note"]!!
+                val onsetDate: String = params["onsetDate"]!!
+                val abatementDate: String = params["abatementDate"]!!
+                val patient = runBlocking { epicCommunication.parseBundleXMLToPatient(epicCommunication.patientSearch(identifier = id), isXML = false) }
+                if (patient != null) {
+                    val condition = runBlocking {
+                        if (epicCommunication.latestConditionId != null) {
+                            epicCommunication.getCondition(epicCommunication.latestConditionId!!)
+                        } else {
+                            val responseCondition = epicCommunication.searchCondition(patient.idElement.idPart, "json").receive<String>()
+                            epicCommunication.parseConditionBundleStringToObject(responseCondition)
+                        }
+                    }
+
+                    // Make sure that the patient doesn't already have a registered pregnancy
+                    if (condition == null) {
+                        epicCommunication.createCondition(patient.idElement.idPart, note, onsetDate, abatementDate)
+                    }
+                }
+
+                call.respondRedirect("/venter-barn/doctor")
+            }
+
+            ///
+            // OLD
+            ///
 
             get("/person") {
                 val person = call.receive<Person>()
@@ -33,19 +93,6 @@ fun Application.venterBarnRoute() {
             get("/epic") {
                 val epicResponse = "Epic"
                 call.respondText(epicResponse)
-            }
-
-            get("/doctor") {
-                var data = mapOf<String, String?>("patientId" to null)
-
-                if (epicCommunication.patientCreated) {
-                    val responsePatient = runBlocking { epicCommunication.readPatient(epicCommunication.latestPatientId, "json").receive<String>() }
-                    val patient = epicCommunication.parsePatientStringToObject(responsePatient)
-
-                    data = mapOf("patientId" to epicCommunication.latestPatientId, "name" to patient.name[0].family, "pregnancy" to epicCommunication.latestConditionId)
-                }
-
-                call.respondTemplate("venterBarn/doctor.ftl", data)
             }
 
             get("/nav-derrick-lin") {
@@ -97,26 +144,6 @@ fun Application.venterBarnRoute() {
                 val data = mapOf("response" to response)
 
                 call.respondTemplate("venterBarn/doctor-create-sykemelding.ftl", data)
-            }
-
-            get("/patient") {
-                val patientId = epicCommunication.latestPatientId
-                val condition = runBlocking {
-                    if (epicCommunication.latestConditionId != null) {
-                        epicCommunication.getCondition(epicCommunication.latestConditionId!!)
-                    } else {
-                        val responseCondition = epicCommunication.searchCondition(patientId, "json").receive<String>()
-                        epicCommunication.parseConditionBundleStringToObject(responseCondition)
-                    }
-                }
-
-                val responsePatient = runBlocking { epicCommunication.readPatient(patientId, "json").receive<String>() }
-                val patient = epicCommunication.parsePatientStringToObject(responsePatient)
-
-                // TODO : Rather compare condition.code == 77386006
-                val note = if (condition == null || condition.note.isEmpty()) null else condition.note[0].text
-                val data = mapOf("condition" to note, "due_date" to (condition?.abatement ?: "Ingen termindato satt"), "name" to patient.name[0].family)
-                call.respondTemplate("venterBarn/patient.ftl", data)
             }
 
             post("/create-patient") {
@@ -179,13 +206,6 @@ fun Application.venterBarnRoute() {
                 val response = runBlocking { epicCommunication.searchPregnantPatient(conditionId) }
                 val data = mapOf("response" to response)
                 call.respondTemplate("venterBarn/show-info.ftl", data)
-            }
-
-            get("/patient") {
-                val params = call.receiveParameters()
-                val id = params["id"]
-                val patient = runBlocking { epicCommunication.parsePatientStringToObject(epicCommunication.readPatient(id!!).receive()) }
-                call.respondTemplate("/venter-barn/patient-login.ftl")
             }
         }
 

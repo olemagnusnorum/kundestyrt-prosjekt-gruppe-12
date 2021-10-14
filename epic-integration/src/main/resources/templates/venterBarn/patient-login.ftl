@@ -14,7 +14,7 @@
     </form>
     <br>
     <br>
-    <a href="/">Gå tilbake til navigasjonsiden.</a>
+    <a href="/venter-barn">Gå tilbake til navigasjonsiden.</a>
 </div>
 </body>
 </html>

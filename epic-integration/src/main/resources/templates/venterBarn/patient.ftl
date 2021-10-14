@@ -3,17 +3,18 @@
 <html lang="en">
 <head>
     <title>Legeside</title>
+    <base href="/venter-barn/">
 </head>
 <body style="text-align: center; font-family: sans-serif">
 <div>
     <h1>Pasient Journal</h1>
-    <h2>Hei ${name}!</h2>
+    <h2>Hei, ${name}!</h2>
     <h3>Se melding fra NAV</h3>
     <#if condition??>
         <p>${condition}</p>
         <p><b>Termindato:</b> ${due_date}</p>
 
-        <form action="/venter-barn" method="get">
+        <form action="/" method="get">
             <input type="submit" value="Søk foreldrepenger">
         </form>
     <#else>
