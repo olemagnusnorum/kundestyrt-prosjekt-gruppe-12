@@ -10,14 +10,14 @@
     <p>Hei! Vi trenger info om helsen til Derrick.</p>
     <h3>Send et svar:</h3>
     <input type="text">
-    <form action="/messages-sent-from-doctor-confirmation" method="get">
+    <form action="/venter-barn/messages-sent-from-doctor-confirmation" method="get">
         <input type="submit" value="Send melding til NAV">
     </form>
     <br>
     <br>
-    <a href="/doctor">Gå tilbake til legesiden</a>
+    <a href="/venter-barn/doctor">Gå tilbake til legesiden</a>
     <br>
-    <a href="/">Gå tilbake til navigasjonsiden.</a>
+    <a href="/venter-barn">Gå tilbake til navigasjonsiden.</a>
 </div>
 </body>
 </html>

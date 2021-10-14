@@ -11,14 +11,14 @@
     <p>${response}</p>
     <h3>Send et svar:</h3>
     <input type="text">
-    <form action="/request-health-information-confirmation" method="post">
+    <form action="/venter-barn/request-health-information-confirmation" method="post">
         <input type="submit" value="Send melding til legen">
     </form>
     <br>
     <br>
-    <a href="/nav">Gå tilbake til NAVs side</a>
+    <a href="/venter-barn/nav">Gå tilbake til NAVs side</a>
     <br>
-    <a href="/">Gå tilbake til navigasjonsiden.</a>
+    <a href="/venter-barn">Gå tilbake til navigasjonsiden.</a>
 </div>
 </body>
 </html>
