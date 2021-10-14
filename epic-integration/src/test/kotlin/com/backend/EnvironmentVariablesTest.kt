@@ -1,8 +1,5 @@
 package com.backend
 
-import com.backend.plugins.getEpicAccessToken
-import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class EnvironmentVariablesTest {
