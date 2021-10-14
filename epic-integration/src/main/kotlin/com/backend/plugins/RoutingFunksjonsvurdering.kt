@@ -2,18 +2,17 @@ package com.backend.plugins
 
 import io.ktor.routing.*
 import io.ktor.application.*
-import io.ktor.client.call.*
 import io.ktor.freemarker.*
 import io.ktor.response.*
-import io.ktor.request.*
-import io.ktor.util.*
-import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.Serializable
 
 
 fun Application.routingFunksjonsvurdering() {
 
     routing {
+
+        get("/funksjonsvurdering") {
+            call.respondTemplate("funksjonsvurdering/index.ftl")
+        }
 
         //dummy epic server endpoint
         get("/funksjonsvurdering/sometest") {
