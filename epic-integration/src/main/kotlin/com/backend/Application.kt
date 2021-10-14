@@ -17,6 +17,8 @@ import kotlinx.serialization.json.Json
 
 
 fun main() {
+    val epicCommunication = EpicCommunication()
+    runBlocking { epicCommunication.searchQuestionnaireResponse("1160885") }
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", watchPaths = listOf("classes", "resources")) {
         install(ContentNegotiation){
             json(Json {

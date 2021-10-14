@@ -374,4 +374,21 @@ class EpicCommunication(server: String = "public") {
             }
         return response.receive()
     }
+
+    /**
+     * Function to search for a questionnaire response.
+     * TODO: check that it works, currently a server error.
+     * @param patient is the id of the patient the QR is filled out for.
+     * @return an http response as a string.
+     */
+    suspend fun searchQuestionnaireResponse(patient: String) {
+        val response: HttpResponse =
+            client.get(baseURL + "/QuestionnaireResponse?" +
+                    "patient=$patient&" +
+                    "status=completed&") {
+            }
+
+        println(response)
+        return response.receive()
+    }
 }
