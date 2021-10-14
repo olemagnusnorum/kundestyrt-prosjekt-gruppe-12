@@ -10,6 +10,8 @@ import kotlinx.coroutines.runBlocking
 
 fun Application.funksjonsvurderingRoute() {
 
+    val questionnaireCommunication = QuestionnaireCommunication()
+
     routing {
 
         // Landing page - navigation
@@ -36,7 +38,7 @@ fun Application.funksjonsvurderingRoute() {
             val question3 = params["question3"]!!
 
             // Run createQuestionnaire method
-            val jsonResponse = runBlocking { epicCommunication.createQuestionnaire(params) }
+            val jsonResponse = runBlocking { questionnaireCommunication.createQuestionnaire(params) }
 
             // Pass
             val data = mapOf("response" to jsonResponse)
@@ -62,7 +64,7 @@ fun Application.funksjonsvurderingRoute() {
 
             //TODO: Get all questionnaires associated with patientId, put them in a list and send them as "questionnaires"
             //For now hardcoded for testing
-            val questionnaires = mutableListOf(epicCommunication.getQuestionnaire("2641197"))
+            val questionnaires = mutableListOf(questionnaireCommunication.getQuestionnaire("2641197"))
 
             println(questionnaires[0].text)
 
@@ -75,7 +77,7 @@ fun Application.funksjonsvurderingRoute() {
         get("funksjonsvurdering/doctor-inbox/Questionnaire/{questionnaireId}/_history/1") {
             val questionnaireId: String = call.parameters["questionnaireId"]!!
 
-            val data = mapOf("questionnaire" to epicCommunication.getQuestionnaire(questionnaireId))
+            val data = mapOf("questionnaire" to questionnaireCommunication.getQuestionnaire(questionnaireId))
 
             call.respondTemplate("funksjonsvurdering/questionnaireResponse.ftl", data)
         }
@@ -95,8 +97,29 @@ fun Application.funksjonsvurderingRoute() {
             answerList.add(params["answer2"]!!)
             //answerList.add(params["answer3"]!!)
 
-            epicCommunication.createQuestionnaireResponse(epicCommunication.getQuestionnaire(questionnaireId), answerList)
+            questionnaireCommunication.createQuestionnaireResponse(questionnaireCommunication.getQuestionnaire(questionnaireId), answerList)
             call.respondRedirect("/funksjonsvurdering/doctor-inbox")
+        }
+
+        //new questionnaire site
+        post("/create-questionnaire"){
+            val params = call.receiveParameters()
+
+            val question1 = params["question1"]!!
+            val question2 = params["question2"]!!
+
+
+            val jsonResponse = runBlocking { questionnaireCommunication.createQuestionnaire(params) }
+            val data = mapOf("response" to jsonResponse)
+            //testing inbox function
+
+            navInbox.addToInbox("Questionnaire", jsonResponse)
+            call.respondTemplate("create-questionnaire-confirmation.ftl", data)
+        }
+
+        //new questionnaire site
+        get("/questionnaire"){
+            call.respondTemplate("/questionnaire.ftl")
         }
     }
 
