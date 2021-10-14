@@ -53,15 +53,21 @@ fun Application.funksjonsvurderingRoute() {
         //Called when doctor is accessing inbox
         get("/funksjonsvurdering/doctor-inbox") {
 
+            call.respondTemplate("funksjonsvurdering/doctor-inbox.ftl")
+        }
+
+        post("/funksjonsvurdering/doctor-inbox") {
+
+            val patientId: String = call.receiveParameters()["patientId"]!!
+
             //TODO: Get all questionnaires associated with patientId, put them in a list and send them as "questionnaires"
             //For now hardcoded for testing
             val questionnaires = mutableListOf(epicCommunication.getQuestionnaire("2641197"))
 
             println(questionnaires[0].text)
 
-            val data = mapOf("patientId" to "2641197", "questionnaires" to questionnaires)
+            val data = mapOf("patientId" to patientId, "questionnaires" to questionnaires)
             call.respondTemplate("funksjonsvurdering/doctor-inbox.ftl", data)
-            //}
         }
 
         //functional analysis  | Helseplattformen questionnaire

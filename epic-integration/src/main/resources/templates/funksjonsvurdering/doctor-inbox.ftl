@@ -19,7 +19,7 @@
 
         <h3>Velg pasient</h3>
         <form action="/funksjonsvurdering/doctor-inbox" method="post">
-            <input name="id" type="text">
+            <input name="patientId" type="text">
             <input type="submit">
         </form>
 
