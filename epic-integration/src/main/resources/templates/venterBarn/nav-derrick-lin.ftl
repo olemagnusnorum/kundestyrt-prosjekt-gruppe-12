@@ -6,12 +6,12 @@
 <body style="text-align: center; font-family: sans-serif">
 <div>
     <h3>Søk sykepenger!</h3>
-    <form action="/request-sykepenger" method="post">
+    <form action="/venter-barn/request-sykepenger" method="post">
         <input type="submit">
     </form>
     <br>
     <br>
-    <a href="/">Gå tilbake til navigasjonsiden.</a>
+    <a href="/venter-barn">Gå tilbake til navigasjonsiden.</a>
 </div>
 </body>
 </html>

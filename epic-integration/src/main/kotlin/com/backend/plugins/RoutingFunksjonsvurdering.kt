@@ -8,7 +8,7 @@ import io.ktor.response.*
 import kotlinx.coroutines.runBlocking
 
 
-fun Application.routingFunksjonsvurdering() {
+fun Application.funksjonsvurderingRoute() {
 
     routing {
 

@@ -9,16 +9,16 @@
     <p>Derrick Lin har søkt om sykepenger.</p>
     <h3>Be om helseinfo</h3>
     <input type="text">
-    <form action="/request-health-information-confirmation" method="post">
+    <form action="/venter-barn/request-health-information-confirmation" method="post">
         <input type="submit">
     </form>
     <h3>Se melding fra lege</h3>
-    <form action="/messages-from-doctor" method="post">
+    <form action="/venter-barn/messages-from-doctor" method="post">
         <input type="submit">
     </form>
     <br>
     <br>
-    <a href="/">Gå tilbake til navigasjonsiden.</a>
+    <a href="/venter-barn">Gå tilbake til navigasjonsiden.</a>
 </div>
 </body>
 </html>

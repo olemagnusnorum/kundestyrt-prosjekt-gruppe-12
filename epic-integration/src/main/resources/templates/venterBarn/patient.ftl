@@ -13,7 +13,7 @@
         <p>${condition}</p>
         <p><b>Termindato:</b> ${due_date}</p>
 
-        <form action="/" method="get">
+        <form action="/venter-barn" method="get">
             <input type="submit" value="Søk foreldrepenger">
         </form>
     <#else>
@@ -21,7 +21,7 @@
     </#if>
     <br>
     <br>
-    <a href="/">Gå tilbake til navigasjonsiden.</a>
+    <a href="/venter-barn">Gå tilbake til navigasjonsiden.</a>
 </div>
 </body>
 </html>

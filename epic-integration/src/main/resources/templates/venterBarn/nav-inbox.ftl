@@ -24,9 +24,9 @@
         </#list>
     </#if>
     <br>
-    <a href="/doctor">Gå tilbake til legens side.</a>
+    <a href="/venter-barn/doctor">Gå tilbake til legens side.</a>
     <br>
-    <a href="/">Gå tilbake til navigasjonsiden.</a>
+    <a href="/venter-barn">Gå tilbake til navigasjonsiden.</a>
 </div>
 </body>
 </html>
