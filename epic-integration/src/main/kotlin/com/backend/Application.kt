@@ -40,9 +40,8 @@ fun main() {
 
 fun createDefaultPatient() {
     // Check if a predetermined patient exists in the fhir server
-    // TODO : Think this is creating duplicate patients
     val patient = runBlocking {
-        val response = epicCommunication.patientSearch("Kari", "Nordmann", "1990-07-06", "07069012345")
+        val response = epicCommunication.patientSearch(identifier = "07069012345")
         epicCommunication.parseBundleXMLToPatient(response, isXML = false)
     }
 
