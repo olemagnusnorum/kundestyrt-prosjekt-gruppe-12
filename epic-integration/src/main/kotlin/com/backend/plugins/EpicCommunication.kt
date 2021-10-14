@@ -20,7 +20,7 @@ class EpicCommunication(server: String = "public") {
     //the base of the fhir server
     private val baseURL: String = when (server) {
         "public" -> "http://hapi.fhir.org/baseR4"
-        "local" -> "http://localhost:8000/fhir/"
+        "local" -> "http://localhost:8000/fhir"
         else -> throw IllegalArgumentException("server parameter must be either \"public\" or \"local\"")
     }
 
@@ -52,17 +52,18 @@ class EpicCommunication(server: String = "public") {
     }
 
     /**
+     * TODO : Unable to search on identifier alone
      * Makes an HTTP response request to the epic server at fhir.epic.com
      * Returns an HttpResponse object with a bundle containing 0, 1 or more patient object(s)
      * As default the format returned is JSON (but XML can be returned by setting format to = "xml")
      * Birthdate format yyyy-mm-dd
      */
-    suspend fun patientSearch(givenName: String, familyName: String, birthdate: String? = null, identifier: String? = null, outputFormat: String = "json"): String {
+    suspend fun patientSearch(givenName: String? = null, familyName: String? = null, birthdate: String? = null, identifier: String? = null, outputFormat: String = "json"): String {
         //val token: String = runBlocking { getEpicAccessToken() }
         val response: HttpResponse =
             client.get(baseURL + "/Patient?" +
-                    "given=$givenName&" +
-                    "family=$familyName&" +
+                    (if (givenName != null) "given=$givenName&" else "") +
+                    (if (familyName != null) "family=$familyName&" else "") +
                     (if (birthdate != null) "birthdate=$birthdate&" else "") +
                     (if (identifier != null) "identifier=$identifier&" else "") +
                     "_format=$outputFormat") {
