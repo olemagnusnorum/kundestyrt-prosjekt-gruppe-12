@@ -28,15 +28,15 @@ fun Application.venterBarnRoute() {
                 val id = call.parameters["id"]!!
 
                 val patient = runBlocking {
-                    val patientResponse = epicCommunication.patientSearch(identifier = id)
-                    epicCommunication.parseBundleXMLToPatient(patientResponse, isXML = false)
+                    val patientResponse = patientCommunication.patientSearch(identifier = id)
+                    patientCommunication.parseBundleXMLToPatient(patientResponse, isXML = false)
                 }
                 val condition = runBlocking {
-                    if (epicCommunication.latestConditionId != null) {
-                        epicCommunication.getCondition(epicCommunication.latestConditionId!!)
+                    if (conditionCommunication.latestConditionId != null) {
+                        conditionCommunication.getCondition(conditionCommunication.latestConditionId!!)
                     } else {
-                        val responseCondition = epicCommunication.searchCondition(patient!!.idElement.idPart, "json").receive<String>()
-                        epicCommunication.parseConditionBundleStringToObject(responseCondition)
+                        val responseCondition = conditionCommunication.searchCondition(patient!!.idElement.idPart, "json").receive<String>()
+                        conditionCommunication.parseConditionBundleStringToObject(responseCondition)
                     }
                 }
                 val note = if (condition == null || condition.note.isEmpty()) null else condition.note[0].text
@@ -60,20 +60,20 @@ fun Application.venterBarnRoute() {
                 val note: String = params["note"]!!
                 val onsetDate: String = params["onsetDate"]!!
                 val abatementDate: String = params["abatementDate"]!!
-                val patient = runBlocking { epicCommunication.parseBundleXMLToPatient(epicCommunication.patientSearch(identifier = id), isXML = false) }
+                val patient = runBlocking { patientCommunication.parseBundleXMLToPatient(patientCommunication.patientSearch(identifier = id), isXML = false) }
                 if (patient != null) {
                     val condition = runBlocking {
-                        if (epicCommunication.latestConditionId != null) {
-                            epicCommunication.getCondition(epicCommunication.latestConditionId!!)
+                        if (conditionCommunication.latestConditionId != null) {
+                            conditionCommunication.getCondition(conditionCommunication.latestConditionId!!)
                         } else {
-                            val responseCondition = epicCommunication.searchCondition(patient.idElement.idPart, "json").receive<String>()
-                            epicCommunication.parseConditionBundleStringToObject(responseCondition)
+                            val responseCondition = conditionCommunication.searchCondition(patient.idElement.idPart, "json").receive<String>()
+                            conditionCommunication.parseConditionBundleStringToObject(responseCondition)
                         }
                     }
 
                     // Make sure that the patient doesn't already have a registered pregnancy
                     if (condition == null) {
-                        epicCommunication.createCondition(patient.idElement.idPart, note, onsetDate, abatementDate)
+                        conditionCommunication.createCondition(patient.idElement.idPart, note, onsetDate, abatementDate)
                     }
                 }
 
@@ -113,8 +113,10 @@ fun Application.venterBarnRoute() {
 
             post("/messages-from-doctor") {
                 val params = call.receiveParameters()
-                val response = epicCommunication.parseCommunicationStringToJson("""{"resourceType": "Communication", "id": "eQtjP5dExSGL8QY3jIixZo0TrO52tQfNEGkoWTOJdWCU3", "basedOn": [{"reference": "ServiceRequest/eZykr93PG.4eADHuIA7x31kTgnBtaXdav57aDWVlvDWvi-TiVRQGvTBsmjwpvM8n73"}], "partOf": [{"reference": "Task/ebvg8Qy8tsSAz7oLPJgZXUN3gKXtUQEDEo-3.OI.uuPcHc7JRfVOphJCVs.wEo4DF3"}], "status": "in-progress", "subject": {"reference": "Patient/e5CmvJNKQAN-kUr-XDKfXSQ3", "display": "Patient, Bravo"}, "encounter": {"reference": "Encounter/ePsDBvsehVaICEzX4yNBTGig.9WVSJYHW-td1KddCl1k3"}, "sent": "2021-01-25T06:16:23Z", "recipient": [{"reference": "Organization/eXn64I93.1fbFG3bFDGaXbA3", "display": "Ven B Cbo Transport 5 (Fhir)"}], "sender": {"reference": "Practitioner/ectBdL9yLwfiRop1f5LsU6A3", "display": "Susanna Sammer, MSW"}, "payload": [{"contentString": "Dette er helsedataen du ba om."}]}""")
-                val data = mapOf("response" to response.payload[0].content)
+                //val response = epicCommunication.parseCommunicationStringToJson("""{"resourceType": "Communication", "id": "eQtjP5dExSGL8QY3jIixZo0TrO52tQfNEGkoWTOJdWCU3", "basedOn": [{"reference": "ServiceRequest/eZykr93PG.4eADHuIA7x31kTgnBtaXdav57aDWVlvDWvi-TiVRQGvTBsmjwpvM8n73"}], "partOf": [{"reference": "Task/ebvg8Qy8tsSAz7oLPJgZXUN3gKXtUQEDEo-3.OI.uuPcHc7JRfVOphJCVs.wEo4DF3"}], "status": "in-progress", "subject": {"reference": "Patient/e5CmvJNKQAN-kUr-XDKfXSQ3", "display": "Patient, Bravo"}, "encounter": {"reference": "Encounter/ePsDBvsehVaICEzX4yNBTGig.9WVSJYHW-td1KddCl1k3"}, "sent": "2021-01-25T06:16:23Z", "recipient": [{"reference": "Organization/eXn64I93.1fbFG3bFDGaXbA3", "display": "Ven B Cbo Transport 5 (Fhir)"}], "sender": {"reference": "Practitioner/ectBdL9yLwfiRop1f5LsU6A3", "display": "Susanna Sammer, MSW"}, "payload": [{"contentString": "Dette er helsedataen du ba om."}]}""")
+                //val data = mapOf("response" to response.payload[0].content)
+                // Should not be using communication
+                val data = mapOf("response" to "En streng")
                 print(data)
                 call.respondTemplate("venterBarn/messages-from-doctor.ftl", data)
             }
@@ -129,7 +131,7 @@ fun Application.venterBarnRoute() {
                 println("Received request for sykepenger!")
 
                 // TODO : Inappropriate blocking method call on the backend
-                val response: String = epicCommunication.patientSearch("Derrick", "Lin", "1973-06-03")
+                val response: String = patientCommunication.patientSearch("Derrick", "Lin", "1973-06-03")
                 val data = mapOf("response" to response)
 
                 call.respondTemplate("venterBarn/nav-derrick-lin-sykepenger.ftl", data)
@@ -140,7 +142,7 @@ fun Application.venterBarnRoute() {
                 println("Created sykemelding for Derrick Lin!")
 
                 // TODO : Inappropriate blocking method call on the backend
-                val response: String = epicCommunication.patientSearch("Derrick", "Lin", "1973-06-03")
+                val response: String = patientCommunication.patientSearch("Derrick", "Lin", "1973-06-03")
                 val data = mapOf("response" to response)
 
                 call.respondTemplate("venterBarn/doctor-create-sykemelding.ftl", data)
@@ -153,15 +155,15 @@ fun Application.venterBarnRoute() {
                 val family : String = params["family"]!!
                 val identifierValue : String = params["identifierValue"]!!
 
-                runBlocking { epicCommunication.createPatient(given, family, identifierValue) }
+                runBlocking { patientCommunication.createPatient(given, family, identifierValue) }
 
                 val data = mapOf("response" to family)
                 call.respondTemplate("venterBarn/create-patient-confirmation.ftl", data)
             }
 
             post("/create-pregnancy") {
-                val response = runBlocking { epicCommunication.createCondition(
-                    epicCommunication.latestPatientId, "The patient is pregnant.",
+                val response = runBlocking { conditionCommunication.createCondition(
+                    patientCommunication.latestPatientId, "The patient is pregnant.",
                     "2015-01-01", "2015-08-30") }
 
                 val conditionId = response.headers["Location"]!!.split("/")[5]
@@ -203,7 +205,7 @@ fun Application.venterBarnRoute() {
             //get pregnancy information
             get("/nav-inbox/pregnancy/{id}"){
                 val conditionId: String = call.parameters["id"]!!
-                val response = runBlocking { epicCommunication.searchPregnantPatient(conditionId) }
+                val response = runBlocking { conditionCommunication.searchPregnantPatient(conditionId) }
                 val data = mapOf("response" to response)
                 call.respondTemplate("venterBarn/show-info.ftl", data)
             }

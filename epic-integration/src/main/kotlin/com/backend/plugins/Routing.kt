@@ -16,6 +16,8 @@ import org.hl7.fhir.r4.model.Questionnaire
 data class Person(val firstName: String?, val lastName: String?, val age: Int?)
 
 val epicCommunication = EpicCommunication()
+val patientCommunication = PatientCommunication()
+val conditionCommunication = ConditionCommunication()
 
 //inboxes for keeping track of messages
 val navInbox = Inbox()
@@ -42,11 +44,11 @@ fun Application.personRoute() {
         get("/doctor") {
             var data = mapOf<String, String?>("patientId" to null)
 
-            if (epicCommunication.patientCreated) {
-                val responsePatient = runBlocking { epicCommunication.readPatient(epicCommunication.latestPatientId, "json").receive<String>() }
-                val patient = epicCommunication.parsePatientStringToObject(responsePatient)
+            if (patientCommunication.patientCreated) {
+                val responsePatient = runBlocking { patientCommunication.readPatient(patientCommunication.latestPatientId, "json").receive<String>() }
+                val patient = patientCommunication.parsePatientStringToObject(responsePatient)
 
-                data = mapOf("patientId" to epicCommunication.latestPatientId, "name" to patient.name[0].family, "pregnancy" to epicCommunication.latestConditionId)
+                data = mapOf("patientId" to patientCommunication.latestPatientId, "name" to patient.name[0].family, "pregnancy" to conditionCommunication.latestConditionId)
             }
 
             call.respondTemplate("doctor.ftl", data)
@@ -70,8 +72,9 @@ fun Application.personRoute() {
 
         post("/messages-from-doctor") {
             val params = call.receiveParameters()
-            val response = epicCommunication.parseCommunicationStringToJson("""{"resourceType": "Communication", "id": "eQtjP5dExSGL8QY3jIixZo0TrO52tQfNEGkoWTOJdWCU3", "basedOn": [{"reference": "ServiceRequest/eZykr93PG.4eADHuIA7x31kTgnBtaXdav57aDWVlvDWvi-TiVRQGvTBsmjwpvM8n73"}], "partOf": [{"reference": "Task/ebvg8Qy8tsSAz7oLPJgZXUN3gKXtUQEDEo-3.OI.uuPcHc7JRfVOphJCVs.wEo4DF3"}], "status": "in-progress", "subject": {"reference": "Patient/e5CmvJNKQAN-kUr-XDKfXSQ3", "display": "Patient, Bravo"}, "encounter": {"reference": "Encounter/ePsDBvsehVaICEzX4yNBTGig.9WVSJYHW-td1KddCl1k3"}, "sent": "2021-01-25T06:16:23Z", "recipient": [{"reference": "Organization/eXn64I93.1fbFG3bFDGaXbA3", "display": "Ven B Cbo Transport 5 (Fhir)"}], "sender": {"reference": "Practitioner/ectBdL9yLwfiRop1f5LsU6A3", "display": "Susanna Sammer, MSW"}, "payload": [{"contentString": "Dette er helsedataen du ba om."}]}""")
-            val data = mapOf("response" to response.payload[0].content)
+            //val response = epicCommunication.parseCommunicationStringToJson("""{"resourceType": "Communication", "id": "eQtjP5dExSGL8QY3jIixZo0TrO52tQfNEGkoWTOJdWCU3", "basedOn": [{"reference": "ServiceRequest/eZykr93PG.4eADHuIA7x31kTgnBtaXdav57aDWVlvDWvi-TiVRQGvTBsmjwpvM8n73"}], "partOf": [{"reference": "Task/ebvg8Qy8tsSAz7oLPJgZXUN3gKXtUQEDEo-3.OI.uuPcHc7JRfVOphJCVs.wEo4DF3"}], "status": "in-progress", "subject": {"reference": "Patient/e5CmvJNKQAN-kUr-XDKfXSQ3", "display": "Patient, Bravo"}, "encounter": {"reference": "Encounter/ePsDBvsehVaICEzX4yNBTGig.9WVSJYHW-td1KddCl1k3"}, "sent": "2021-01-25T06:16:23Z", "recipient": [{"reference": "Organization/eXn64I93.1fbFG3bFDGaXbA3", "display": "Ven B Cbo Transport 5 (Fhir)"}], "sender": {"reference": "Practitioner/ectBdL9yLwfiRop1f5LsU6A3", "display": "Susanna Sammer, MSW"}, "payload": [{"contentString": "Dette er helsedataen du ba om."}]}""")
+            //val data = mapOf("response" to response.payload[0].content)
+            val data = mapOf("response" to "En streng")
             print(data)
             call.respondTemplate("messages-from-doctor.ftl", data)
         }
@@ -86,7 +89,7 @@ fun Application.personRoute() {
             println("Received request for sykepenger!")
 
             // TODO : Inappropriate blocking method call on the backend
-            val response: String = epicCommunication.patientSearch("Derrick", "Lin", "1973-06-03")
+            val response: String = patientCommunication.patientSearch("Derrick", "Lin", "1973-06-03")
             val data = mapOf("response" to response)
 
             call.respondTemplate("nav-derrick-lin-sykepenger.ftl", data)
@@ -97,25 +100,25 @@ fun Application.personRoute() {
             println("Created sykemelding for Derrick Lin!")
 
             // TODO : Inappropriate blocking method call on the backend
-            val response: String = epicCommunication.patientSearch("Derrick", "Lin", "1973-06-03")
+            val response: String = patientCommunication.patientSearch("Derrick", "Lin", "1973-06-03")
             val data = mapOf("response" to response)
 
             call.respondTemplate("doctor-create-sykemelding.ftl", data)
         }
 
         get("/patient") {
-            val patientId = epicCommunication.latestPatientId
+            val patientId = patientCommunication.latestPatientId
             val condition = runBlocking {
-                if (epicCommunication.latestConditionId != null) {
-                    epicCommunication.getCondition(epicCommunication.latestConditionId!!)
+                if (conditionCommunication.latestConditionId != null) {
+                    conditionCommunication.getCondition(conditionCommunication.latestConditionId!!)
                 } else {
-                    val responseCondition = epicCommunication.searchCondition(patientId, "json").receive<String>()
-                    epicCommunication.parseConditionBundleStringToObject(responseCondition)
+                    val responseCondition = conditionCommunication.searchCondition(patientId, "json").receive<String>()
+                    conditionCommunication.parseConditionBundleStringToObject(responseCondition)
                 }
             }
 
-            val responsePatient = runBlocking { epicCommunication.readPatient(patientId, "json").receive<String>() }
-            val patient = epicCommunication.parsePatientStringToObject(responsePatient)
+            val responsePatient = runBlocking { patientCommunication.readPatient(patientId, "json").receive<String>() }
+            val patient = patientCommunication.parsePatientStringToObject(responsePatient)
 
             // TODO : Rather compare condition.code == 77386006
             val note = if (condition == null || condition.note.isEmpty()) null else condition.note[0].text
@@ -130,15 +133,15 @@ fun Application.personRoute() {
             val family : String = params["family"]!!
             val identifierValue : String = params["identifierValue"]!!
 
-            runBlocking { epicCommunication.createPatient(given, family, identifierValue) }
+            runBlocking { patientCommunication.createPatient(given, family, identifierValue) }
 
             val data = mapOf("response" to family)
             call.respondTemplate("create-patient-confirmation.ftl", data)
         }
 
         post("/create-pregnancy") {
-            val response = runBlocking { epicCommunication.createCondition(
-                epicCommunication.latestPatientId, "The patient is pregnant.",
+            val response = runBlocking { conditionCommunication.createCondition(
+                patientCommunication.latestPatientId, "The patient is pregnant.",
                 "2015-01-01", "2015-08-30") }
 
             val conditionId = response.headers["Location"]!!.split("/")[5]
@@ -180,7 +183,7 @@ fun Application.personRoute() {
         //get pregnancy information
         get("/nav-inbox/pregnancy/{id}"){
             val conditionId: String = call.parameters["id"]!!
-            val response = runBlocking { epicCommunication.searchPregnantPatient(conditionId) }
+            val response = runBlocking { conditionCommunication.searchPregnantPatient(conditionId) }
             val data = mapOf("response" to response)
             call.respondTemplate("show-info.ftl", data)
         }

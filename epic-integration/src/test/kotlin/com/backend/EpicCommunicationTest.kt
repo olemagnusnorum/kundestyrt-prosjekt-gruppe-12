@@ -1,6 +1,8 @@
 package com.backend
 
+import com.backend.plugins.ConditionCommunication
 import com.backend.plugins.EpicCommunication
+import com.backend.plugins.PatientCommunication
 import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.Condition
 import org.hl7.fhir.r4.model.Patient
@@ -13,7 +15,8 @@ import kotlin.test.*
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EpicCommunicationTest {
 
-    private val epicCommunication = EpicCommunication()
+    private val conditionCommunication = ConditionCommunication()
+    private val patientCommunication = PatientCommunication()
 
     @Nested
     inner class PatientSearch {
@@ -21,10 +24,10 @@ class EpicCommunicationTest {
         @Test
         fun `getPatientID should return a string`() {
             val JSONBundle = runBlocking {
-                epicCommunication.patientSearch("Derrick","Lin","1973-06-03")
+                patientCommunication.patientSearch("Derrick","Lin","1973-06-03")
             }
-            val derrickThePatient = epicCommunication.parseBundleXMLToPatient(JSONBundle, isXML = false)
-            val returnVal = epicCommunication.getPatientID(derrickThePatient!!)
+            val derrickThePatient = patientCommunication.parseBundleXMLToPatient(JSONBundle, isXML = false)
+            val returnVal = patientCommunication.getPatientID(derrickThePatient!!)
             val derricksID = "eq081-VQEgP8drUUqCWzHfw3"
 
             assert(derrickThePatient is Patient)
@@ -34,7 +37,7 @@ class EpicCommunicationTest {
 
         @Test
         fun `getPatientIDFromDatabase should return a string`() {
-            val returnVal = runBlocking { epicCommunication.getPatientIDFromDatabase(
+            val returnVal = runBlocking { patientCommunication.getPatientIDFromDatabase(
                 givenName = "Derrick",
                 familyName = "Lin",
                 birthdate = "1973-06-03")
@@ -47,7 +50,7 @@ class EpicCommunicationTest {
 
         @Test
         fun `Patient_Search should return a string`() {
-            assert(runBlocking { epicCommunication.patientSearch(
+            assert(runBlocking { patientCommunication.patientSearch(
                 givenName = "Derrick",
                 familyName = "Lin",
                 birthdate = "1973-06-03")
@@ -56,20 +59,20 @@ class EpicCommunicationTest {
 
         @Test
         fun `parseBundleXMLToPatient should parse an xml string to a patient object`() {
-            val patientXML = runBlocking { epicCommunication.patientSearch(
+            val patientXML = runBlocking { patientCommunication.patientSearch(
                 givenName = "Derrick",
                 familyName = "Lin",
                 birthdate = "1973-06-03",
                 outputFormat = "xml"
             )}
             assert(patientXML is String)
-            assert(epicCommunication.parseBundleXMLToPatient(patientXML) is Patient)
+            assert(patientCommunication.parseBundleXMLToPatient(patientXML) is Patient)
         }
 
         @Test
         fun `getCondition should return a condition resource for Derric Lin`() {
             val condition = runBlocking {
-                epicCommunication.getCondition("Condition/eY-LMUKgFarb5r10D5sXS7nGJO9qELcndS5oncvyDjPHp.lFiCEKE6mt2pIDbyFeBHvU6Z0XikLVgIqkXp8XV1Q3")
+                conditionCommunication.getCondition("Condition/eY-LMUKgFarb5r10D5sXS7nGJO9qELcndS5oncvyDjPHp.lFiCEKE6mt2pIDbyFeBHvU6Z0XikLVgIqkXp8XV1Q3")
             }
             assert(condition is Condition)
             assert(condition.subject.reference == "Patient/eq081-VQEgP8drUUqCWzHfw3")
