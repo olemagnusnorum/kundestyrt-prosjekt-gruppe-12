@@ -34,7 +34,7 @@
     </#if>
     <br>
     <br>
-    <a href="/">Gå tilbake til navigasjonsiden.</a>
+    <a href="/funksjonsvurdering">Gå tilbake til navigasjonsiden.</a>
 </div>
 </body>
 </html>
