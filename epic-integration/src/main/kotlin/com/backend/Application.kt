@@ -30,5 +30,6 @@ fun main() {
         }
 
         personRoute()
+        venterBarnRoute()
     }.start(wait = true)
 }
