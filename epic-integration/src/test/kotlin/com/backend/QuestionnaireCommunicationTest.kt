@@ -18,6 +18,19 @@ class QuestionnaireCommunicationTest {
     private val qc = QuestionnaireCommunication()
 
     @Nested
+    inner class GetQuestionnaireQuestions {
+         @Test
+         fun `getQuestionnaireQuestions should return a list of strings`() {
+             val questionnaireID = "2641197" // Mathias made a questionnaire with this ID
+             val questionnaire: Questionnaire = runBlocking { qc.getQuestionnaireResource(questionnaireID) }
+             assert(questionnaire is Questionnaire)
+
+             val returnVal = qc.getQuestionnaireQuestions(questionnaire)
+             assert(returnVal is MutableList<String>)
+         }
+    }
+
+    @Nested
     inner class GeneralTesting {
 
         @Test
@@ -31,7 +44,7 @@ class QuestionnaireCommunicationTest {
             val questionnaireID = "2641197"
 
             // We should be able to find this on the server with the following test
-            val questionnaire: Questionnaire = runBlocking { qc.getQuestionnaire(questionnaireID) }
+            val questionnaire: Questionnaire = runBlocking { qc.getQuestionnaireResource(questionnaireID) }
             assert(questionnaire.item[0].text == itemText1)
             assert(questionnaire.item[1].text == itemText2)
             assert(questionnaire.name == name)
@@ -47,7 +60,7 @@ class QuestionnaireCommunicationTest {
             val questionnaireResponseID = "2644277"
 
             // We should be able to find this on the server with the following test
-            val qr: QuestionnaireResponse = runBlocking { qc.getQuestionnaireResponse(questionnaireResponseID) }
+            val qr: QuestionnaireResponse = runBlocking { qc.getQuestionnaireResponseResource(questionnaireResponseID) }
             assert(qr.item[0].text == itemText1)
             assert(qr.item[1].text == itemText2)
         }

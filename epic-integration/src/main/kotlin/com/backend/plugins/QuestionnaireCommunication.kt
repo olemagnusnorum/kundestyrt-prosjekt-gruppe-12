@@ -29,7 +29,7 @@ class QuestionnaireCommunication(server: String = "public") {
      * @param id is the id of the Questionnaire to get.
      * @return QuestionnaireResponse resource
      */
-    suspend fun getQuestionnaire(id: String, format: String = "json"): Questionnaire {
+    suspend fun getQuestionnaireResource(id: String, format: String = "json"): Questionnaire {
         val response: HttpResponse = client.get("$baseURL/Questionnaire/$id?_format=$format") {}
         val jsonParser: IParser = ctx.newJsonParser()
         return jsonParser.parseResource(Questionnaire::class.java, response.receive<String>())
@@ -40,23 +40,23 @@ class QuestionnaireCommunication(server: String = "public") {
      * @param id is the id of the QR to get.
      * @return QuestionnaireResponse resource
      */
-    suspend fun getQuestionnaireResponse(id: String, format: String = "json"): QuestionnaireResponse {
+    suspend fun getQuestionnaireResponseResource(id: String, format: String = "json"): QuestionnaireResponse {
         val response: HttpResponse = client.get("$baseURL/QuestionnaireResponse/$id?_format=$format") {}
         val jsonParser: IParser = ctx.newJsonParser()
         return jsonParser.parseResource(QuestionnaireResponse::class.java, response.receive<String>())
     }
 
 
-
-
-
     /**
-     * Finds the items of a FHIR Questionnaire object.
+     * Finds the Questions of a FHIR Questionnaire object
+     * @return listOfQuestions a list of Strings containing the questions
      */
-    fun getQuestionnaireQuestions(questionnaire: Questionnaire) : String {
-        val returnVal = questionnaire.item[0].text
-        return returnVal
-
+    fun getQuestionnaireQuestions(questionnaire: Questionnaire) : List<String> {
+        val listOfQuestions: MutableList<String> = mutableListOf()
+        for (item in questionnaire.item) {
+            listOfQuestions.add(item.text)
+        }
+        return listOfQuestions
     }
 
 }
