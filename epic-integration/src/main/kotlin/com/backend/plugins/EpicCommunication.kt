@@ -103,12 +103,7 @@ class EpicCommunication(server: String = "public") {
         return jsonParser.parseResource(Patient::class.java, jsonMessage)
     }
 
-    fun parseQuestionnaireResponseStringToObject(jsonMessage: String): QuestionnaireResponse {
-        val jsonParser: IParser = ctx.newJsonParser()
-        jsonParser.setPrettyPrint(true)
 
-        return jsonParser.parseResource(QuestionnaireResponse::class.java, jsonMessage)
-    }
 
     /**
      * Function to get a Condition resource.
@@ -382,17 +377,4 @@ class EpicCommunication(server: String = "public") {
         return response.receive()
     }
 
-    /**
-     * Function to search for a questionnaire response.
-     * @param id is the id of the QR to get.
-     * @return an http response as a string.
-     */
-    suspend fun readQuestionnaireResponse(id: String, format: String = "json"): String {
-        val response: HttpResponse =
-            client.get(baseURL + "/QuestionnaireResponse/$id?_format=$format") {
-            }
-
-        println(response)
-        return response.receive<String>()
-    }
 }
