@@ -2,8 +2,6 @@ package com.backend.plugins
 
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
-import ca.uhn.fhir.parser.JsonParser
-
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -21,7 +19,7 @@ class EpicCommunication(server: String = "public") {
     //the base of the fhir server
     private val baseURL: String = when (server) {
         "public" -> "http://hapi.fhir.org/baseR4"
-        "local" -> "http://localhost:8000/fhir/"
+        "local" -> "http://localhost:8000/fhir"
         else -> throw IllegalArgumentException("server parameter must be either \"public\" or \"local\"")
     }
 
@@ -47,23 +45,23 @@ class EpicCommunication(server: String = "public") {
      */
     suspend fun getPatientIDFromDatabase(givenName: String, familyName: String, birthdate: String) : String {
         val JSONBundle = patientSearch(givenName, familyName, birthdate)
-        val patient : Patient = parseBundleXMLToPatient(JSONBundle, isXML = false)
+        val patient : Patient = parseBundleXMLToPatient(JSONBundle, isXML = false)!!
         val patientID = getPatientID(patient)
         return patientID
     }
 
     /**
      * Makes an HTTP response request to the epic server at fhir.epic.com
-     * Returns an HttpResponse object with a bundle containing up to 1 patient object
+     * Returns an HttpResponse object with a bundle containing 0, 1 or more patient object(s)
      * As default the format returned is JSON (but XML can be returned by setting format to = "xml")
      * Birthdate format yyyy-mm-dd
      */
-    suspend fun patientSearch(givenName: String, familyName: String, birthdate: String? = null, identifier: String? = null, outputFormat: String = "json"): String {
+    suspend fun patientSearch(givenName: String? = null, familyName: String? = null, birthdate: String? = null, identifier: String? = null, outputFormat: String = "json"): String {
         //val token: String = runBlocking { getEpicAccessToken() }
         val response: HttpResponse =
             client.get(baseURL + "/Patient?" +
-                    "given=$givenName&" +
-                    "family=$familyName&" +
+                    (if (givenName != null) "given=$givenName&" else "") +
+                    (if (familyName != null) "family=$familyName&" else "") +
                     (if (birthdate != null) "birthdate=$birthdate&" else "") +
                     (if (identifier != null) "identifier=$identifier&" else "") +
                     "_format=$outputFormat") {
@@ -116,9 +114,9 @@ class EpicCommunication(server: String = "public") {
         return jsonParser.parseResource(Condition::class.java, response.receive<String>())
     }
 
-    fun parseBundleXMLToPatient(xmlMessage: String, isXML : Boolean = true ): Patient {
+    fun parseBundleXMLToPatient(xmlMessage: String, isXML: Boolean = true): Patient? {
         // Assume we are working with XML
-        val parser : IParser = if (isXML) {
+        val parser: IParser = if (isXML) {
             ctx.newXmlParser()
         } else { // If not XML then JSON
             ctx.newJsonParser()
@@ -126,12 +124,9 @@ class EpicCommunication(server: String = "public") {
         parser.setPrettyPrint(true)
 
         val bundle: Bundle = parser.parseResource(Bundle::class.java, xmlMessage)
+        if (bundle.entry.size == 0) return null
 
-        val patient: Patient = bundle.entry[0].resource as Patient
-
-        println(patient.name[0].family)
-
-        return patient
+        return bundle.entry[0].resource as Patient
     }
 
     fun parseCommunicationStringToJson(jsonMessage: String): Communication {
@@ -202,7 +197,7 @@ class EpicCommunication(server: String = "public") {
         println(conditionJson)
 
         // Post the condition to epic
-        val response: HttpResponse = client.post(baseURL + "/Condition") {
+        val response: HttpResponse = client.post("$baseURL/Condition") {
 
             contentType(ContentType.Application.Json)
             body = conditionJson
@@ -225,13 +220,12 @@ class EpicCommunication(server: String = "public") {
      * @param identifierValue on the format "XXX-XX-XXXX" ("028-27-1234")
      * @return an http response as a string.
      */
-    suspend fun createPatient(givenName: String, familyName: String, identifierValue: String): String {
+    suspend fun createPatient(givenName: String, familyName: String, identifierValue: String, birthdate: String = "7-Jun-2013"): String {
         val patient = Patient()
 
         // Set birthdate
         val formatter = SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH)
-        val dateInString = "7-Jun-2013"
-        val date = formatter.parse(dateInString)
+        val date = formatter.parse(birthdate)
         patient.birthDate = date
 
         // set gender
@@ -254,7 +248,7 @@ class EpicCommunication(server: String = "public") {
         val patientJson = jsonParser.encodeResourceToString(patient)
 
         // Post the patient to epic
-        val response: HttpResponse = client.post(baseURL + "/Patient") {
+        val response: HttpResponse = client.post("$baseURL/Patient") {
 
             contentType(ContentType.Application.Json)
             body = patientJson
@@ -344,7 +338,7 @@ class EpicCommunication(server: String = "public") {
         val questionnaireJson = jsonParser.encodeResourceToString(questionnaire)
 
         //post the questionnaire to the server
-        val response: HttpResponse = client.post(baseURL + "/Questionnaire"){
+        val response: HttpResponse = client.post("$baseURL/Questionnaire"){
 
             contentType(ContentType.Application.Json)
             body = questionnaireJson
@@ -375,6 +369,57 @@ class EpicCommunication(server: String = "public") {
                     "_format=$outputFormat") {
             }
         return response.receive()
+    }
+
+    /**
+      * Generates a QuestionnaireResponse to a specific Questionnaire
+     * @param
+     * @param questionnaire Questionnaire the response is related to
+     * @return http response, not QuestionnaireResponse
+     */
+    suspend fun createQuestionnaireResponse(questionnaire: Questionnaire, questionsList: MutableList<String>): HttpResponse {
+
+        // Create empty template
+        val questionnaireResponse = QuestionnaireResponse()
+
+        //Link Questionnaire
+        questionnaireResponse.questionnaire = questionnaire.id.substringBeforeLast("/").substringBeforeLast("/")
+
+        //TODO: Link patient. Where to get patient id? Probably send as new parameter
+
+        questionnaireResponse.subject = Reference("Patient/13")
+
+        //Put answers in Item and add them to QR
+        val item = mutableListOf<QuestionnaireResponse.QuestionnaireResponseItemComponent>()
+
+        for (i in 0..questionnaire.item.size-1) {
+
+            item.add(QuestionnaireResponse.QuestionnaireResponseItemComponent())
+            item[i].linkId = questionnaire.item[i].id
+            item[i].text = questionnaire.item[i].text
+
+            val answerComponent = mutableListOf<QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent>()
+            answerComponent.add(QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent())
+            answerComponent[0].value = Coding(
+                "some.system",
+                questionsList[i], questionsList[i])
+
+            item[i].answer = answerComponent
+        }
+
+        questionnaireResponse.item = item
+
+        println(jsonParser.setPrettyPrint(true).encodeResourceToString(questionnaireResponse))
+
+        //post the questionnaireResponse to the server
+        val response: HttpResponse = client.post("$baseURL/QuestionnaireResponse"){
+            contentType(ContentType.Application.Json)
+            body = jsonParser.encodeResourceToString(questionnaireResponse)
+        }
+
+        println(response.headers["Location"])
+
+        return response
     }
 
 }

@@ -3,11 +3,12 @@
 <html lang="en">
 <head>
     <title>Legeside</title>
+    <base href="/venter-barn/">
 </head>
 <body style="text-align: center; font-family: sans-serif">
 <div>
     <h1>Pasient Journal</h1>
-    <h2>Hei ${name}!</h2>
+    <h2>Hei, ${name}!</h2>
     <h3>Se melding fra NAV</h3>
     <#if condition??>
         <p>${condition}</p>
@@ -21,7 +22,7 @@
     </#if>
     <br>
     <br>
-    <a href="/">Gå tilbake til navigasjonsiden.</a>
+    <a href="/venter-barn">Gå tilbake til navigasjonsiden.</a>
 </div>
 </body>
 </html>
