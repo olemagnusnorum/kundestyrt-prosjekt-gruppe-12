@@ -9,7 +9,7 @@
 <div>
     <h1>Legeside - Graviditetsskjema</h1>
 
-    <form action="/" method="post">
+    <form action="/venter-barn/doctor-form-pregnant" method="post">
         <p>Personnummer:</p>
         <input name="id" type="text" placeholder="Personnummer"><br><br>
         <p>Medisinsk beskrivelse:</p>

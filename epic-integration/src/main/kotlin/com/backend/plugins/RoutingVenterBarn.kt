@@ -35,7 +35,7 @@ fun Application.venterBarnRoute() {
                     if (epicCommunication.latestConditionId != null) {
                         epicCommunication.getCondition(epicCommunication.latestConditionId!!)
                     } else {
-                        val responseCondition = epicCommunication.searchCondition(id, "json").receive<String>()
+                        val responseCondition = epicCommunication.searchCondition(patient!!.idElement.idPart, "json").receive<String>()
                         epicCommunication.parseConditionBundleStringToObject(responseCondition)
                     }
                 }
@@ -56,26 +56,25 @@ fun Application.venterBarnRoute() {
 
             post("/doctor-form-pregnant") {
                 val params = call.receiveParameters()
-                val id = params["id"]
+                val id = params["id"]!!
                 val note: String = params["note"]!!
                 val onsetDate: String = params["onsetDate"]!!
                 val abatementDate: String = params["abatementDate"]!!
-                val patient = runBlocking { epicCommunication.parsePatientStringToObject(epicCommunication.readPatient(id!!).receive()) }
-                val condition = runBlocking {
-                    if (epicCommunication.latestConditionId != null) {
-                        epicCommunication.getCondition(epicCommunication.latestConditionId!!)
-                    } else {
-                        val responseCondition = epicCommunication.searchCondition(id!!, "json").receive<String>()
-                        epicCommunication.parseConditionBundleStringToObject(responseCondition)
+                val patient = runBlocking { epicCommunication.parseBundleXMLToPatient(epicCommunication.patientSearch(identifier = id), isXML = false) }
+                if (patient != null) {
+                    val condition = runBlocking {
+                        if (epicCommunication.latestConditionId != null) {
+                            epicCommunication.getCondition(epicCommunication.latestConditionId!!)
+                        } else {
+                            val responseCondition = epicCommunication.searchCondition(patient.idElement.idPart, "json").receive<String>()
+                            epicCommunication.parseConditionBundleStringToObject(responseCondition)
+                        }
                     }
-                }
 
-                // Make sure that the patient doesn't already have a registered pregnancy
-                if (condition == null) {
-                    epicCommunication.createCondition(patient.id, note, onsetDate, abatementDate)
-                    println("Condition created!")
-                } else {
-                    println("Patient is already pregnant!")
+                    // Make sure that the patient doesn't already have a registered pregnancy
+                    if (condition == null) {
+                        epicCommunication.createCondition(patient.idElement.idPart, note, onsetDate, abatementDate)
+                    }
                 }
 
                 call.respondRedirect("/venter-barn/doctor")
