@@ -53,12 +53,6 @@ fun Application.funksjonsvurderingRoute() {
         //Called when doctor is accessing inbox
         get("/funksjonsvurdering/doctor-inbox") {
 
-            /*if (call.parameters.isEmpty()) {
-                call.respondTemplate("funksjonsvurdering/doctor-inbox.ftl")
-            }
-            else {
-                val patientId = call.parameters["id"]!!*/
-
             //TODO: Get all questionnaires associated with patientId, put them in a list and send them as "questionnaires"
             //For now hardcoded for testing
             val questionnaires = mutableListOf(epicCommunication.getQuestionnaire("2641197"))
