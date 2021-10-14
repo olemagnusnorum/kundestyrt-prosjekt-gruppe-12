@@ -48,7 +48,7 @@ fun createDefaultPatient() {
     // If the patient doesn't exist, create it
     if (patient == null) {
         runBlocking {
-            epicCommunication.createPatient("Kari", "Nordmann", "7-Jun-1990", "07069012345")
+            epicCommunication.createPatient("Kari", "Nordmann", identifierValue = "07069012345",  birthdate = "7-Jun-1990")
         }
     }
 }
