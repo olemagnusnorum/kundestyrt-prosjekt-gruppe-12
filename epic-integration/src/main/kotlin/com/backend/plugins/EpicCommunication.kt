@@ -381,15 +381,8 @@ class EpicCommunication(server: String = "public") {
         return jsonParser.parseResource(Questionnaire::class.java, response.receive<String>())
     }
 
-//        QuestionnaireResponse
-//          - item (List<QuestionnaireResponse.QuestionnaireResponseItemComponent>)
-//              - linkid (pointer to item from Questionnaire)
-//              - text (name of question)
-//                  - answer (List<QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent>)
-//                      -value[x]
     /**
-     * Javadoc is love, javadoc is life
-     * Generates a QuestionnaireResponse to a specific Questionnaire
+      * Generates a QuestionnaireResponse to a specific Questionnaire
      * @param
      * @param questionnaire Questionnaire the response is related to
      * @return http response, not QuestionnaireResponse
