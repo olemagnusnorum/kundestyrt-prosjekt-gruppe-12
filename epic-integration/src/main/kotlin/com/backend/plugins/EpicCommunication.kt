@@ -2,7 +2,6 @@ package com.backend.plugins
 
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
-import ca.uhn.fhir.parser.JsonParser
 
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -47,7 +46,7 @@ class EpicCommunication(server: String = "public") {
      */
     suspend fun getPatientIDFromDatabase(givenName: String, familyName: String, birthdate: String) : String {
         val JSONBundle = patientSearch(givenName, familyName, birthdate)
-        val patient : Patient = parseBundleXMLToPatient(JSONBundle, isXML = false)
+        val patient : Patient = parseBundleXMLToPatient(JSONBundle, isXML = false)!!
         val patientID = getPatientID(patient)
         return patientID
     }
@@ -114,9 +113,9 @@ class EpicCommunication(server: String = "public") {
         return jsonParser.parseResource(Condition::class.java, response.receive<String>())
     }
 
-    fun parseBundleXMLToPatient(xmlMessage: String, isXML : Boolean = true ): Patient {
+    fun parseBundleXMLToPatient(xmlMessage: String, isXML: Boolean = true): Patient? {
         // Assume we are working with XML
-        val parser : IParser = if (isXML) {
+        val parser: IParser = if (isXML) {
             ctx.newXmlParser()
         } else { // If not XML then JSON
             ctx.newJsonParser()
@@ -124,12 +123,9 @@ class EpicCommunication(server: String = "public") {
         parser.setPrettyPrint(true)
 
         val bundle: Bundle = parser.parseResource(Bundle::class.java, xmlMessage)
+        if (bundle.entry.size == 0) return null
 
-        val patient: Patient = bundle.entry[0].resource as Patient
-
-        println(patient.name[0].family)
-
-        return patient
+        return bundle.entry[0].resource as Patient
     }
 
     fun parseCommunicationStringToJson(jsonMessage: String): Communication {
