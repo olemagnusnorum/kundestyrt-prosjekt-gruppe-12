@@ -17,18 +17,29 @@ class QuestionnaireCommunicationTest {
 
     private val qc = QuestionnaireCommunication()
 
-    @Nested
-    inner class GetQuestionnaireQuestions {
-         @Test
-         fun `getQuestionnaireQuestions should return a list of strings`() {
-             val questionnaireID = "2641197" // Mathias made a questionnaire with this ID
-             val questionnaire: Questionnaire = runBlocking { qc.getQuestionnaire(questionnaireID) }
-             assert(questionnaire is Questionnaire)
+    @Test
+    fun `getQuestionnaireQuestions should return a list of strings`() {
+        val questionnaireID = "2641197" // Mathias made a questionnaire with this ID
+        val questionnaire: Questionnaire = runBlocking { qc.getQuestionnaire(questionnaireID) }
+        assert(questionnaire is Questionnaire)
 
-             val returnVal = qc.getQuestionnaireQuestions(questionnaire)
-             assert(returnVal is MutableList<String>)
-         }
+        val returnVal = qc.getQuestionnaireQuestions(questionnaire)
+        assert(returnVal is MutableList<String>)
     }
+
+    @Test
+    fun `getQuestionnaireAnswers should return a list of strings`() {
+        val questionnaireResponseID = "2644277" // Mathias made a questionnaire with this ID
+        val questionnaireResponse: QuestionnaireResponse = runBlocking { qc.getQuestionnaireResponse(questionnaireResponseID) }
+        assert(questionnaireResponse is QuestionnaireResponse)
+
+        val returnVal = qc.getQuestionnaireAnswers(questionnaireResponse)
+        println(returnVal)
+        assert(returnVal is MutableList<String>)
+        assert(returnVal[0] == "fwjnkjefn")
+        assert(returnVal[1] == "gknlwfe")
+    }
+
 
     @Nested
     inner class GeneralTesting {

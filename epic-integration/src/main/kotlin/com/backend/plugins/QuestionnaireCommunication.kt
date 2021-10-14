@@ -184,4 +184,16 @@ class QuestionnaireCommunication(server: String = "public") {
         return listOfQuestions
     }
 
+    /**
+     * Finds the Answers of a FHIR QuestionnaireResponse object
+     * @return listOfAnswers a list of Strings containing the answers
+     */
+    fun getQuestionnaireAnswers(questionnaireResponse: QuestionnaireResponse) : List<String> {
+        val listOfQuestions: MutableList<String> = mutableListOf()
+        for (item in questionnaireResponse.item) {
+            listOfQuestions.add(item.answer[0].valueCoding.code)
+        }
+        return listOfQuestions
+    }
+
 }
