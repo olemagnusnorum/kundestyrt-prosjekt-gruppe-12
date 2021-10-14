@@ -30,5 +30,7 @@ fun main() {
         }
 
         personRoute()
+        routingFunksjonsvurdering()
+        routingVenterBarn()
     }.start(wait = true)
 }
