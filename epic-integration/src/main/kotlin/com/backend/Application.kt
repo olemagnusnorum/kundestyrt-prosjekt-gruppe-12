@@ -41,7 +41,7 @@ fun main() {
 fun createDefaultPatient() {
     // Check if a predetermined patient exists in the fhir server
     val patient = runBlocking {
-        val response = epicCommunication.patientSearch("Kari", "Nordmann", "7-Jun-1990", "07069012345")
+        val response = epicCommunication.patientSearch("Kari", "Nordmann", "1990-07-06", "07069012345")
         epicCommunication.parseBundleXMLToPatient(response, isXML = false)
     }
 
