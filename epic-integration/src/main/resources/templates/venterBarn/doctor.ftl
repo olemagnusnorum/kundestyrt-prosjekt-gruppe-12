@@ -19,13 +19,13 @@
         <#if pregnancy??>
             <p>Pasienten er gravid</p>
         <#else>
-            <form action="/create-pregnancy" method="post">
+            <form action="/venter-barn/create-pregnancy" method="post">
                 <input type="submit" value="Registrer graviditet">
             </form>
         </#if>
     <#else>
         <h3>Registrer testpasient</h3>
-        <form action="/create-patient" method="post">
+        <form action="/venter-barn/create-patient" method="post">
             <input name="given" type="text" placeholder="Given name"><br><br>
             <input name="family" type="text" placeholder="Family name"><br><br>
             <input name="identifierValue" type="text" placeholder="xxx-xx-xxxx"><br><br>
@@ -34,7 +34,7 @@
     </#if>
     <br>
     <br>
-    <a href="/funksjonsvurdering">Gå tilbake til navigasjonsiden.</a>
+    <a href="/venter-barn">Gå tilbake til navigasjonsiden.</a>
 </div>
 </body>
 </html>
