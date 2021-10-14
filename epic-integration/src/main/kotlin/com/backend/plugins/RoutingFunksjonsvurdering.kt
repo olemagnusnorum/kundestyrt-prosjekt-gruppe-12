@@ -118,8 +118,23 @@ fun Application.funksjonsvurderingRoute() {
         }
 
         //new questionnaire site
-        get("/questionnaire"){
-            call.respondTemplate("/questionnaire.ftl")
+        get("/funksjonsvurdering/read-questionnaire-response"){
+
+            // Mathis made these
+            val questionnaireID = "2641197"
+            val questionnaireResponseID = "2644277"
+
+            // Extract questionnaire and questionnaireResponse
+            val questionnaire = questionnaireCommunication.getQuestionnaire(questionnaireID)
+            val questionnaireResponse = questionnaireCommunication.getQuestionnaireResponse(questionnaireResponseID)
+
+            // Extract questions and answers
+            val questions = questionnaireCommunication.getQuestionnaireQuestions(questionnaire)
+            val answers = questionnaireCommunication.getQuestionnaireAnswers(questionnaireResponse)
+
+            // Map data so we can display it on the Front end
+            val data = mapOf("questions" to questions, "answers" to answers)
+            call.respondTemplate("/funksjonsvurdering/read-questionnaire-response.ftl", data)
         }
     }
 
