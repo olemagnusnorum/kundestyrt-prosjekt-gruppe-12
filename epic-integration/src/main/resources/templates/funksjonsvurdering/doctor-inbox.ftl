@@ -12,13 +12,13 @@
 
         <h3>Innboks</h3>
         <#list questionnaires as questionnaire>
-            <a href="/functional-analysis/doctor-inbox/${questionnaire.id}"> ${questionnaire.title} </a>
+            <a href="/funksjonsvurdering/doctor-inbox/${questionnaire.id}"> ${questionnaire.title} </a>
         </#list>
 
     <#else>
 
         <h3>Velg pasient</h3>
-        <form action="/functional-analysis/doctor-inbox" method="post">
+        <form action="/funksjonsvurdering/doctor-inbox" method="post">
             <input name="id" type="text">
             <input type="submit">
         </form>

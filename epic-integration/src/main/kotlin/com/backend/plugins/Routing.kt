@@ -184,56 +184,5 @@ fun Application.personRoute() {
             val data = mapOf("response" to response)
             call.respondTemplate("show-info.ftl", data)
         }
-
-        //functional analysis | Helseplattformen inbox
-        //Called when doctor is accessing inbox
-        get("/functional-analysis/doctor-inbox") {
-
-            /*if (call.parameters.isEmpty()) {
-                call.respondTemplate("functional-analysis/doctor-inbox.ftl")
-                println("HERERERRIJI")
-            }
-            else {
-                val patientId = call.parameters["id"]!!*/
-
-                //TODO: Get all questionnaires associated with patientId, put them in a list and send them as "questionnaires"
-                //For now hardcoded for testing
-                val questionnaires = mutableListOf(epicCommunication.getQuestionnaire("2641197"))
-
-                println(questionnaires[0].text)
-
-                val data = mapOf("patientId" to "2641197", "questionnaires" to questionnaires)
-                call.respondTemplate("functional-analysis/doctor-inbox.ftl", data)
-            //}
-        }
-
-        //functional analysis  | Helseplattformen questionnaire
-        //Called when doctor opens a questionnaire
-        get("functional-analysis/doctor-inbox/Questionnaire/{questionnaireId}/_history/1") {
-            val questionnaireId: String = call.parameters["questionnaireId"]!!
-
-            val data = mapOf("questionnaire" to epicCommunication.getQuestionnaire(questionnaireId))
-
-            call.respondTemplate("functional-analysis/questionnaireResponse.ftl", data)
-        }
-
-        //functional analysis | Helseplattformen questionnaire response
-        //Called when doctor response to a questionnaire with a questionnaire response
-        post("functional-analysis/createQuestionnaireResponse/Questionnaire/{questionnaireId}/_history/1") {
-            val questionnaireId: String = call.parameters["questionnaireId"]!!
-            val params = call.receiveParameters()
-            val answerList = mutableListOf<String>()
-
-            println("Creating qr...")
-            println("PARAMETERS ${params}")
-
-            //BAHHH frick it, will do it like this for now
-            answerList.add(params["answer1"]!!)
-            answerList.add(params["answer2"]!!)
-            //answerList.add(params["answer3"]!!)
-
-            epicCommunication.createQuestionnaireResponse(epicCommunication.getQuestionnaire(questionnaireId), answerList)
-            call.respondRedirect("/functional-analysis/doctor-inbox")
-        }
     }
 }

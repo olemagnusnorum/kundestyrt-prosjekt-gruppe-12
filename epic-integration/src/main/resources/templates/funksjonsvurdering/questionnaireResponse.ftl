@@ -8,7 +8,7 @@
 <div>
     <h1>Questionnaire fra NAV</h1>
 
-    <form action="/functional-analysis/createQuestionnaireResponse/${questionnaire.id}" method="post">
+    <form action="/funksjonsvurdering/createQuestionnaireResponse/${questionnaire.id}" method="post">
         <#list questionnaire.item as question>
             <p> ${question.text} </p>
             <input type="text" name="answer${question.linkId}">
