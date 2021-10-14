@@ -8,6 +8,7 @@ import io.ktor.server.netty.*
 import freemarker.cache.ClassTemplateLoader
 import io.ktor.application.*
 import io.ktor.client.call.*
+import io.ktor.client.statement.*
 import io.ktor.features.*
 import io.ktor.freemarker.*
 import io.ktor.serialization.*
@@ -18,7 +19,10 @@ import kotlinx.serialization.json.Json
 
 fun main() {
     val epicCommunication = EpicCommunication()
-    runBlocking { epicCommunication.searchQuestionnaireResponse("1160885") }
+    val qrString: String = runBlocking { epicCommunication.readQuestionnaireResponse("2644277") }
+    val qr = epicCommunication.parseQuestionnaireResponseStringToObject(qrString.toString())
+    println(qr.item[0].text)
+    println(qr.item[1].text)
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", watchPaths = listOf("classes", "resources")) {
         install(ContentNegotiation){
             json(Json {
