@@ -10,14 +10,19 @@ fun Application.routingFunksjonsvurdering() {
 
     routing {
 
+        // Landing page - navigation
         get("/funksjonsvurdering") {
             call.respondTemplate("funksjonsvurdering/index.ftl")
         }
 
-        //dummy epic server endpoint
-        get("/funksjonsvurdering/sometest") {
-            val epicResponse = "Aight her gjør vi funksjonsvurderingsting-"
-            call.respondText(epicResponse)
+        // Nav landing page
+        get("/funksjonsvurdering/nav") {
+            call.respondTemplate("funksjonsvurdering/nav.ftl")
+        }
+
+        // Doctor landing page
+        get("/funksjonsvurdering/doctor") {
+            call.respondTemplate("funksjonsvurdering/doctor.ftl")
         }
 
     }

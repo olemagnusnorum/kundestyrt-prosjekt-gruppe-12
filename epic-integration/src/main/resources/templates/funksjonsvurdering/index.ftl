@@ -7,9 +7,9 @@
 <div>
     <h3>Navigasjonsside - Demo Funksjonsvurdering</h3>
     <br>
-    <a href="/templates/funksjonsvurdering/doctor">Gå til legesiden.</a>
+    <a href="/funksjonsvurdering/doctor">Gå til legesiden.</a>
     <br>
-    <a href="/templates/funksjonsvurdering/nav">Gå til NAVs side</a>
+    <a href="/funksjonsvurdering/nav">Gå til NAVs side</a>
 </div>
 </body>
 </html>
