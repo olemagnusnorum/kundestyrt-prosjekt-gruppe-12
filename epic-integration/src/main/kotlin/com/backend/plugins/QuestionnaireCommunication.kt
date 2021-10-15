@@ -191,7 +191,7 @@ class QuestionnaireCommunication(server: String = "public") {
         for (item in questionnaireResponse.item) {
             listOfQuestions.add(item.answer[0].valueCoding.code)
         }
-        return listOfQuestions
+        return listOfAnswers
     }
 
 }
