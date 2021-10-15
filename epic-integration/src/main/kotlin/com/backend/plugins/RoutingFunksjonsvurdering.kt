@@ -6,11 +6,13 @@ import io.ktor.freemarker.*
 import io.ktor.request.*
 import io.ktor.response.*
 import kotlinx.coroutines.runBlocking
+import org.hl7.fhir.r4.model.Questionnaire
 
 
 fun Application.funksjonsvurderingRoute() {
 
     val questionnaireCommunication = QuestionnaireCommunication()
+    val questionnaireResponseCommunication = QuestionnaireResponseCommunication()
 
     routing {
 
@@ -86,6 +88,7 @@ fun Application.funksjonsvurderingRoute() {
         //Called when doctor response to a questionnaire with a questionnaire response
         post("funksjonsvurdering/createQuestionnaireResponse/Questionnaire/{questionnaireId}/_history/1") {
             val questionnaireId: String = call.parameters["questionnaireId"]!!
+            val questionnaire: Questionnaire = questionnaireCommunication.getQuestionnaire(questionnaireId)
             val params = call.receiveParameters()
             val answerList = mutableListOf<String>()
 
@@ -97,7 +100,7 @@ fun Application.funksjonsvurderingRoute() {
             answerList.add(params["answer2"]!!)
             //answerList.add(params["answer3"]!!)
 
-            questionnaireCommunication.createQuestionnaireResponse(questionnaireCommunication.getQuestionnaire(questionnaireId), answerList)
+            questionnaireResponseCommunication.createQuestionnaireResponse(questionnaire, answerList)
             call.respondRedirect("/funksjonsvurdering/doctor-inbox")
         }
 
@@ -126,11 +129,11 @@ fun Application.funksjonsvurderingRoute() {
 
             // Extract questionnaire and questionnaireResponse
             val questionnaire = questionnaireCommunication.getQuestionnaire(questionnaireID)
-            val questionnaireResponse = questionnaireCommunication.getQuestionnaireResponse(questionnaireResponseID)
+            val questionnaireResponse = questionnaireResponseCommunication.getQuestionnaireResponse(questionnaireResponseID)
 
             // Extract questions and answers
             val questions = questionnaireCommunication.getQuestionnaireQuestions(questionnaire)
-            val answers = questionnaireCommunication.getQuestionnaireAnswers(questionnaireResponse)
+            val answers = questionnaireResponseCommunication.getQuestionnaireAnswers(questionnaireResponse)
 
             // Map data so we can display it on the Front end
             val data = mapOf("questions" to questions, "answers" to answers)
