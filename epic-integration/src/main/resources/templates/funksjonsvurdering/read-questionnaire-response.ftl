@@ -9,7 +9,7 @@
     <h1>Questionaire-response from Doctor</h1>
 
     <#list questions as question>
-        <p> Question ${question?index} : ${question} </p>
+        <p> Question ${question?index+1} : ${question} </p>
         <p> Answer: ${answers[question?index]} </p>
         <br>
     </#list>
