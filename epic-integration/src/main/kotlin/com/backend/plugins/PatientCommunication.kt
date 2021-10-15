@@ -46,7 +46,6 @@ class PatientCommunication(server: String = "public") {
 
             }
 
-        println(response.receive<String>())
         return jsonParser.parseResource(Patient::class.java, response.receive<String>())
     }
 
@@ -134,10 +133,8 @@ class PatientCommunication(server: String = "public") {
             body = patientJson
         }
         val responseString = response.receive<String>()
-        println("HEADERS: ${response.headers}")
 
         if (response.headers["Location"] != null) {
-            println(response.headers["Location"])
             latestPatientId = response.headers["Location"]!!.split("/")[5]
             conditionCommunication.latestConditionId = null
             patientCreated = true

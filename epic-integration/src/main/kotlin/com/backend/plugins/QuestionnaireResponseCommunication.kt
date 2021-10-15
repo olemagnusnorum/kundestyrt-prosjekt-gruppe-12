@@ -34,7 +34,7 @@ class QuestionnaireResponseCommunication(server: String = "public") {
      * @param questionnaire Questionnaire the response is related to
      * @return http response, not QuestionnaireResponse
      */
-    suspend fun createQuestionnaireResponse(questionnaire: Questionnaire, questionsList: MutableList<String>, patientId: String = "13"): HttpResponse {
+    suspend fun createQuestionnaireResponse(questionnaire: Questionnaire, questionsList: MutableList<String>, patientId: String = "2559067"): HttpResponse {
 
         // Create empty template
         val questionnaireResponse = QuestionnaireResponse()
@@ -66,24 +66,25 @@ class QuestionnaireResponseCommunication(server: String = "public") {
 
         questionnaireResponse.item = item
 
-        if (inbox[patientId]?.isEmpty() == false) {
-            inbox[patientId]?.add(questionnaireResponse)
-        }
-        else {
-            inbox[patientId] = mutableListOf(questionnaireResponse)
-            inbox[patientId]?.add(questionnaireResponse)
-        }
-
-
-        println(jsonParser.setPrettyPrint(true).encodeResourceToString(questionnaireResponse))
-
         //post the questionnaireResponse to the server
         val response: HttpResponse = client.post("$baseURL/QuestionnaireResponse"){
             contentType(ContentType.Application.Json)
             body = jsonParser.encodeResourceToString(questionnaireResponse)
         }
 
-        println(response.headers["Location"])
+        if (response.headers["Location"] != null) {
+            var responseId = response.headers["Location"]!!.split("/")[5]
+
+            val newQuestionnaireResponse = getQuestionnaireResponse(responseId)
+
+            if (inbox.containsKey(patientId)) {
+                inbox[patientId]?.add(newQuestionnaireResponse)
+            }
+            else {
+                var newList = mutableListOf<QuestionnaireResponse>(newQuestionnaireResponse)
+                inbox[patientId] = newList
+            }
+        }
 
         return response
     }

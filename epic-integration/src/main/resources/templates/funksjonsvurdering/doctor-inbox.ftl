@@ -8,13 +8,12 @@
 <div>
     <h1>Lege</h1>
 
-    <#if patientId??>
+    <#if patient??>
 
-        <h3>${patient.name[0].family}</h3>
-        <br>
+        <h3>Pasient: ${patient.name[0].given[0]} ${patient.name[0].family}</h3>
 
         <h3>Innboks</h3>
-        <#if questionnaireResponses??>
+        <#if questionnaires??>
             <#list questionnaires as questionnaire>
                 <a href="/funksjonsvurdering/doctor-inbox/${questionnaire.id}"> ${questionnaire.title} </a>
             </#list>
@@ -32,6 +31,7 @@
 
     </#if>
 
+    <br>
     <br>
     <br>
     <a href="/">Gå tilbake til navigasjonsiden.</a>

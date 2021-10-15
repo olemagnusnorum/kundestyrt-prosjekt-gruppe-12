@@ -38,7 +38,7 @@ class QuestionnaireCommunication(server: String = "public") {
      * the "Register questionnaire" button you receive the params to send in.
      * @return id of the created questionnaire or "EMPTY" if a questionnaire was not created.
      */
-    suspend fun createQuestionnaire(questions: Parameters, patientId: String = "13"): String{
+    suspend fun createQuestionnaire(questions: Parameters, patientId: String = "2559067"): String{
 
         val questionnaire = Questionnaire()
 
@@ -62,7 +62,6 @@ class QuestionnaireCommunication(server: String = "public") {
             number++
             var item = Questionnaire.QuestionnaireItemComponent()
             item.setLinkId(number.toString())
-            println(question[0])
             item.setText(question[0])
             item.setType(Questionnaire.QuestionnaireItemType.STRING)
             items.add(item)
@@ -80,13 +79,6 @@ class QuestionnaireCommunication(server: String = "public") {
 
         val questionnaireJson = jsonParser.encodeResourceToString(questionnaire)
 
-        if (inbox[patientId]?.isEmpty() == false) {
-            inbox[patientId]?.add(questionnaire)
-        }
-        else {
-            inbox[patientId] = mutableListOf(questionnaire)
-            inbox[patientId]?.add(questionnaire)
-        }
 
         //post the questionnaire to the server
         val response: HttpResponse = client.post("$baseURL/Questionnaire"){
@@ -96,11 +88,20 @@ class QuestionnaireCommunication(server: String = "public") {
         }
 
         val responseString = response.receive<String>()
-        println("HEADERS: ${response.headers}")
 
         if (response.headers["Location"] != null) {
-            println(response.headers["Location"])
             var responseId = response.headers["Location"]!!.split("/")[5]
+
+            val newQuestionnaire = getQuestionnaire(responseId)
+
+            if (inbox.containsKey(patientId)) {
+                inbox[patientId]?.add(newQuestionnaire)
+            }
+            else {
+                var newList = mutableListOf<Questionnaire>(newQuestionnaire)
+                inbox[patientId] = newList
+            }
+
             return responseId
         }
 

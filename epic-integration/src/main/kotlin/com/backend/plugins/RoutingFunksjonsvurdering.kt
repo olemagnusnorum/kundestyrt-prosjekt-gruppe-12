@@ -35,13 +35,20 @@ fun Application.funksjonsvurderingRoute() {
             val patientId = call.receiveParameters()["patientId"]!!
             val patient = patientCommunication.readPatient(patientId)
 
-            //TODO: Get all questionnaires associated with patientId, put them in a list and send them as "questionnaires"
-            //For now hardcoded for testing
             val questionnaireResponses = questionnaireResponseCommunication.inbox[patientId]
+            val questionnaires = questionnaireCommunication.inbox[patientId]
 
-            //testing 2559067
+//            Alternative way of doing it if we want to remove questionnaire from inbox after doctor has answered it.
+//
+//            val questionnaireTitles = mutableListOf<String>()
+//
+//            if (questionnaireResponses != null) {
+//                for (questionnaireResponse in questionnaireResponses) {
+//                    questionnaireTitles.add(questionnaireCommunication.getQuestionnaire(questionnaireResponse.questionnaire.substringAfter("/")).title)
+//                }
+//            }
 
-            val data = mapOf("patient" to patient, "questionnaireResponses" to questionnaireResponses)
+            val data = mapOf("patient" to patient, "questionnaireResponses" to questionnaireResponses, "questionnaires" to questionnaires)
             call.respondTemplate("funksjonsvurdering/nav.ftl", data)
         }
 
@@ -52,10 +59,8 @@ fun Application.funksjonsvurderingRoute() {
             val questionnaireResponseId: String = call.parameters["questionnaireResponseId"]!!
             val questionnaireResponse = questionnaireResponseCommunication.getQuestionnaireResponse(questionnaireResponseId)
 
-            println(questionnaireResponse.questionnaire)
-
             //Getting questionnaire
-            val questionnaire = questionnaireCommunication.getQuestionnaire(questionnaireResponse.questionnaire)
+            val questionnaire = questionnaireCommunication.getQuestionnaire(questionnaireResponse.questionnaire.substringAfter(("/")))
 
             // Extract questions and answers
             val questions = questionnaireCommunication.getQuestionnaireQuestions(questionnaire)
@@ -80,15 +85,10 @@ fun Application.funksjonsvurderingRoute() {
             //testing inbox function
 
             navInbox.addToInbox("Questionnaire", jsonResponse)
-            call.respondTemplate("create-questionnaire-confirmation.ftl", data)
+            call.respondTemplate("funksjonsvurdering/create-questionnaire-confirmation.ftl", data)
         }
 
         //––––––––––––––––– Doctor –––––––––––––––––
-
-        // Doctor landing page, is not currently used
-        get("/funksjonsvurdering/doctor") {
-            call.respondTemplate("funksjonsvurdering/doctor.ftl")
-        }
 
         // Doctor choose patient page
         get("/funksjonsvurdering/doctor-inbox") {
@@ -100,15 +100,11 @@ fun Application.funksjonsvurderingRoute() {
         post("/funksjonsvurdering/doctor-inbox") {
 
             val patientId: String = call.receiveParameters()["patientId"]!!
+            val patient = patientCommunication.readPatient(patientId)
 
-            //TODO: Get all questionnaires associated with patientId, put them in a list and send them as "questionnaires"
-            //For now hardcoded for testing
-            println(questionnaireCommunication.inbox[patientId])
+            val questionnaires = questionnaireCommunication.inbox[patientId]
 
-            //Should be gotten from inbox: questionnaireCommunication.inbox[patientId]
-            val questionnaires = mutableListOf(questionnaireCommunication.getQuestionnaire("2645039"))
-
-            val data = mapOf("patientId" to patientId, "questionnaires" to questionnaires)
+            val data = mapOf("patient" to patient, "questionnaires" to questionnaires)
             call.respondTemplate("funksjonsvurdering/doctor-inbox.ftl", data)
         }
 
@@ -118,7 +114,7 @@ fun Application.funksjonsvurderingRoute() {
 
             val data = mapOf("questionnaire" to questionnaireCommunication.getQuestionnaire(questionnaireId))
 
-            call.respondTemplate("funksjonsvurdering/questionnaireResponse.ftl", data)
+            call.respondTemplate("funksjonsvurdering/create-questionnaire-response.ftl", data)
         }
 
         // Doctor create questionnaireResponse

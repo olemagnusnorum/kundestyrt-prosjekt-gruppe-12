@@ -150,7 +150,6 @@ class ConditionCommunication(server: String = "public") {
         )
 
         val conditionJson = jsonParser.encodeResourceToString(condition)
-        println(conditionJson)
 
         // Post the condition to epic
         val response: HttpResponse = client.post("$baseURL/Condition") {
@@ -160,7 +159,6 @@ class ConditionCommunication(server: String = "public") {
         }
 
         if (response.headers["Location"] != null) {
-            println(response.headers["Location"])
             latestConditionId = response.headers["Location"]!!.split("/")[5]
         }
 
