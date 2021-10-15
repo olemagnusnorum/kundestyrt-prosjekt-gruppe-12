@@ -8,6 +8,7 @@ import io.ktor.server.netty.*
 import freemarker.cache.ClassTemplateLoader
 import io.ktor.application.*
 import io.ktor.client.call.*
+import io.ktor.client.statement.*
 import io.ktor.features.*
 import io.ktor.freemarker.*
 import io.ktor.serialization.*

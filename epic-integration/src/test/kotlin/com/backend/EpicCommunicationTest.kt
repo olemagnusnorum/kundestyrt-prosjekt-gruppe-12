@@ -1,7 +1,6 @@
 package com.backend
 
 import com.backend.plugins.ConditionCommunication
-import com.backend.plugins.EpicCommunication
 import com.backend.plugins.PatientCommunication
 import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.Condition

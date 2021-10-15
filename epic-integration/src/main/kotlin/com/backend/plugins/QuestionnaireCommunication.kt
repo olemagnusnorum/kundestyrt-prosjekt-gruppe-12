@@ -1,32 +1,31 @@
 package com.backend.plugins
-
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.client.call.*
 import io.ktor.http.Parameters
+import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.*
 import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter.ofPattern
+import java.time.format.DateTimeFormatter
 import java.util.*
 
-class EpicCommunication(server: String = "public") {
+class QuestionnaireCommunication(server: String = "public") {
 
     //the base of the fhir server
     private val baseURL: String = when (server) {
         "public" -> "http://hapi.fhir.org/baseR4"
-        "local" -> "http://localhost:8000/fhir"
+        "local" -> "http://localhost:8000/fhir/"
         else -> throw IllegalArgumentException("server parameter must be either \"public\" or \"local\"")
     }
 
     private val ctx: FhirContext = FhirContext.forR4()
     private val client = HttpClient()
     private val jsonParser: IParser = ctx.newJsonParser()
-
 
     /**
      * Function to create a questionnaire and save the questionnaire to fhir server.
@@ -41,7 +40,7 @@ class EpicCommunication(server: String = "public") {
         val questionnaire = Questionnaire()
 
         // The date is set to the current date
-        val formatter = ofPattern("yyyy-MM-dd")
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         val dateString = LocalDate.now().format(formatter)
         val date = SimpleDateFormat("yyyy-MM-dd").parse(dateString)
 
@@ -97,63 +96,25 @@ class EpicCommunication(server: String = "public") {
         return "EMPTY"
     }
 
-
-    suspend fun getQuestionnaire(questionnaireId: String): Questionnaire {
-        val response: HttpResponse =
-            client.get("$baseURL/Questionnaire/$questionnaireId") {
-            }
-
+    /**
+     * Function to get a Questionnaire resource.
+     * @param id is the id of the Questionnaire to get.
+     * @return QuestionnaireResponse resource
+     */
+    suspend fun getQuestionnaire(id: String, format: String = "json"): Questionnaire {
+        val response: HttpResponse = client.get("$baseURL/Questionnaire/$id?_format=$format") {}
         return jsonParser.parseResource(Questionnaire::class.java, response.receive<String>())
     }
 
     /**
-      * Generates a QuestionnaireResponse to a specific Questionnaire
-     * @param
-     * @param questionnaire Questionnaire the response is related to
-     * @return http response, not QuestionnaireResponse
+     * Finds the Questions of a FHIR Questionnaire object
+     * @return listOfQuestions a list of Strings containing the questions
      */
-    suspend fun createQuestionnaireResponse(questionnaire: Questionnaire, questionsList: MutableList<String>): HttpResponse {
-
-        // Create empty template
-        val questionnaireResponse = QuestionnaireResponse()
-
-        //Link Questionnaire
-        questionnaireResponse.questionnaire = questionnaire.id.substringBeforeLast("/").substringBeforeLast("/")
-
-        //TODO: Link patient. Where to get patient id? Probably send as new parameter
-
-        questionnaireResponse.subject = Reference("Patient/13")
-
-        //Put answers in Item and add them to QR
-        val item = mutableListOf<QuestionnaireResponse.QuestionnaireResponseItemComponent>()
-
-        for (i in 0..questionnaire.item.size-1) {
-
-            item.add(QuestionnaireResponse.QuestionnaireResponseItemComponent())
-            item[i].linkId = questionnaire.item[i].id
-            item[i].text = questionnaire.item[i].text
-
-            val answerComponent = mutableListOf<QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent>()
-            answerComponent.add(QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent())
-            answerComponent[0].value = Coding(
-                "some.system",
-                questionsList[i], questionsList[i])
-
-            item[i].answer = answerComponent
+    fun getQuestionnaireQuestions(questionnaire: Questionnaire) : List<String> {
+        val listOfQuestions: MutableList<String> = mutableListOf()
+        for (item in questionnaire.item) {
+            listOfQuestions.add(item.text)
         }
-
-        questionnaireResponse.item = item
-
-        println(jsonParser.setPrettyPrint(true).encodeResourceToString(questionnaireResponse))
-
-        //post the questionnaireResponse to the server
-        val response: HttpResponse = client.post("$baseURL/QuestionnaireResponse"){
-            contentType(ContentType.Application.Json)
-            body = jsonParser.encodeResourceToString(questionnaireResponse)
-        }
-
-        println(response.headers["Location"])
-
-        return response
+        return listOfQuestions
     }
 }

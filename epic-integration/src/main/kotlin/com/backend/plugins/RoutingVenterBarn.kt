@@ -13,6 +13,9 @@ import kotlinx.serialization.Serializable
 
 fun Application.venterBarnRoute() {
 
+    val questionnaireCommunication = QuestionnaireCommunication()
+
+
     routing {
         route("/venter-barn") {
 
@@ -179,7 +182,7 @@ fun Application.venterBarnRoute() {
                 val question2 = params["question2"]!!
 
 
-                val jsonResponse = runBlocking { epicCommunication.createQuestionnaire(params) }
+                val jsonResponse = runBlocking { questionnaireCommunication.createQuestionnaire(params) }
                 val data = mapOf("response" to jsonResponse)
                 //testing inbox function
 
