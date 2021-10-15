@@ -166,7 +166,6 @@ class QuestionnaireCommunication(server: String = "public") {
      */
     suspend fun getQuestionnaireResponse(id: String, format: String = "json"): QuestionnaireResponse {
         val response: HttpResponse = client.get("$baseURL/QuestionnaireResponse/$id?_format=$format") {}
-        val jsonParser: IParser = ctx.newJsonParser()
         return jsonParser.parseResource(QuestionnaireResponse::class.java, response.receive<String>())
     }
 
