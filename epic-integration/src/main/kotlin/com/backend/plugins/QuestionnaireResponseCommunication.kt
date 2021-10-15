@@ -25,13 +25,16 @@ class QuestionnaireResponseCommunication(server: String = "public") {
     private val client = HttpClient()
     private val jsonParser: IParser = ctx.newJsonParser()
 
+    //{patientId: [questionnaire]}
+    var inbox: MutableMap<String, MutableList<QuestionnaireResponse>> = mutableMapOf()
+
     /**
      * Generates a QuestionnaireResponse to a specific Questionnaire
      * @param
      * @param questionnaire Questionnaire the response is related to
      * @return http response, not QuestionnaireResponse
      */
-    suspend fun createQuestionnaireResponse(questionnaire: Questionnaire, questionsList: MutableList<String>): HttpResponse {
+    suspend fun createQuestionnaireResponse(questionnaire: Questionnaire, questionsList: MutableList<String>, patientId: String = "2559067"): HttpResponse {
 
         // Create empty template
         val questionnaireResponse = QuestionnaireResponse()
@@ -39,9 +42,8 @@ class QuestionnaireResponseCommunication(server: String = "public") {
         //Link Questionnaire
         questionnaireResponse.questionnaire = questionnaire.id.substringBeforeLast("/").substringBeforeLast("/")
 
-        //TODO: Link patient. Where to get patient id? Probably send as new parameter
+        questionnaireResponse.subject = Reference("Patient/$patientId")
 
-        questionnaireResponse.subject = Reference("Patient/13")
 
         //Put answers in Item and add them to QR
         val item = mutableListOf<QuestionnaireResponse.QuestionnaireResponseItemComponent>()
@@ -63,15 +65,25 @@ class QuestionnaireResponseCommunication(server: String = "public") {
 
         questionnaireResponse.item = item
 
-        println(jsonParser.setPrettyPrint(true).encodeResourceToString(questionnaireResponse))
-
         //post the questionnaireResponse to the server
         val response: HttpResponse = client.post("$baseURL/QuestionnaireResponse"){
             contentType(ContentType.Application.Json)
             body = jsonParser.encodeResourceToString(questionnaireResponse)
         }
 
-        println(response.headers["Location"])
+        if (response.headers["Location"] != null) {
+            var responseId = response.headers["Location"]!!.split("/")[5]
+
+            val newQuestionnaireResponse = getQuestionnaireResponse(responseId)
+
+            if (inbox.containsKey(patientId)) {
+                inbox[patientId]?.add(newQuestionnaireResponse)
+            }
+            else {
+                var newList = mutableListOf<QuestionnaireResponse>(newQuestionnaireResponse)
+                inbox[patientId] = newList
+            }
+        }
 
         return response
     }

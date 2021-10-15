@@ -21,7 +21,6 @@ class QuestionnaireResponseCommunicationTest {
         assert(questionnaireResponse is QuestionnaireResponse)
 
         val returnVal = qrc.getQuestionnaireAnswers(questionnaireResponse)
-        println(returnVal)
         assert(returnVal is MutableList<String>)
         assert(returnVal[0] == "fwjnkjefn")
         assert(returnVal[1] == "gknlwfe")

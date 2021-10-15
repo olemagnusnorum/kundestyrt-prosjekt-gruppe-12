@@ -44,8 +44,7 @@ fun Application.personRoute() {
             var data = mapOf<String, String?>("patientId" to null)
 
             if (patientCommunication.patientCreated) {
-                val responsePatient = runBlocking { patientCommunication.readPatient(patientCommunication.latestPatientId, "json").receive<String>() }
-                val patient = patientCommunication.parsePatientStringToObject(responsePatient)
+                val patient = patientCommunication.readPatient(patientCommunication.latestPatientId)
 
                 data = mapOf("patientId" to patientCommunication.latestPatientId, "name" to patient.name[0].family, "pregnancy" to conditionCommunication.latestConditionId)
             }
@@ -87,7 +86,6 @@ fun Application.personRoute() {
             val params = call.receiveParameters()
             println("Received request for sykepenger!")
 
-            // TODO : Inappropriate blocking method call on the backend
             val response: String = patientCommunication.patientSearch("Derrick", "Lin", "1973-06-03")
             val data = mapOf("response" to response)
 
@@ -98,7 +96,6 @@ fun Application.personRoute() {
             val params = call.receiveParameters()
             println("Created sykemelding for Derrick Lin!")
 
-            // TODO : Inappropriate blocking method call on the backend
             val response: String = patientCommunication.patientSearch("Derrick", "Lin", "1973-06-03")
             val data = mapOf("response" to response)
 
@@ -116,8 +113,7 @@ fun Application.personRoute() {
                 }
             }
 
-            val responsePatient = runBlocking { patientCommunication.readPatient(patientId, "json").receive<String>() }
-            val patient = patientCommunication.parsePatientStringToObject(responsePatient)
+            val patient = patientCommunication.readPatient(patientId)
 
             // TODO : Rather compare condition.code == 77386006
             val note = if (condition == null || condition.note.isEmpty()) null else condition.note[0].text
