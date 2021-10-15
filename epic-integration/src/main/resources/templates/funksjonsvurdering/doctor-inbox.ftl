@@ -10,10 +10,17 @@
 
     <#if patientId??>
 
+        <h3>${patient.name[0].family}</h3>
+        <br>
+
         <h3>Innboks</h3>
-        <#list questionnaires as questionnaire>
-            <a href="/funksjonsvurdering/doctor-inbox/${questionnaire.id}"> ${questionnaire.title} </a>
-        </#list>
+        <#if questionnaireResponses??>
+            <#list questionnaires as questionnaire>
+                <a href="/funksjonsvurdering/doctor-inbox/${questionnaire.id}"> ${questionnaire.title} </a>
+            </#list>
+        <#else>
+            <p>Ingen nye meldinger.
+        </#if>
 
     <#else>
 

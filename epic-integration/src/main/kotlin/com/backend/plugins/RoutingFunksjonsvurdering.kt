@@ -13,6 +13,7 @@ fun Application.funksjonsvurderingRoute() {
 
     val questionnaireCommunication = QuestionnaireCommunication()
     val questionnaireResponseCommunication = QuestionnaireResponseCommunication()
+    val patientCommunication = PatientCommunication()
 
     routing {
 
@@ -21,115 +22,40 @@ fun Application.funksjonsvurderingRoute() {
             call.respondTemplate("funksjonsvurdering/index.ftl")
         }
 
-        // Nav landing page
+        //–––––––––––––––––  Nav  –––––––––––––––––
+
+        // Nav choose patient page
         get("/funksjonsvurdering/nav") {
             call.respondTemplate("funksjonsvurdering/nav.ftl")
         }
 
-        // Nav create questionnaire page
-        get("/funksjonsvurdering/create-questionnaire") {
-            call.respondTemplate("funksjonsvurdering/create-questionnaire.ftl")
-        }
+        // Nav landing page after choosing patient
+        post("/funksjonsvurdering/nav") {
 
-        // Create questionnaire
-        post("/funksjonsvurdering/create-questionnaire"){
-            val params = call.receiveParameters()
-
-            val question1 = params["question1"]!!
-            val question2 = params["question2"]!!
-            val question3 = params["question3"]!!
-
-            // Run createQuestionnaire method
-            val jsonResponse = runBlocking { questionnaireCommunication.createQuestionnaire(params) }
-
-            // Pass
-            val data = mapOf("response" to jsonResponse)
-            call.respondTemplate("/funksjonsvurdering/create-questionnaire-confirmation.ftl", data)
-        }
-
-        
-        // Doctor landing page
-        get("/funksjonsvurdering/doctor") {
-            call.respondTemplate("funksjonsvurdering/doctor.ftl")
-        }
-
-        //functional analysis | Helseplattformen inbox
-        //Called when doctor is accessing inbox
-        get("/funksjonsvurdering/doctor-inbox") {
-
-            call.respondTemplate("funksjonsvurdering/doctor-inbox.ftl")
-        }
-
-        post("/funksjonsvurdering/doctor-inbox") {
-
-            val patientId: String = call.receiveParameters()["patientId"]!!
+            val patientId = call.receiveParameters()["patientId"]!!
+            val patient = patientCommunication.readPatient(patientId)
 
             //TODO: Get all questionnaires associated with patientId, put them in a list and send them as "questionnaires"
             //For now hardcoded for testing
-            val questionnaires = mutableListOf(questionnaireCommunication.getQuestionnaire("2641197"))
+            val questionnaireResponses = questionnaireResponseCommunication.inbox[patientId]
 
-            println(questionnaires[0].text)
+            //testing 2559067
 
-            val data = mapOf("patientId" to patientId, "questionnaires" to questionnaires)
-            call.respondTemplate("funksjonsvurdering/doctor-inbox.ftl", data)
+            val data = mapOf("patient" to patient, "questionnaireResponses" to questionnaireResponses)
+            call.respondTemplate("funksjonsvurdering/nav.ftl", data)
         }
 
-        //functional analysis  | Helseplattformen questionnaire
-        //Called when doctor opens a questionnaire
-        get("funksjonsvurdering/doctor-inbox/Questionnaire/{questionnaireId}/_history/1") {
-            val questionnaireId: String = call.parameters["questionnaireId"]!!
+        // Nav choose questionnaireResponse
+        get("/funksjonsvurdering/nav/QuestionnaireResponse/{questionnaireResponseId}/_history/1"){
 
-            val data = mapOf("questionnaire" to questionnaireCommunication.getQuestionnaire(questionnaireId))
+            // Getting questionnaireResponse
+            val questionnaireResponseId: String = call.parameters["questionnaireResponseId"]!!
+            val questionnaireResponse = questionnaireResponseCommunication.getQuestionnaireResponse(questionnaireResponseId)
 
-            call.respondTemplate("funksjonsvurdering/questionnaireResponse.ftl", data)
-        }
+            println(questionnaireResponse.questionnaire)
 
-        //functional analysis | Helseplattformen questionnaire response
-        //Called when doctor response to a questionnaire with a questionnaire response
-        post("funksjonsvurdering/createQuestionnaireResponse/Questionnaire/{questionnaireId}/_history/1") {
-            val questionnaireId: String = call.parameters["questionnaireId"]!!
-            val questionnaire: Questionnaire = questionnaireCommunication.getQuestionnaire(questionnaireId)
-            val params = call.receiveParameters()
-            val answerList = mutableListOf<String>()
-
-            println("Creating qr...")
-            println("PARAMETERS ${params}")
-
-            //BAHHH frick it, will do it like this for now
-            answerList.add(params["answer1"]!!)
-            answerList.add(params["answer2"]!!)
-            //answerList.add(params["answer3"]!!)
-
-            questionnaireResponseCommunication.createQuestionnaireResponse(questionnaire, answerList)
-            call.respondRedirect("/funksjonsvurdering/doctor-inbox")
-        }
-
-        //new questionnaire site
-        post("/create-questionnaire"){
-            val params = call.receiveParameters()
-
-            val question1 = params["question1"]!!
-            val question2 = params["question2"]!!
-
-
-            val jsonResponse = runBlocking { questionnaireCommunication.createQuestionnaire(params) }
-            val data = mapOf("response" to jsonResponse)
-            //testing inbox function
-
-            navInbox.addToInbox("Questionnaire", jsonResponse)
-            call.respondTemplate("create-questionnaire-confirmation.ftl", data)
-        }
-
-        //new questionnaire site
-        get("/funksjonsvurdering/read-questionnaire-response"){
-
-            // Mathis made these
-            val questionnaireID = "2641197"
-            val questionnaireResponseID = "2644277"
-
-            // Extract questionnaire and questionnaireResponse
-            val questionnaire = questionnaireCommunication.getQuestionnaire(questionnaireID)
-            val questionnaireResponse = questionnaireResponseCommunication.getQuestionnaireResponse(questionnaireResponseID)
+            //Getting questionnaire
+            val questionnaire = questionnaireCommunication.getQuestionnaire(questionnaireResponse.questionnaire)
 
             // Extract questions and answers
             val questions = questionnaireCommunication.getQuestionnaireQuestions(questionnaire)
@@ -139,6 +65,75 @@ fun Application.funksjonsvurderingRoute() {
             val data = mapOf("questions" to questions, "answers" to answers)
             call.respondTemplate("/funksjonsvurdering/read-questionnaire-response.ftl", data)
         }
-    }
 
+        // Nav create questionnaire
+        get("/funksjonsvurdering/create-questionnaire") {
+            call.respondTemplate("funksjonsvurdering/create-questionnaire.ftl")
+        }
+
+        // Nav create questionnaire confirmation
+        post("/funksjonsvurdering/create-questionnaire"){
+            val params = call.receiveParameters()
+
+            val jsonResponse = runBlocking { questionnaireCommunication.createQuestionnaire(params) }
+            val data = mapOf("response" to jsonResponse)
+            //testing inbox function
+
+            navInbox.addToInbox("Questionnaire", jsonResponse)
+            call.respondTemplate("create-questionnaire-confirmation.ftl", data)
+        }
+
+        //––––––––––––––––– Doctor –––––––––––––––––
+
+        // Doctor landing page, is not currently used
+        get("/funksjonsvurdering/doctor") {
+            call.respondTemplate("funksjonsvurdering/doctor.ftl")
+        }
+
+        // Doctor choose patient page
+        get("/funksjonsvurdering/doctor-inbox") {
+
+            call.respondTemplate("funksjonsvurdering/doctor-inbox.ftl")
+        }
+
+        // Doctor landing page after choosing patient
+        post("/funksjonsvurdering/doctor-inbox") {
+
+            val patientId: String = call.receiveParameters()["patientId"]!!
+
+            //TODO: Get all questionnaires associated with patientId, put them in a list and send them as "questionnaires"
+            //For now hardcoded for testing
+            println(questionnaireCommunication.inbox[patientId])
+
+            //Should be gotten from inbox: questionnaireCommunication.inbox[patientId]
+            val questionnaires = mutableListOf(questionnaireCommunication.getQuestionnaire("2645039"))
+
+            val data = mapOf("patientId" to patientId, "questionnaires" to questionnaires)
+            call.respondTemplate("funksjonsvurdering/doctor-inbox.ftl", data)
+        }
+
+        // Doctor choose questionnaire
+        get("funksjonsvurdering/doctor-inbox/Questionnaire/{questionnaireId}/_history/1") {
+            val questionnaireId: String = call.parameters["questionnaireId"]!!
+
+            val data = mapOf("questionnaire" to questionnaireCommunication.getQuestionnaire(questionnaireId))
+
+            call.respondTemplate("funksjonsvurdering/questionnaireResponse.ftl", data)
+        }
+
+        // Doctor create questionnaireResponse
+        post("funksjonsvurdering/createQuestionnaireResponse/Questionnaire/{questionnaireId}/_history/1") {
+            val questionnaireId: String = call.parameters["questionnaireId"]!!
+            val questionnaire: Questionnaire = questionnaireCommunication.getQuestionnaire(questionnaireId)
+            val params = call.receiveParameters()
+            val answerList = mutableListOf<String>()
+
+            answerList.add(params["answer1"]!!)
+            answerList.add(params["answer2"]!!)
+            answerList.add(params["answer3"]!!)
+
+            questionnaireResponseCommunication.createQuestionnaireResponse(questionnaire, answerList)
+            call.respondRedirect("/funksjonsvurdering/doctor-inbox")
+        }
+    }
 }

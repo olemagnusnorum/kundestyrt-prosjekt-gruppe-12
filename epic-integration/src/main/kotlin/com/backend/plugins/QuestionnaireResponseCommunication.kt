@@ -25,13 +25,16 @@ class QuestionnaireResponseCommunication(server: String = "public") {
     private val client = HttpClient()
     private val jsonParser: IParser = ctx.newJsonParser()
 
+    //{patientId: [questionnaire]}
+    var inbox: MutableMap<String, MutableList<QuestionnaireResponse>> = mutableMapOf()
+
     /**
      * Generates a QuestionnaireResponse to a specific Questionnaire
      * @param
      * @param questionnaire Questionnaire the response is related to
      * @return http response, not QuestionnaireResponse
      */
-    suspend fun createQuestionnaireResponse(questionnaire: Questionnaire, questionsList: MutableList<String>): HttpResponse {
+    suspend fun createQuestionnaireResponse(questionnaire: Questionnaire, questionsList: MutableList<String>, patientId: String = "13"): HttpResponse {
 
         // Create empty template
         val questionnaireResponse = QuestionnaireResponse()
@@ -40,8 +43,8 @@ class QuestionnaireResponseCommunication(server: String = "public") {
         questionnaireResponse.questionnaire = questionnaire.id.substringBeforeLast("/").substringBeforeLast("/")
 
         //TODO: Link patient. Where to get patient id? Probably send as new parameter
+        questionnaireResponse.subject = Reference("Patient/$patientId")
 
-        questionnaireResponse.subject = Reference("Patient/13")
 
         //Put answers in Item and add them to QR
         val item = mutableListOf<QuestionnaireResponse.QuestionnaireResponseItemComponent>()
@@ -62,6 +65,15 @@ class QuestionnaireResponseCommunication(server: String = "public") {
         }
 
         questionnaireResponse.item = item
+
+        if (inbox[patientId]?.isEmpty() == false) {
+            inbox[patientId]?.add(questionnaireResponse)
+        }
+        else {
+            inbox[patientId] = mutableListOf(questionnaireResponse)
+            inbox[patientId]?.add(questionnaireResponse)
+        }
+
 
         println(jsonParser.setPrettyPrint(true).encodeResourceToString(questionnaireResponse))
 

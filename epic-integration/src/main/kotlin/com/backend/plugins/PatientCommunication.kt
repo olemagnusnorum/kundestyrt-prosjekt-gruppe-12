@@ -32,21 +32,22 @@ class PatientCommunication(server: String = "public") {
 
     /**
      * Makes an HTTP response request to the epic server at fhir.epic.com
-     * Returns a HttpResponse object containing the patient resource.
+     * Returns a Patient object
      * As default the format returned is JSON (but XML can be returned by setting format to = "xml")
      * Birthdate format yyyy-mm-dd
      *
      * @property[patientId] the id of the patient resource
-     * @property[outputFormat] the requested response format. Either "json" or "xml"
      */
-    suspend fun readPatient(patientId: String, outputFormat: String = "json"): HttpResponse {
+    suspend fun readPatient(patientId: String): Patient {
         val response: HttpResponse =
             client.get(baseURL + "/Patient/" +
                     patientId +
-                    "?_format=$outputFormat") {
+                    "?_format=json") {
 
             }
-        return response.receive()
+
+        println(response.receive<String>())
+        return jsonParser.parseResource(Patient::class.java, response.receive<String>())
     }
 
     // Functions for search

@@ -27,6 +27,9 @@ class QuestionnaireCommunication(server: String = "public") {
     private val client = HttpClient()
     private val jsonParser: IParser = ctx.newJsonParser()
 
+    //{patientId: [questionnaire]}
+    var inbox: MutableMap<String, MutableList<Questionnaire>> = mutableMapOf()
+
     /**
      * Function to create a questionnaire and save the questionnaire to fhir server.
      * In the future, this function should take in parameters, for the
@@ -35,7 +38,7 @@ class QuestionnaireCommunication(server: String = "public") {
      * the "Register questionnaire" button you receive the params to send in.
      * @return id of the created questionnaire or "EMPTY" if a questionnaire was not created.
      */
-    suspend fun createQuestionnaire(questions: Parameters): String{
+    suspend fun createQuestionnaire(questions: Parameters, patientId: String = "13"): String{
 
         val questionnaire = Questionnaire()
 
@@ -76,6 +79,14 @@ class QuestionnaireCommunication(server: String = "public") {
         questionnaire.setIdentifier(mutableListOf(identifier))
 
         val questionnaireJson = jsonParser.encodeResourceToString(questionnaire)
+
+        if (inbox[patientId]?.isEmpty() == false) {
+            inbox[patientId]?.add(questionnaire)
+        }
+        else {
+            inbox[patientId] = mutableListOf(questionnaire)
+            inbox[patientId]?.add(questionnaire)
+        }
 
         //post the questionnaire to the server
         val response: HttpResponse = client.post("$baseURL/Questionnaire"){
