@@ -146,26 +146,7 @@ fun Application.personRoute() {
             call.respondRedirect("/doctor")
         }
 
-        //new questionnaire site
-        post("/create-questionnaire"){
-            val params = call.receiveParameters()
 
-            val question1 = params["question1"]!!
-            val question2 = params["question2"]!!
-
-
-            val jsonResponse = runBlocking { epicCommunication.createQuestionnaire(params) }
-            val data = mapOf("response" to jsonResponse)
-            //testing inbox function
-
-            navInbox.addToInbox("Questionnaire", jsonResponse)
-            call.respondTemplate("create-questionnaire-confirmation.ftl", data)
-        }
-
-        //new questionnaire site
-        get("/questionnaire"){
-            call.respondTemplate("/questionnaire.ftl")
-        }
 
         //new inbox site for nav
         get("/nav-inbox"){
