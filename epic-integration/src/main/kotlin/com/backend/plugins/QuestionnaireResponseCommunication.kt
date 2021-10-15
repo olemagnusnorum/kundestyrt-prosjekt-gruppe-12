@@ -42,7 +42,6 @@ class QuestionnaireResponseCommunication(server: String = "public") {
         //Link Questionnaire
         questionnaireResponse.questionnaire = questionnaire.id.substringBeforeLast("/").substringBeforeLast("/")
 
-        //TODO: Link patient. Where to get patient id? Probably send as new parameter
         questionnaireResponse.subject = Reference("Patient/$patientId")
 
 

@@ -86,7 +86,6 @@ fun Application.personRoute() {
             val params = call.receiveParameters()
             println("Received request for sykepenger!")
 
-            // TODO : Inappropriate blocking method call on the backend
             val response: String = patientCommunication.patientSearch("Derrick", "Lin", "1973-06-03")
             val data = mapOf("response" to response)
 
@@ -97,7 +96,6 @@ fun Application.personRoute() {
             val params = call.receiveParameters()
             println("Created sykemelding for Derrick Lin!")
 
-            // TODO : Inappropriate blocking method call on the backend
             val response: String = patientCommunication.patientSearch("Derrick", "Lin", "1973-06-03")
             val data = mapOf("response" to response)
 
