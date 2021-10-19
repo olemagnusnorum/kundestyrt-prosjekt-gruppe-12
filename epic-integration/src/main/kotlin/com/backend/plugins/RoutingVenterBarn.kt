@@ -3,10 +3,12 @@ package com.backend.plugins
 import io.ktor.routing.*
 import io.ktor.application.*
 import io.ktor.client.call.*
+import io.ktor.client.statement.*
 import io.ktor.freemarker.*
 import io.ktor.response.*
 import io.ktor.request.*
 import io.ktor.util.*
+import io.netty.handler.codec.http.HttpResponseStatus
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 
@@ -83,6 +85,14 @@ fun Application.venterBarnRoute() {
                 call.respondRedirect("/venter-barn/doctor")
             }
 
+            //fhir subscription endpoint for pregnancy subscription
+            put("/pregnancy-subscription/{...}"){
+                //this function should check if it is an update on pregnancy or a new pregnancy condition
+                val body = call.receive<String>()
+                println("message received")
+                println(body)
+                call.respond(HttpResponseStatus.CREATED)
+            }
             ///
             // OLD
             ///
