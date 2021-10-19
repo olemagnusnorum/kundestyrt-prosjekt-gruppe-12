@@ -43,14 +43,20 @@ class SubscriptionCommunication(server: String = "public") {
         return response
     }
 
-    fun createPregnancySubscription(): HttpResponse {
-        val response = runBlocking {
-            createSubscription(
-                reason = "Listen for new and updated pregnancy conditions",
-                criteria = "Condition?code=77386006",
-                endpoint = "venter-barn/pregnancy-subscription"
-            )
-        }
-        return response
+    suspend fun createPregnancySubscription(): HttpResponse {
+        return createSubscription(
+            reason = "Listen for new and updated pregnancy conditions",
+            criteria = "Condition?code=77386006",
+            endpoint = "venter-barn/pregnancy-subscription"
+        )
+    }
+
+    suspend fun searchSubscription(status: String = "active", criteria: String): HttpResponse {
+        return client.get(
+            "$baseURL/Subscription?" +
+                    "criteria=$criteria&" +
+                    "status=$status&" +
+                    "_format=json"
+        )
     }
 }

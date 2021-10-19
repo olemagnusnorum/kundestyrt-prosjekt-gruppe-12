@@ -61,6 +61,10 @@ fun createDefaultPatient() {
 fun createSubscriptions() {
     val subscriptionCommunication = SubscriptionCommunication("local") // Vet ikke helt om denne skal ligge her, men kommer ikke på noe bedre sted
     // TODO: check if subscription resource already exists
+    val pregnancySubscriptionSearch = runBlocking {
+        subscriptionCommunication.searchSubscription(criteria="Condition?code=77386006").receive<String>()
+    }
+    println(pregnancySubscriptionSearch)
 
-    subscriptionCommunication.createPregnancySubscription()
+    // subscriptionCommunication.createPregnancySubscription()
 }
