@@ -81,7 +81,7 @@ class SubscriptionCommunication(server: String = "public") {
     }
 
     /**
-     * Checks if required subscription resources exist in the HAPI server and crreates the if necessary
+     * Checks if required subscription resources exist in the HAPI server and creates them if necessary
      */
     fun createDefaultSubscriptions() {
         val pregnancySubscriptionSearch = runBlocking {
