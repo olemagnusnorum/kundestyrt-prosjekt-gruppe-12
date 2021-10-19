@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
+val subscriptionCommunication = SubscriptionCommunication("local")
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", watchPaths = listOf("classes", "resources")) {
@@ -35,7 +36,8 @@ fun main() {
         funksjonsvurderingRoute()
 
         // Create required subscriptions if they do not exist
-        createSubscriptions()
+        // Commented out because the switch to local HAPI servers has not been made yet
+        // subscriptionCommunication.createDefaultSubscriptions()
 
         // Create a default patient
         createDefaultPatient()
@@ -58,13 +60,3 @@ fun createDefaultPatient() {
     }
 }
 
-fun createSubscriptions() {
-    val subscriptionCommunication = SubscriptionCommunication("local") // Vet ikke helt om denne skal ligge her, men kommer ikke på noe bedre sted
-    // TODO: check if subscription resource already exists
-    val pregnancySubscriptionSearch = runBlocking {
-        subscriptionCommunication.searchSubscription(criteria="Condition?code=77386006").receive<String>()
-    }
-    println(pregnancySubscriptionSearch)
-
-    // subscriptionCommunication.createPregnancySubscription()
-}
