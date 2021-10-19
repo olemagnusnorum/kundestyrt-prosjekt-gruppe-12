@@ -59,12 +59,17 @@ class QuestionnaireCommunication(server: String = "public") {
         var items = mutableListOf<Questionnaire.QuestionnaireItemComponent>()
 
         questions.forEach { t, question ->
-            number++
-            var item = Questionnaire.QuestionnaireItemComponent()
-            item.setLinkId(number.toString())
-            item.setText(question[0])
-            item.setType(Questionnaire.QuestionnaireItemType.STRING)
-            items.add(item)
+            if (t == "patientId") {
+                null
+            }
+            else {
+                number++
+                var item = Questionnaire.QuestionnaireItemComponent()
+                item.setLinkId(number.toString())
+                item.setText(question[0])
+                item.setType(Questionnaire.QuestionnaireItemType.STRING)
+                items.add(item)
+            }
         }
 
         questionnaire.setItem(items)
@@ -74,7 +79,7 @@ class QuestionnaireCommunication(server: String = "public") {
         // TODO: figure out how to search for a questionnaire, this might not work
         val identifier = Identifier()
         val uuid = UUID.randomUUID().toString()
-        identifier.setValue("$uuid/1244780")
+        identifier.setValue("$uuid/$patientId")
         questionnaire.setIdentifier(mutableListOf(identifier))
 
         val questionnaireJson = jsonParser.encodeResourceToString(questionnaire)
