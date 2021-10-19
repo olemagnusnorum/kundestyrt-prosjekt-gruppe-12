@@ -134,8 +134,8 @@ fun Application.funksjonsvurderingRoute() {
 
             questionnaireResponseCommunication.createQuestionnaireResponse(questionnaire, answerList, patientId)
 
-            //This is where q should be deleted, but need to get patientId
-            questionnaireCommunication.inbox.remove(patientId)
+            //This is where q should be deleted
+            questionnaireCommunication.inbox[patientId]?.removeAll {it.id == questionnaire.id}
 
             call.respondRedirect("/funksjonsvurdering/doctor-inbox")
         }
