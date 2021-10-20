@@ -14,6 +14,7 @@
             <input name="question1" type="text" placeholder="Question 1"><br><br>
             <input name="question2" type="text" placeholder="Question 2"><br><br>
             <input name="question3" type="text" placeholder="Question 3"><br><br>
+            <input hidden name="patientId" type="text" value="${patientId}">
             <input type="submit" value="Registrer questionnaire">
         </form>
     </#if>

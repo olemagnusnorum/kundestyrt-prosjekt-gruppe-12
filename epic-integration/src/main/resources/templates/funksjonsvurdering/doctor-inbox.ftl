@@ -16,6 +16,7 @@
         <#if questionnaires??>
             <#list questionnaires as questionnaire>
                 <a href="/funksjonsvurdering/doctor-inbox/${questionnaire.id}"> ${questionnaire.title} </a>
+                <br>
             </#list>
         <#else>
             <p>Ingen nye meldinger.

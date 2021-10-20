@@ -11,11 +11,12 @@
     <#if patient??>
 
         <h3>Pasient: ${patient.name[0].given[0]} ${patient.name[0].family}</h3>
-        <a href="/funksjonsvurdering/create-questionnaire">Lag et questionnaire som skal sendes til Legen.</a>
+        <a href="/funksjonsvurdering/create-questionnaire/${patient.id}">Lag et questionnaire som skal sendes til Legen.</a>
         <h3>Innboks</h3>
         <#if questionnaireResponses??>
             <#list questionnaireResponses as questionnaireResponse>
-                <a href="/funksjonsvurdering/nav/${questionnaireResponse.id}"> ${questionnaires[questionnaireResponse?index].title} </a>
+                <a href="/funksjonsvurdering/nav/${questionnaireResponse.id}"> ${questionnaireTitles[questionnaireResponse?index]} </a>
+                <br>
             </#list>
         <#else>
             <p>Ingen nye meldinger.
