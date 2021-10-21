@@ -71,8 +71,6 @@ fun Application.venterBarnRoute() {
                     return@runBlocking null
                 }
 
-                println(null)
-
                 val note = condition?.note?.get(0)?.text
                 val abatement = condition?.abatement
                 val data = mapOf("id" to id, "condition" to condition, "abatement" to abatement, "note" to note)
@@ -87,13 +85,9 @@ fun Application.venterBarnRoute() {
                 val abatementDate: String = params["abatementDate"]!!
                 val patient = runBlocking { patientCommunication.parseBundleXMLToPatient(patientCommunication.patientSearch(identifier = id), isXML = false) }
                 if (patient != null) {
-                    val condition = runBlocking {
-                        if (conditionCommunication.latestConditionId != null) {
-                            conditionCommunication.getCondition(conditionCommunication.latestConditionId!!)
-                        } else {
-                            val responseCondition = conditionCommunication.searchCondition(patient.idElement.idPart, "json").receive<String>()
-                            conditionCommunication.parseConditionBundleStringToObject(responseCondition)
-                        }
+                    val condition: Condition? = runBlocking {
+                        val responseCondition = conditionCommunication.searchCondition(patient.idElement.idPart, "json").receive<String>()
+                        conditionCommunication.parseConditionBundleStringToObject(responseCondition)
                     }
 
                     // Make sure that the patient doesn't already have a registered pregnancy

@@ -53,7 +53,6 @@ class ConditionCommunication(server: String = "public") {
     suspend fun searchCondition(patientId: String, outputFormat: String, code: String? = null): HttpResponse {
         val response: HttpResponse =
             client.get(baseURL + "/Condition?patient=$patientId&" +
-                    "category=problem-list-item&" +
                     (if (code != null) "_include=$code&" else "") +
                     "_format=$outputFormat") {
             }
