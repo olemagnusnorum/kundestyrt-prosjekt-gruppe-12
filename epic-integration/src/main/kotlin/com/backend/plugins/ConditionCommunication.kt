@@ -182,4 +182,8 @@ class ConditionCommunication(server: String = "public") {
 
         return null
     }
+
+    fun parseConditionsStringToObject(jsonMessage: String): Condition {
+        return jsonParser.parseResource(Condition::class.java, jsonMessage)
+    }
 }
