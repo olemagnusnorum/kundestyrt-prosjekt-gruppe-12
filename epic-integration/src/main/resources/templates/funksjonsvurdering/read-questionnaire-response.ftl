@@ -16,7 +16,8 @@
 
     <br>
     <br>
-    <a href="/funksjonsvurdering/create-questionnaire/${patientId}">Lag et nytt questionnaire som skal sendes til Legen.</a>
+    <a href="/funksjonsvurdering/create-questionnaire/Patient/${patientId}/_history/1">Lag et nytt questionnaire som skal sendes til Legen.</a>
+    <br>
     <a href="/funksjonsvurdering/nav">Gå tilbake til NAVs side</a>
 </div>
 </body>
