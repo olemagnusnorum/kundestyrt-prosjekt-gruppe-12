@@ -15,8 +15,8 @@ import org.hl7.fhir.r4.model.Questionnaire
 @Serializable
 data class Person(val firstName: String?, val lastName: String?, val age: Int?)
 
-val patientCommunication = PatientCommunication()
-val conditionCommunication = ConditionCommunication()
+val patientCommunication = PatientCommunication("local")
+val conditionCommunication = ConditionCommunication("local")
 
 //inboxes for keeping track of messages
 val navInbox = Inbox()

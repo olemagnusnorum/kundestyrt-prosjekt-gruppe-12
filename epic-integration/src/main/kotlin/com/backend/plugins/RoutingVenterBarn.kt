@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
 
 fun Application.venterBarnRoute() {
 
-    val questionnaireCommunication = QuestionnaireCommunication()
+    val questionnaireCommunication = QuestionnaireCommunication("local")
 
 
     routing {

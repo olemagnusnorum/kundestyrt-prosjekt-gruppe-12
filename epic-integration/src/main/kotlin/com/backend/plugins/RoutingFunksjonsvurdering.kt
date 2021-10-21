@@ -11,9 +11,9 @@ import org.hl7.fhir.r4.model.Questionnaire
 
 fun Application.funksjonsvurderingRoute() {
 
-    val questionnaireCommunication = QuestionnaireCommunication()
-    val questionnaireResponseCommunication = QuestionnaireResponseCommunication()
-    val patientCommunication = PatientCommunication()
+    val questionnaireCommunication = QuestionnaireCommunication("local")
+    val questionnaireResponseCommunication = QuestionnaireResponseCommunication("local")
+    val patientCommunication = PatientCommunication("local")
 
     routing {
 
