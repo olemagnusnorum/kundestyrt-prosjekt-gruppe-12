@@ -11,7 +11,8 @@
 
     <#if condition??>
         <form action="/venter-barn/doctor-form-pregnant-update" method="post">
-            <p>Personnummer: ${id}</p>
+            <p>Personnummer: </p>
+            <input name="id" type="text" placeholder="Personnummer" value="${id}" readonly><br><br>
             <p>Medisinsk beskrivelse:</p>
             <input name="note" type="text" placeholder="Beskrivelse" value="${note!""}"><br><br>
             <p>Abatement Date:</p>

@@ -7,6 +7,7 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import kotlinx.serialization.json.JsonObject
 import org.hl7.fhir.r4.model.*
 import org.hl7.fhir.r4.model.Annotation
 
@@ -164,6 +165,23 @@ class ConditionCommunication(server: String = "public") {
         }
 
         return response
+    }
+
+    /**
+     * Function to patch note and abatementDate of a condition
+     * @param conditionId is a reference to a Condition resource (the id field in a Condition)
+     * @param note is a free text comment
+     * @param abatementDate is the date the condition ends/ended on the format "YYYY-MM-DD"
+     * Guide: https://fhirblog.com/2019/08/13/updating-a-resource-using-patch/
+     */
+    suspend fun updateCondition(conditionId: String, note: String, abatementDate: String) {
+        val conditionPatch = "[{ \"op\": \"replace\", \"path\": \"/note/0\", \"value\": { \"text\": \"$note\" } }," +
+                             " { \"op\": \"replace\", \"path\": \"/abatementDateTime\", \"value\": \"$abatementDate\" }]"
+
+        val response: HttpResponse = client.patch("$baseURL/Condition/$conditionId") {
+            contentType(ContentType("application", "json-patch+json"))
+            body = conditionPatch
+        }
     }
 
     // Functions for parsing

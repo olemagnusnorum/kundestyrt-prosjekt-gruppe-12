@@ -100,6 +100,27 @@ fun Application.venterBarnRoute() {
                 call.respondRedirect("/venter-barn/doctor")
             }
 
+            post("/doctor-form-pregnant-update") {
+                val params = call.receiveParameters()
+                val id = params["id"]!!
+                val note: String = params["note"]!!
+                val abatementDate: String = params["abatementDate"]!!
+                val patient = runBlocking { patientCommunication.parseBundleXMLToPatient(patientCommunication.patientSearch(identifier = id), isXML = false) }
+                if (patient != null) {
+                    val condition: Condition? = runBlocking {
+                        val responseCondition = conditionCommunication.searchCondition(patient.idElement.idPart, "json").receive<String>()
+                        conditionCommunication.parseConditionBundleStringToObject(responseCondition)
+                    }
+
+                    // Make sure that the condition exists
+                    if (condition != null) {
+                        conditionCommunication.updateCondition(conditionId = condition.idElement.idPart, note = note, abatementDate = abatementDate)
+                    }
+                }
+
+                call.respondRedirect("/venter-barn/doctor")
+            }
+
             //fhir subscription endpoint for pregnancy subscription
             put("/pregnancy-subscription/{...}"){
                 //this function should check if it is an update on pregnancy or a new pregnancy condition
