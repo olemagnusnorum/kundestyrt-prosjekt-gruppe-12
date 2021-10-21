@@ -71,8 +71,8 @@ class SubscriptionCommunication(server: String = "public") {
     suspend fun createQuestionnaireSubscription(): HttpResponse {
         return createSubscription(
                 reason = "Listen for new and updated questionnaires",
-                criteria = "Questionnaire",
-                endpoint = "funksjonsvurdering/questionnaire-subscription/{...}"
+                criteria = "Questionnaire?status=active",
+                endpoint = "funksjonsvurdering/questionnaire-subscription"
         )
     }
 
@@ -83,8 +83,8 @@ class SubscriptionCommunication(server: String = "public") {
     suspend fun createQuestionnaireResponseSubscription(): HttpResponse {
         return createSubscription(
                 reason = "Listen for new and updated questionnaireResponses",
-                criteria = "QuestionnaireResponse",
-                endpoint = "funksjonsvurdering/questionnaire-subscription/{...}"
+                criteria = "QuestionnaireResponse?",
+                endpoint = "funksjonsvurdering/questionnaireResponse-subscription"
         )
     }
 
@@ -120,7 +120,7 @@ class SubscriptionCommunication(server: String = "public") {
         }
 
         val questionnaireSubscriptionSearch = runBlocking {
-            searchSubscription(criteria="Questionnaire").receive<String>()
+            searchSubscription(criteria="Questionnaire?status=active").receive<String>()
         }
 
         if(jsonParser.parseResource(Bundle::class.java, questionnaireSubscriptionSearch).total > 0) {
@@ -131,7 +131,7 @@ class SubscriptionCommunication(server: String = "public") {
         }
 
         val questionnaireResponseSubscriptionSearch = runBlocking {
-            searchSubscription(criteria="QuestionnaireResponse").receive<String>()
+            searchSubscription(criteria="QuestionnaireResponse?").receive<String>()
         }
 
         if(jsonParser.parseResource(Bundle::class.java, questionnaireResponseSubscriptionSearch).total > 0) {
