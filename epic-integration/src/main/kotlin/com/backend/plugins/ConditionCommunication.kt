@@ -51,10 +51,11 @@ class ConditionCommunication(server: String = "public") {
      * @param [code] searchable condition code (for e.g. Pregnancy: 77386006)
      * @return an http response
      */
-    suspend fun searchCondition(patientId: String, outputFormat: String, code: String? = null): HttpResponse {
+    suspend fun searchCondition(patientId: String, outputFormat: String, code: String? = null, clinicalStatus: String? = "active"): HttpResponse {
         val response: HttpResponse =
             client.get(baseURL + "/Condition?patient=$patientId&" +
                     (if (code != null) "_include=$code&" else "") +
+                    (if (code != null) "clinical-status=$clinicalStatus" else "") +
                     "_format=$outputFormat") {
             }
         return response

@@ -25,6 +25,9 @@
             <input name="id" type="text" placeholder="Personnummer"><br><br>
             <input type="submit" value="Finn pasient">
         </form>
+        <#if error??>
+            <p>${error}</p>
+        </#if>
     </#if>
     <br>
     <br>
