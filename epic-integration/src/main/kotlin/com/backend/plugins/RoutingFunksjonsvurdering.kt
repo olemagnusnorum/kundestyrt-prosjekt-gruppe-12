@@ -2,6 +2,7 @@ package com.backend.plugins
 
 import io.ktor.routing.*
 import io.ktor.application.*
+import io.ktor.client.call.*
 import io.ktor.freemarker.*
 import io.ktor.request.*
 import io.ktor.response.*

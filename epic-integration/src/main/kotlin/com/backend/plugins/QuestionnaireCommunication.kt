@@ -76,7 +76,6 @@ class QuestionnaireCommunication(server: String = "public") {
 
         // Set the identifier. Should be on the format UUID/patientID.
         // This allows us to connect a questionnaire to a patient.
-        // TODO: figure out how to search for a questionnaire, this might not work
         val identifier = Identifier()
         val uuid = UUID.randomUUID().toString()
         identifier.setValue("$uuid/$patientId")
