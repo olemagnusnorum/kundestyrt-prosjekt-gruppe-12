@@ -17,6 +17,7 @@ fun Application.venterBarnRoute() {
 
     val questionnaireCommunication = QuestionnaireCommunication("local")
 
+    val navPregnancyMap: MutableMap<String, String> = mutableMapOf()
 
     routing {
         route("/venter-barn") {
@@ -87,12 +88,22 @@ fun Application.venterBarnRoute() {
 
             //fhir subscription endpoint for pregnancy subscription
             put("/pregnancy-subscription/{...}"){
-                //this function should check if it is an update on pregnancy or a new pregnancy condition
+                //this endpoint listens for new pregnancy subscriptions and adds the personnummer and abatement time to a map
                 val body = call.receive<String>()
-                println("message received")
-                println(body)
+                val condition = conditionCommunication.parseConditionsStringToObject(body)
+
+                val patient = patientCommunication.readPatient(condition.subject.reference.split("/")[1])
+
+                navPregnancyMap[patient.identifier[0].value] = condition.abatement.toString().replace("DateTimeType[", "").replace("]", "")
+
                 call.respond(HttpResponseStatus.CREATED)
             }
+
+            get("/nav") {
+                val data = mapOf("data" to navPregnancyMap)
+                call.respondTemplate("venterBarn/nav.ftl")
+            }
+
             ///
             // OLD
             ///
@@ -110,10 +121,6 @@ fun Application.venterBarnRoute() {
 
             get("/nav-derrick-lin") {
                 call.respondTemplate("venterBarn/nav-derrick-lin.ftl")
-            }
-
-            get("/nav") {
-                call.respondTemplate("venterBarn/nav.ftl")
             }
 
             get("/messages-from-nav") {
