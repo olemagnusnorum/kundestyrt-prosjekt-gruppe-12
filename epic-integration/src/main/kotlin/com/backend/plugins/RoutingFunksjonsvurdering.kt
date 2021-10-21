@@ -5,6 +5,7 @@ import io.ktor.application.*
 import io.ktor.freemarker.*
 import io.ktor.request.*
 import io.ktor.response.*
+import io.netty.handler.codec.http.HttpResponseStatus
 import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.Questionnaire
 
@@ -20,6 +21,23 @@ fun Application.funksjonsvurderingRoute() {
         // Landing page - navigation
         get("/funksjonsvurdering") {
             call.respondTemplate("funksjonsvurdering/index.ftl")
+        }
+
+        //fhir subscription endpoint for questionnaire subscription
+        put("funksjonsvurdering/questionnaire-subscription/{...}"){
+            val body = call.receive<String>()
+            println("message received")
+            println(body)
+            questionnaireCommunication.addToInbox(body)
+            call.respond(HttpResponseStatus.CREATED)
+        }
+        //fhir subscription endpoint for questionnaire subscription
+        put("funksjonsvurdering/questionnaireResponse-subscription/{...}"){
+            val body = call.receive<String>()
+            println("message received")
+            println(body)
+            questionnaireResponseCommunication.addToInbox(body)
+            call.respond(HttpResponseStatus.CREATED)
         }
 
         //–––––––––––––––––  Nav  –––––––––––––––––

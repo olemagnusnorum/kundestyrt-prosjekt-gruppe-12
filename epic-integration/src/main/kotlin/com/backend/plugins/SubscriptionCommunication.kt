@@ -94,5 +94,28 @@ class SubscriptionCommunication(server: String = "public") {
             val response = runBlocking { createPregnancySubscription() }
             println("Pregnancy subscription creation status code: ${response.status}")
         }
+
+        val questionnaireSubscriptionSearch = runBlocking {
+            searchSubscription(criteria="Questionnaire").receive<String>()
+        }
+
+        if(jsonParser.parseResource(Bundle::class.java, questionnaireSubscriptionSearch).total > 0) {
+            println("Questionnaire subscription already exists")
+        } else {
+            val response = runBlocking { createQuestionnaireSubscription() }
+            println("Questionnaire subscription creation status code: ${response.status}")
+        }
+
+        val questionnaireResponseSubscriptionSearch = runBlocking {
+            searchSubscription(criteria="QuestionnaireResponse").receive<String>()
+        }
+
+        if(jsonParser.parseResource(Bundle::class.java, questionnaireResponseSubscriptionSearch).total > 0) {
+            println("QuestionnaireResponse subscription already exists")
+        } else {
+            val response = runBlocking { createQuestionnaireResponseSubscription() }
+            println("QuestionnaireResponse subscription creation status code: ${response.status}")
+        }
+
     }
 }

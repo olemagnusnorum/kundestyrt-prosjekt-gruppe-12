@@ -38,6 +38,7 @@ fun main() {
         // Create required subscriptions if they do not exist
         subscriptionCommunication.createDefaultSubscriptions()
 
+
         // Create a default patient
         createDefaultPatient()
     }.start(wait = true)

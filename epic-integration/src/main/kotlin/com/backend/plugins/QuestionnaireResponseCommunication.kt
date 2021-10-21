@@ -71,20 +71,6 @@ class QuestionnaireResponseCommunication(server: String = "public") {
             body = jsonParser.encodeResourceToString(questionnaireResponse)
         }
 
-        if (response.headers["Location"] != null) {
-            var responseId = response.headers["Location"]!!.split("/")[5]
-
-            val newQuestionnaireResponse = getQuestionnaireResponse(responseId)
-
-            if (inbox.containsKey(patientId)) {
-                inbox[patientId]?.add(newQuestionnaireResponse)
-            }
-            else {
-                var newList = mutableListOf<QuestionnaireResponse>(newQuestionnaireResponse)
-                inbox[patientId] = newList
-            }
-        }
-
         return response
     }
 
@@ -108,5 +94,21 @@ class QuestionnaireResponseCommunication(server: String = "public") {
             listOfAnswers.add(item.answer[0].valueCoding.code)
         }
         return listOfAnswers
+    }
+
+    /**
+     * Add questionnaireResponse to local inbox when it arrives via subscription
+     */
+    fun addToInbox(json: String) {
+        val questionnaireResponse = jsonParser.parseResource(QuestionnaireResponse::class.java, json)
+        val patientId = questionnaireResponse.subject.reference.substringAfter("/")
+
+        if (inbox.containsKey(patientId)) {
+            inbox[patientId]?.add(questionnaireResponse)
+        }
+        else {
+            var newList = mutableListOf<QuestionnaireResponse>(questionnaireResponse)
+            inbox[patientId] = newList
+        }
     }
 }
