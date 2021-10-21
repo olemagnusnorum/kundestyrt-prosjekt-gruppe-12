@@ -11,6 +11,7 @@ import io.ktor.util.*
 import io.netty.handler.codec.http.HttpResponseStatus
 import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.Condition
+import org.hl7.fhir.r4.model.Patient
 
 
 fun Application.venterBarnRoute() {
@@ -32,17 +33,14 @@ fun Application.venterBarnRoute() {
             get("/patient") {
                 val id = call.parameters["id"]!!
 
-                val patient = runBlocking {
+                val patient: Patient? = runBlocking {
                     val patientResponse = patientCommunication.patientSearch(identifier = id)
-                    patientCommunication.parseBundleXMLToPatient(patientResponse, isXML = false)
+                    return@runBlocking patientCommunication.parseBundleXMLToPatient(patientResponse, isXML = false)
                 }
-                val condition = runBlocking {
-                    if (conditionCommunication.latestConditionId != null) {
-                        conditionCommunication.getCondition(conditionCommunication.latestConditionId!!)
-                    } else {
-                        val responseCondition = conditionCommunication.searchCondition(patient!!.idElement.idPart, "json").receive<String>()
-                        conditionCommunication.parseConditionBundleStringToObject(responseCondition)
-                    }
+                val condition: Condition? = if (patient == null) null else runBlocking {
+                    val responseCondition = conditionCommunication.searchCondition(patient.idElement.idPart, "json").receive<String>()
+                    println(responseCondition)
+                    return@runBlocking conditionCommunication.parseConditionBundleStringToObject(responseCondition)
                 }
                 val note = if (condition == null || condition.note.isEmpty()) null else condition.note[0].text
                 val patientName = if (patient == null) "no patient found" else patient.name[0].nameAsSingleString
