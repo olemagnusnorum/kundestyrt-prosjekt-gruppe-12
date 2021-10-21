@@ -83,8 +83,11 @@ fun Application.funksjonsvurderingRoute() {
             val questions = questionnaireCommunication.getQuestionnaireQuestions(questionnaire)
             val answers = questionnaireResponseCommunication.getQuestionnaireAnswers(questionnaireResponse)
 
+            // Getting patient
+            val patientId = questionnaireResponse.subject.reference.substringAfter("/")
+
             // Map data so we can display it on the Front end
-            val data = mapOf("questions" to questions, "answers" to answers)
+            val data = mapOf("questions" to questions, "answers" to answers, "patientId" to patientId)
             call.respondTemplate("/funksjonsvurdering/read-questionnaire-response.ftl", data)
         }
 
