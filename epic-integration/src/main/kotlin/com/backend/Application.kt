@@ -36,8 +36,7 @@ fun main() {
         funksjonsvurderingRoute()
 
         // Create required subscriptions if they do not exist
-        // Commented out because the switch to local HAPI servers has not been made yet
-        // subscriptionCommunication.createDefaultSubscriptions()
+        subscriptionCommunication.createDefaultSubscriptions()
 
         // Create a default patient
         createDefaultPatient()

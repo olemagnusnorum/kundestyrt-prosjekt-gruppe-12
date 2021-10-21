@@ -12,7 +12,7 @@ import kotlin.test.*
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class QuestionnaireResponseCommunicationTest {
 
-    private val qrc = QuestionnaireResponseCommunication()
+    private val qrc = QuestionnaireResponseCommunication("local")
 
     @Test
     fun `getQuestionnaireAnswers should return a list of strings`() {
