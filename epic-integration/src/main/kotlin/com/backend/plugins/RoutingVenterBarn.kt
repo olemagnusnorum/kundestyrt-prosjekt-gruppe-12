@@ -10,7 +10,7 @@ import io.ktor.request.*
 import io.ktor.util.*
 import io.netty.handler.codec.http.HttpResponseStatus
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.Serializable
+import org.hl7.fhir.r4.model.Condition
 
 
 fun Application.venterBarnRoute() {
@@ -57,6 +57,28 @@ fun Application.venterBarnRoute() {
 
             get("/doctor-form-pregnant") {
                 call.respondTemplate("venterBarn/doctor-form-pregnant.ftl")
+            }
+
+            get("/doctor-form-pregnant-update") {
+                val id = call.parameters["id"]
+                val condition: Condition? = if (id == null) null else runBlocking {
+                    val patient = patientCommunication.parseBundleXMLToPatient(patientCommunication.patientSearch(identifier = id), isXML = false)
+                    if (patient != null) {
+                        return@runBlocking conditionCommunication.parseConditionBundleStringToObject(conditionCommunication.searchCondition(
+                            patientId = patient.idElement.idPart,
+                            outputFormat = "json",
+                            code = "77386006"  // 77386006 is the code for Pregnancy
+                        ).receive())
+                    }
+                    return@runBlocking null
+                }
+
+                println(null)
+
+                val note = condition?.note?.get(0)?.text
+                val abatement = condition?.abatement
+                val data = mapOf("id" to id, "condition" to condition, "abatement" to abatement, "note" to note)
+                call.respondTemplate("venterBarn/doctor-form-pregnant-update.ftl", data)
             }
 
             post("/doctor-form-pregnant") {

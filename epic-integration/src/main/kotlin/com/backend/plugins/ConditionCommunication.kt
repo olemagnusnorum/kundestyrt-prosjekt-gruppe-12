@@ -47,13 +47,15 @@ class ConditionCommunication(server: String = "public") {
      * Function to search for one or more condition resource(s).
      * @param patientId is the id of the patient who has the condition
      * @param outputFormat is either "json" or "xml"
+     * @param [code] searchable condition code (for e.g. Pregnancy: 77386006)
      * @return an http response
      */
-    suspend fun searchCondition(patientId: String, outputFormat: String): HttpResponse {
+    suspend fun searchCondition(patientId: String, outputFormat: String, code: String? = null): HttpResponse {
         val response: HttpResponse =
-            client.get(baseURL + "/Condition?patient=$patientId" +
-                    "&category=problem-list-item" +
-                    "&_format=$outputFormat") {
+            client.get(baseURL + "/Condition?patient=$patientId&" +
+                    "category=problem-list-item&" +
+                    (if (code != null) "_include=$code&" else "") +
+                    "_format=$outputFormat") {
             }
         return response
     }
