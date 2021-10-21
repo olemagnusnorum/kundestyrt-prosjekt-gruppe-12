@@ -11,9 +11,9 @@ import org.hl7.fhir.r4.model.Questionnaire
 
 fun Application.funksjonsvurderingRoute() {
 
-    val questionnaireCommunication = QuestionnaireCommunication()
-    val questionnaireResponseCommunication = QuestionnaireResponseCommunication()
-    val patientCommunication = PatientCommunication()
+    val questionnaireCommunication = QuestionnaireCommunication("local")
+    val questionnaireResponseCommunication = QuestionnaireResponseCommunication("local")
+    val patientCommunication = PatientCommunication("local")
 
     routing {
 
@@ -36,19 +36,17 @@ fun Application.funksjonsvurderingRoute() {
             val patient = patientCommunication.readPatient(patientId)
 
             val questionnaireResponses = questionnaireResponseCommunication.inbox[patientId]
-            val questionnaires = questionnaireCommunication.inbox[patientId]
 
-//            Alternative way of doing it if we want to remove questionnaire from inbox after doctor has answered it.
-//
-//            val questionnaireTitles = mutableListOf<String>()
-//
-//            if (questionnaireResponses != null) {
-//                for (questionnaireResponse in questionnaireResponses) {
-//                    questionnaireTitles.add(questionnaireCommunication.getQuestionnaire(questionnaireResponse.questionnaire.substringAfter("/")).title)
-//                }
-//            }
+            // Getting questionnaire titles as they are not in questionnaireResponses
+            val questionnaireTitles = mutableListOf<String>()
 
-            val data = mapOf("patient" to patient, "questionnaireResponses" to questionnaireResponses, "questionnaires" to questionnaires)
+            if (questionnaireResponses != null) {
+                for (questionnaireResponse in questionnaireResponses) {
+                    questionnaireTitles.add(questionnaireCommunication.getQuestionnaire(questionnaireResponse.questionnaire.substringAfter("/")).title)
+                }
+            }
+
+            val data = mapOf("patient" to patient, "questionnaireResponses" to questionnaireResponses, "questionnaireTitles" to questionnaireTitles)
             call.respondTemplate("funksjonsvurdering/nav.ftl", data)
         }
 
@@ -72,19 +70,23 @@ fun Application.funksjonsvurderingRoute() {
         }
 
         // Nav create questionnaire
-        get("/funksjonsvurdering/create-questionnaire") {
-            call.respondTemplate("funksjonsvurdering/create-questionnaire.ftl")
+        get("/funksjonsvurdering/create-questionnaire/Patient/{patientId}/_history/1") {
+            val patientId: String = call.parameters["patientId"]!!
+
+            val data = mapOf("patientId" to patientId)
+
+            call.respondTemplate("funksjonsvurdering/create-questionnaire.ftl", data)
         }
 
         // Nav create questionnaire confirmation
         post("/funksjonsvurdering/create-questionnaire"){
+
             val params = call.receiveParameters()
+            val patientId: String = params["patientId"]!!
 
-            val jsonResponse = runBlocking { questionnaireCommunication.createQuestionnaire(params) }
+            val jsonResponse = questionnaireCommunication.createQuestionnaire(params, patientId)
             val data = mapOf("response" to jsonResponse)
-            //testing inbox function
 
-            navInbox.addToInbox("Questionnaire", jsonResponse)
             call.respondTemplate("funksjonsvurdering/create-questionnaire-confirmation.ftl", data)
         }
 
@@ -128,7 +130,13 @@ fun Application.funksjonsvurderingRoute() {
             answerList.add(params["answer2"]!!)
             answerList.add(params["answer3"]!!)
 
-            questionnaireResponseCommunication.createQuestionnaireResponse(questionnaire, answerList)
+            val patientId = questionnaire.identifier[0].value.substringAfter("/")
+
+            questionnaireResponseCommunication.createQuestionnaireResponse(questionnaire, answerList, patientId)
+
+            //This is where q should be deleted
+            questionnaireCommunication.inbox[patientId]?.removeAll {it.id == questionnaire.id}
+
             call.respondRedirect("/funksjonsvurdering/doctor-inbox")
         }
     }

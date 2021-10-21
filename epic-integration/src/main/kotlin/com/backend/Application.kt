@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
+val subscriptionCommunication = SubscriptionCommunication("local")
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", watchPaths = listOf("classes", "resources")) {
@@ -33,6 +34,9 @@ fun main() {
         personRoute()
         venterBarnRoute()
         funksjonsvurderingRoute()
+
+        // Create required subscriptions if they do not exist
+        subscriptionCommunication.createDefaultSubscriptions()
 
         // Create a default patient
         createDefaultPatient()
@@ -54,3 +58,4 @@ fun createDefaultPatient() {
         }
     }
 }
+

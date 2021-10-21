@@ -14,8 +14,8 @@ import kotlin.test.*
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EpicCommunicationTest {
 
-    private val conditionCommunication = ConditionCommunication()
-    private val patientCommunication = PatientCommunication()
+    private val conditionCommunication = ConditionCommunication("local")
+    private val patientCommunication = PatientCommunication("local")
 
     @Nested
     inner class PatientSearch {

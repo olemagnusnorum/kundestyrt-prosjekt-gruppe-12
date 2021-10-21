@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.Condition
 
 fun Application.venterBarnRoute() {
 
-    val questionnaireCommunication = QuestionnaireCommunication()
+    val questionnaireCommunication = QuestionnaireCommunication("local")
 
 
     routing {
