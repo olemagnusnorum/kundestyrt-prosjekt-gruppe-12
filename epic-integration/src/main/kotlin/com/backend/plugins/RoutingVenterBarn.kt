@@ -1,17 +1,18 @@
 package com.backend.plugins
 
-import io.ktor.routing.*
 import io.ktor.application.*
 import io.ktor.client.call.*
 import io.ktor.client.statement.*
 import io.ktor.freemarker.*
-import io.ktor.response.*
 import io.ktor.request.*
+import io.ktor.response.*
+import io.ktor.routing.*
 import io.ktor.util.*
 import io.netty.handler.codec.http.HttpResponseStatus
 import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.Condition
 import org.hl7.fhir.r4.model.Patient
+import java.time.format.DateTimeFormatter
 
 
 fun Application.venterBarnRoute() {
@@ -72,7 +73,7 @@ fun Application.venterBarnRoute() {
                 }
 
                 val note = condition?.note?.get(0)?.text
-                val abatement = condition?.abatement
+                val abatement = condition?.abatementDateTimeType?.valueAsString
                 val data = mapOf("id" to id, "condition" to condition, "abatement" to abatement, "note" to note)
                 call.respondTemplate("venterBarn/doctor-form-pregnant-update.ftl", data)
             }
