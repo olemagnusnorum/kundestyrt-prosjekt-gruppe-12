@@ -11,7 +11,6 @@ import io.ktor.util.*
 import io.netty.handler.codec.http.HttpResponseStatus
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
-import java.util.*
 
 
 fun Application.venterBarnRoute() {
@@ -99,6 +98,12 @@ fun Application.venterBarnRoute() {
 
                 call.respond(HttpResponseStatus.CREATED)
             }
+
+            get("/nav") {
+                val data = mapOf("data" to navPregnancyMap)
+                call.respondTemplate("venterBarn/nav.ftl")
+            }
+
             ///
             // OLD
             ///
@@ -116,10 +121,6 @@ fun Application.venterBarnRoute() {
 
             get("/nav-derrick-lin") {
                 call.respondTemplate("venterBarn/nav-derrick-lin.ftl")
-            }
-
-            get("/nav") {
-                call.respondTemplate("venterBarn/nav.ftl")
             }
 
             get("/messages-from-nav") {

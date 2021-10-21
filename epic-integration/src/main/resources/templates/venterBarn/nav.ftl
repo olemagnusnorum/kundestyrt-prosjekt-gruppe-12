@@ -6,18 +6,18 @@
 <body style="text-align: center; font-family: sans-serif">
 <div>
     <h1>NAV</h1>
-    <p>Derrick Lin har søkt om sykepenger.</p>
-    <h3>Be om helseinfo</h3>
-    <input type="text">
-    <form action="/venter-barn/request-health-information-confirmation" method="post">
-        <input type="submit">
-    </form>
-    <h3>Se melding fra lege</h3>
-    <form action="/venter-barn/messages-from-doctor" method="post">
-        <input type="submit">
-    </form>
+    <h3>Personer som er gravide</h3>
     <br>
-    <br>
+    <#if data??>
+        <#list data?keys as key>
+            person ${key}: ${data[key]}
+            <br>
+            <br>
+        </#list>
+    <#else>
+        Ingen gravide personer
+        <br>
+    </#if>
     <a href="/venter-barn">Gå tilbake til navigasjonsiden.</a>
 </div>
 </body>
