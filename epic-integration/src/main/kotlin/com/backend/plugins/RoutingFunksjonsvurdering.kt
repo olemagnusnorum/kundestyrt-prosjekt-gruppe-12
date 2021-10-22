@@ -11,10 +11,9 @@ import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.Questionnaire
 
 
-fun Application.funksjonsvurderingRoute() {
+fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: QuestionnaireResponseCommunication) {
 
     val questionnaireCommunication = QuestionnaireCommunication("local")
-    val questionnaireResponseCommunication = QuestionnaireResponseCommunication("local")
     val patientCommunication = PatientCommunication("local")
 
     routing {

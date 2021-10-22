@@ -5,8 +5,7 @@
 </head>
 <body style="text-align: center; font-family: sans-serif">
 <div>
-    <h3>Du har opprettet en questionnaire</h3>
-    <p>Json questionnaire response: ${response}</p>
+    <h3>Du har opprettet questionnaire ${response}</h3>
     <br>
     <a href="/funksjonsvurdering/nav">Gå tilbake til NAV sin side.</a>
     <br>

@@ -7,10 +7,7 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import org.hl7.fhir.r4.model.Coding
-import org.hl7.fhir.r4.model.Questionnaire
-import org.hl7.fhir.r4.model.QuestionnaireResponse
-import org.hl7.fhir.r4.model.Reference
+import org.hl7.fhir.r4.model.*
 
 class QuestionnaireResponseCommunication(server: String = "public") {
 
@@ -82,6 +79,15 @@ class QuestionnaireResponseCommunication(server: String = "public") {
     suspend fun getQuestionnaireResponse(id: String, format: String = "json"): QuestionnaireResponse {
         val response: HttpResponse = client.get("$baseURL/QuestionnaireResponse/$id?_format=$format") {}
         return jsonParser.parseResource(QuestionnaireResponse::class.java, response.receive<String>())
+    }
+
+    /**
+     * Function to get all QuestionnaireResponses on the server.
+     * @return Bundle resource with QuestionnaireResponses in entry.
+     */
+    suspend fun getAllQuestionnaireResponses(): Bundle {
+        val response: HttpResponse = client.get("$baseURL/QuestionnaireResponse?_format=json") {}
+        return jsonParser.parseResource(Bundle::class.java, response.receive<String>())
     }
 
     /**
