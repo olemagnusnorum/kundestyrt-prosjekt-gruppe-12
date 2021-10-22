@@ -6,10 +6,8 @@ import io.ktor.client.call.*
 import io.ktor.freemarker.*
 import io.ktor.response.*
 import io.ktor.request.*
-import io.ktor.util.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
-import org.hl7.fhir.r4.model.Questionnaire
 
 
 @Serializable

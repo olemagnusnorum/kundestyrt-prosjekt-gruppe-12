@@ -1,23 +1,25 @@
 package com.backend.plugins
 
-import io.ktor.routing.*
 import io.ktor.application.*
 import io.ktor.client.call.*
 import io.ktor.client.statement.*
 import io.ktor.freemarker.*
-import io.ktor.response.*
 import io.ktor.request.*
+import io.ktor.response.*
+import io.ktor.routing.*
 import io.ktor.util.*
 import io.netty.handler.codec.http.HttpResponseStatus
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.Serializable
+import org.hl7.fhir.r4.model.Condition
+import org.hl7.fhir.r4.model.Patient
+import java.time.format.DateTimeFormatter
 
 
 fun Application.venterBarnRoute() {
 
     val questionnaireCommunication = QuestionnaireCommunication("local")
 
-    val navPregnancyMap: MutableMap<String, String> = mutableMapOf()
+    val navPregnancyMap: MutableMap<String, Condition> = mutableMapOf()
 
     routing {
         route("/venter-barn") {
@@ -33,21 +35,19 @@ fun Application.venterBarnRoute() {
             get("/patient") {
                 val id = call.parameters["id"]!!
 
-                val patient = runBlocking {
+                val patient: Patient? = runBlocking {
                     val patientResponse = patientCommunication.patientSearch(identifier = id)
-                    patientCommunication.parseBundleXMLToPatient(patientResponse, isXML = false)
+                    return@runBlocking patientCommunication.parseBundleXMLToPatient(patientResponse, isXML = false)
                 }
-                val condition = runBlocking {
-                    if (conditionCommunication.latestConditionId != null) {
-                        conditionCommunication.getCondition(conditionCommunication.latestConditionId!!)
-                    } else {
-                        val responseCondition = conditionCommunication.searchCondition(patient!!.idElement.idPart, "json").receive<String>()
-                        conditionCommunication.parseConditionBundleStringToObject(responseCondition)
-                    }
-                }
+                // val condition: Condition? = if (patient == null) null else runBlocking {
+                //     val responseCondition = conditionCommunication.searchCondition(patient.idElement.idPart, "json", code="77386006").receive<String>()
+                //     println(responseCondition)
+                //     return@runBlocking conditionCommunication.parseConditionBundleStringToObject(responseCondition)
+                // }
+                val condition: Condition? = navPregnancyMap[id]
                 val note = if (condition == null || condition.note.isEmpty()) null else condition.note[0].text
                 val patientName = if (patient == null) "no patient found" else patient.name[0].nameAsSingleString
-                val data = mapOf("patient" to patient, "condition" to note, "due_date" to (condition?.abatement ?: "Ingen termindato satt"), "name" to patientName)
+                val data = mapOf("patient" to patient, "condition" to note, "due_date" to (condition?.abatement.toString().replace("DateTimeType[", "").replace("]", "") ?: "Ingen termindato satt"), "name" to patientName)
 
                 call.respondTemplate("venterBarn/patient.ftl", data)
             }
@@ -60,6 +60,28 @@ fun Application.venterBarnRoute() {
                 call.respondTemplate("venterBarn/doctor-form-pregnant.ftl")
             }
 
+            get("/doctor-form-pregnant-update") {
+                println("Inside get")
+                val id = call.parameters["id"]
+                val condition: Condition? = if (id == null) null else navPregnancyMap[id]
+                    // runBlocking {
+                    // val patient = patientCommunication.parseBundleXMLToPatient(patientCommunication.patientSearch(identifier = id), isXML = false)
+                    // if (navPregnancyMap.containsKey(id)) {
+                    //     return@runBlocking conditionCommunication.parseConditionBundleStringToObject(conditionCommunication.searchCondition(
+                    //         patientId = id,
+                    //         outputFormat = "json",
+                    //         code = "77386006"  // 77386006 is the code for Pregnancy
+                    //     ).receive())
+                    // }
+                    // return@runBlocking null
+                // }
+
+                val note = condition?.note?.get(0)?.text
+                val abatement = condition?.abatementDateTimeType?.valueAsString
+                val data = mapOf("id" to id, "condition" to condition, "abatement" to abatement, "note" to note)
+                call.respondTemplate("venterBarn/doctor-form-pregnant-update.ftl", data)
+            }
+
             post("/doctor-form-pregnant") {
                 val params = call.receiveParameters()
                 val id = params["id"]!!
@@ -68,19 +90,38 @@ fun Application.venterBarnRoute() {
                 val abatementDate: String = params["abatementDate"]!!
                 val patient = runBlocking { patientCommunication.parseBundleXMLToPatient(patientCommunication.patientSearch(identifier = id), isXML = false) }
                 if (patient != null) {
-                    val condition = runBlocking {
-                        if (conditionCommunication.latestConditionId != null) {
-                            conditionCommunication.getCondition(conditionCommunication.latestConditionId!!)
-                        } else {
-                            val responseCondition = conditionCommunication.searchCondition(patient.idElement.idPart, "json").receive<String>()
-                            conditionCommunication.parseConditionBundleStringToObject(responseCondition)
-                        }
-                    }
 
                     // Make sure that the patient doesn't already have a registered pregnancy
-                    if (condition == null) {
+                    if (!navPregnancyMap.containsKey(id)) {
                         conditionCommunication.createCondition(patient.idElement.idPart, note, onsetDate, abatementDate)
+                    } else {
+                        val data = mutableMapOf("error" to "Personen er allerede gravid")
+                        call.respondTemplate("venterBarn/doctor-form-pregnant.ftl", data)
                     }
+                } else {
+                    println("Patient does not exist")
+                }
+
+                call.respondRedirect("/venter-barn/doctor")
+            }
+
+            post("/doctor-form-pregnant-update") {
+                println("Inside post")
+                val params = call.receiveParameters()
+                val id = params["id"]!!
+                val note: String = params["note"]!!
+                val abatementDate: String = params["abatementDate"]!!
+                val patient = runBlocking { patientCommunication.parseBundleXMLToPatient(patientCommunication.patientSearch(identifier = id), isXML = false) }
+                if (patient != null) {
+                    // val condition: Condition? = runBlocking {
+                    //     val responseCondition = conditionCommunication.searchCondition(patient.idElement.idPart, "json").receive<String>()
+                    //     conditionCommunication.parseConditionBundleStringToObject(responseCondition)
+                    // }
+                    if (navPregnancyMap.containsKey(id)) {
+                        val condition = navPregnancyMap[id]
+                        conditionCommunication.updateCondition(conditionId = condition?.idElement!!.idPart, note = note, abatementDate = abatementDate)
+                    }
+
                 }
 
                 call.respondRedirect("/venter-barn/doctor")
@@ -94,14 +135,18 @@ fun Application.venterBarnRoute() {
 
                 val patient = patientCommunication.readPatient(condition.subject.reference.split("/")[1])
 
-                navPregnancyMap[patient.identifier[0].value] = condition.abatement.toString().replace("DateTimeType[", "").replace("]", "")
+                navPregnancyMap[patient.identifier[0].value] = condition
 
                 call.respond(HttpResponseStatus.CREATED)
             }
 
             get("/nav") {
-                val data = mapOf("data" to navPregnancyMap)
-                call.respondTemplate("venterBarn/nav.ftl")
+                val patientMap: MutableMap<String, String> = mutableMapOf()
+                navPregnancyMap.forEach { t, u ->
+                    patientMap[t] = u.abatement.toString().replace("DateTimeType[", "").replace("]", "")
+                }
+                val data = mapOf("data" to patientMap)
+                call.respondTemplate("venterBarn/nav.ftl", data)
             }
 
             ///

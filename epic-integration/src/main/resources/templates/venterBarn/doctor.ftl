@@ -9,7 +9,8 @@
 <div>
     <h1>Legeside</h1>
     <h3>Tilgjengelige legeskjema</h3>
-    <a href="doctor-form-pregnant">1) Registrer graviditet</a>
+    <a href="doctor-form-pregnant">1) Registrer graviditet</a><br>
+    <a href="doctor-form-pregnant-update">2) Oppdater graviditet</a>
     <br>
     <br>
     <a href="/venter-barn">Gå tilbake til navigasjonsiden.</a>

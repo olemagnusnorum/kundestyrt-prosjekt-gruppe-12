@@ -10,7 +10,7 @@
     <br>
     <#if data??>
         <#list data?keys as key>
-            person ${key}: ${data[key]}
+            Person ${key}: ${data[key]}
             <br>
             <br>
         </#list>

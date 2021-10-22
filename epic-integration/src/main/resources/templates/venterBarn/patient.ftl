@@ -9,7 +9,6 @@
 <div>
     <h1>Pasient Journal</h1>
     <h2>Hei, ${name}!</h2>
-    <h3>Se melding fra NAV</h3>
     <#if condition??>
         <p>${condition}</p>
         <p><b>Termindato:</b> ${due_date}</p>
