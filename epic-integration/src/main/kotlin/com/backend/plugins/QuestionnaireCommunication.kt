@@ -76,7 +76,6 @@ class QuestionnaireCommunication(server: String = "public") {
 
         // Set the identifier. Should be on the format UUID/patientID.
         // This allows us to connect a questionnaire to a patient.
-        // TODO: figure out how to search for a questionnaire, this might not work
         val identifier = Identifier()
         val uuid = UUID.randomUUID().toString()
         identifier.setValue("$uuid/$patientId")
@@ -96,16 +95,6 @@ class QuestionnaireCommunication(server: String = "public") {
 
         if (response.headers["Location"] != null) {
             var responseId = response.headers["Location"]!!.split("/")[5]
-
-            val newQuestionnaire = getQuestionnaire(responseId)
-
-            if (inbox.containsKey(patientId)) {
-                inbox[patientId]?.add(newQuestionnaire)
-            }
-            else {
-                var newList = mutableListOf<Questionnaire>(newQuestionnaire)
-                inbox[patientId] = newList
-            }
 
             return responseId
         }
@@ -133,5 +122,21 @@ class QuestionnaireCommunication(server: String = "public") {
             listOfQuestions.add(item.text)
         }
         return listOfQuestions
+    }
+
+    /**
+     * Add questionnaire to local inbox when it arrives via subscription
+     */
+    fun addToInbox(json: String) {
+        val questionnaire = jsonParser.parseResource(Questionnaire::class.java, json)
+        val patientId = questionnaire.identifier[0].value.substringAfter("/")
+
+        if (inbox.containsKey(patientId)) {
+            inbox[patientId]?.add(questionnaire)
+        }
+        else {
+            var newList = mutableListOf<Questionnaire>(questionnaire)
+            inbox[patientId] = newList
+        }
     }
 }

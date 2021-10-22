@@ -65,6 +65,30 @@ class SubscriptionCommunication(server: String = "public") {
     }
 
     /**
+     * Function to create a subscription that is triggered by questionnaire resources
+     * @return the HttpResponse returned by the HAPI server
+     */
+    suspend fun createQuestionnaireSubscription(): HttpResponse {
+        return createSubscription(
+                reason = "Listen for new and updated questionnaires",
+                criteria = "Questionnaire?status=active",
+                endpoint = "funksjonsvurdering/questionnaire-subscription"
+        )
+    }
+
+    /**
+     * Function to create a subscription that is triggered by questionnaireResponse resources
+     * @return the HttpResponse returned by the HAPI server
+     */
+    suspend fun createQuestionnaireResponseSubscription(): HttpResponse {
+        return createSubscription(
+                reason = "Listen for new and updated questionnaireResponses",
+                criteria = "QuestionnaireResponse?",
+                endpoint = "funksjonsvurdering/questionnaireResponse-subscription"
+        )
+    }
+
+    /**
      * Function to create a subscription resource with channel type rest-hook.
      * @param criteria is the criteria of the subscription resource being searched for
      * @param status is the reason the subscription was created
@@ -94,5 +118,28 @@ class SubscriptionCommunication(server: String = "public") {
             val response = runBlocking { createPregnancySubscription() }
             println("Pregnancy subscription creation status code: ${response.status}")
         }
+
+        val questionnaireSubscriptionSearch = runBlocking {
+            searchSubscription(criteria="Questionnaire?status=active").receive<String>()
+        }
+
+        if(jsonParser.parseResource(Bundle::class.java, questionnaireSubscriptionSearch).total > 0) {
+            println("Questionnaire subscription already exists")
+        } else {
+            val response = runBlocking { createQuestionnaireSubscription() }
+            println("Questionnaire subscription creation status code: ${response.status}")
+        }
+
+        val questionnaireResponseSubscriptionSearch = runBlocking {
+            searchSubscription(criteria="QuestionnaireResponse?").receive<String>()
+        }
+
+        if(jsonParser.parseResource(Bundle::class.java, questionnaireResponseSubscriptionSearch).total > 0) {
+            println("QuestionnaireResponse subscription already exists")
+        } else {
+            val response = runBlocking { createQuestionnaireResponseSubscription() }
+            println("QuestionnaireResponse subscription creation status code: ${response.status}")
+        }
+
     }
 }

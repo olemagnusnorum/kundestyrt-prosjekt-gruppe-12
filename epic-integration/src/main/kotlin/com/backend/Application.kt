@@ -1,5 +1,7 @@
 package com.backend
 
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.parser.IParser
 import com.backend.plugins.*
 
 import io.ktor.server.engine.*
@@ -15,8 +17,10 @@ import io.ktor.serialization.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import org.hl7.fhir.instance.model.api.IBaseResource
 
 val subscriptionCommunication = SubscriptionCommunication("local")
+val questionnaireResponseCommunication = QuestionnaireResponseCommunication("local")
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", watchPaths = listOf("classes", "resources")) {
@@ -33,13 +37,16 @@ fun main() {
 
         personRoute()
         venterBarnRoute()
-        funksjonsvurderingRoute()
+        funksjonsvurderingRoute(questionnaireResponseCommunication)
 
         // Create required subscriptions if they do not exist
         subscriptionCommunication.createDefaultSubscriptions()
 
         // Create a default patient
         createDefaultPatient()
+
+        // Put QRs already in the server in NAV's inbox
+        loadNAVInbox()
     }.start(wait = true)
 }
 
@@ -59,3 +66,13 @@ fun createDefaultPatient() {
     }
 }
 
+fun loadNAVInbox() {
+    val ctx: FhirContext = FhirContext.forR4()
+    val jsonParser: IParser = ctx.newJsonParser()
+    val bundle = runBlocking { questionnaireResponseCommunication.getAllQuestionnaireResponses() }
+    val resources = bundle.entry
+    for (resource in resources) {
+        val final = resource.resource as IBaseResource
+        questionnaireResponseCommunication.addToInbox(jsonParser.encodeResourceToString(final))
+    }
+}

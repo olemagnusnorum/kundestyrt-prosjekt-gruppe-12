@@ -2,17 +2,18 @@ package com.backend.plugins
 
 import io.ktor.routing.*
 import io.ktor.application.*
+import io.ktor.client.call.*
 import io.ktor.freemarker.*
 import io.ktor.request.*
 import io.ktor.response.*
+import io.netty.handler.codec.http.HttpResponseStatus
 import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.Questionnaire
 
 
-fun Application.funksjonsvurderingRoute() {
+fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: QuestionnaireResponseCommunication) {
 
     val questionnaireCommunication = QuestionnaireCommunication("local")
-    val questionnaireResponseCommunication = QuestionnaireResponseCommunication("local")
     val patientCommunication = PatientCommunication("local")
 
     routing {
@@ -20,6 +21,23 @@ fun Application.funksjonsvurderingRoute() {
         // Landing page - navigation
         get("/funksjonsvurdering") {
             call.respondTemplate("funksjonsvurdering/index.ftl")
+        }
+
+        //fhir subscription endpoint for questionnaire subscription
+        put("funksjonsvurdering/questionnaire-subscription/{...}"){
+            val body = call.receive<String>()
+            println("message received")
+            println(body)
+            questionnaireCommunication.addToInbox(body)
+            call.respond(HttpResponseStatus.CREATED)
+        }
+        //fhir subscription endpoint for questionnaire subscription
+        put("funksjonsvurdering/questionnaireResponse-subscription/{...}"){
+            val body = call.receive<String>()
+            println("message received")
+            println(body)
+            questionnaireResponseCommunication.addToInbox(body)
+            call.respond(HttpResponseStatus.CREATED)
         }
 
         //–––––––––––––––––  Nav  –––––––––––––––––
@@ -64,8 +82,11 @@ fun Application.funksjonsvurderingRoute() {
             val questions = questionnaireCommunication.getQuestionnaireQuestions(questionnaire)
             val answers = questionnaireResponseCommunication.getQuestionnaireAnswers(questionnaireResponse)
 
+            // Getting patient
+            val patientId = questionnaireResponse.subject.reference.substringAfter("/")
+
             // Map data so we can display it on the Front end
-            val data = mapOf("questions" to questions, "answers" to answers)
+            val data = mapOf("questions" to questions, "answers" to answers, "patientId" to patientId)
             call.respondTemplate("/funksjonsvurdering/read-questionnaire-response.ftl", data)
         }
 
