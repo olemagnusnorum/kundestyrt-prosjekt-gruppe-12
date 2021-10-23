@@ -6,12 +6,8 @@ import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import org.hl7.fhir.r4.model.Enumerations
-import org.hl7.fhir.r4.model.Questionnaire
 import org.hl7.fhir.r4.model.Reference
 import org.hl7.fhir.r4.model.Task
-import java.time.LocalDateTime
-import java.util.*
 
 class TaskCommunication(server: String = "public") {
 
@@ -26,9 +22,14 @@ class TaskCommunication(server: String = "public") {
     private val client = HttpClient()
     private val jsonParser: IParser = ctx.newJsonParser()
 
-    //{patientId: [questionnaire]}
-    var inbox: MutableMap<String, MutableList<Questionnaire>> = mutableMapOf()
+    private val questionnaireCommunication = QuestionnaireCommunication()
 
+    //{patientId: [questionnaire]}
+    var inbox: MutableMap<String, MutableList<Task>> = mutableMapOf()
+
+    /**
+     * Create task from patient and questionnaire.
+     */
     suspend fun createTask(patientId: String, questionnaireId: String): HttpResponse {
 
         val task = Task()
@@ -53,4 +54,20 @@ class TaskCommunication(server: String = "public") {
         return response
     }
 
+    /**
+     * Add Task to local inbox when it arrives via subscription
+     */
+    fun addToInbox(json: String) {
+        val task = jsonParser.parseResource(Task::class.java, json)
+        val patientId = task.`for`.reference.substringAfter("/")
+
+        if (inbox.containsKey(patientId)) {
+            inbox[patientId]?.add(task)
+        }
+        else {
+            var newList = mutableListOf<Task>(task)
+            inbox[patientId] = newList
+        }
+        println(inbox)
+    }
 }
