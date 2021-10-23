@@ -15,6 +15,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
 
     val questionnaireCommunication = QuestionnaireCommunication("local")
     val patientCommunication = PatientCommunication("local")
+    val taskCommunication = TaskCommunication("local")
 
     routing {
 
@@ -105,8 +106,10 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             val params = call.receiveParameters()
             val patientId: String = params["patientId"]!!
 
-            val jsonResponse = questionnaireCommunication.createQuestionnaire(params, patientId)
-            val data = mapOf("response" to jsonResponse)
+            val questionnaireId = questionnaireCommunication.createQuestionnaire(params, patientId)
+            taskCommunication.createTask(patientId, questionnaireId)
+
+            val data = mapOf("response" to questionnaireId)
 
             call.respondTemplate("funksjonsvurdering/create-questionnaire-confirmation.ftl", data)
         }
