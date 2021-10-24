@@ -26,7 +26,6 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         put("funksjonsvurdering/questionnaire-subscription/{...}"){
             val body = call.receive<String>()
             println("message received")
-            println(body)
             questionnaireCommunication.addToInbox(body)
             call.respond(HttpResponseStatus.CREATED)
         }
@@ -34,7 +33,6 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         put("funksjonsvurdering/questionnaireResponse-subscription/{...}"){
             val body = call.receive<String>()
             println("message received")
-            println(body)
             questionnaireResponseCommunication.addToInbox(body)
             call.respond(HttpResponseStatus.CREATED)
         }
@@ -42,7 +40,6 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         put("funksjonsvurdering/task-subscription/{...}"){
             val body = call.receive<String>()
             println("message received")
-            println(body)
             taskCommunication.addToInbox(body)
             call.respond(HttpResponseStatus.CREATED)
         }
@@ -71,7 +68,11 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
                 }
             }
 
-            val data = mapOf("patient" to patient, "questionnaireResponses" to questionnaireResponses, "questionnaireTitles" to questionnaireTitles)
+            val data = mapOf("patient" to patient,
+                    "questionnaireResponses" to questionnaireResponses,
+                    "questionnaireTitles" to questionnaireTitles,
+                    "predefinedQuestionnaires" to questionnaireCommunication.predefinedQuestionnaires)
+
             call.respondTemplate("funksjonsvurdering/nav.ftl", data)
         }
 
@@ -113,6 +114,20 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             val patientId: String = params["patientId"]!!
 
             val questionnaireId = questionnaireCommunication.createQuestionnaire(params, patientId)
+            taskCommunication.createTask(patientId, questionnaireId)  //Should trigger subscription
+
+            val data = mapOf("response" to questionnaireId)
+
+            call.respondTemplate("funksjonsvurdering/create-questionnaire-confirmation.ftl", data)
+        }
+
+        // NAV send predefined questionnaire
+        post("/funksjonsvurdering/create-predefined-questionnaire") {
+
+            val params = call.receiveParameters()
+            val patientId: String = params["patientId"]!!.substringAfter("/")
+            val questionnaireId: String = params["questionnaireId"]!!.substringAfter("/")
+
             taskCommunication.createTask(patientId, questionnaireId)  //Should trigger subscription
 
             val data = mapOf("response" to questionnaireId)

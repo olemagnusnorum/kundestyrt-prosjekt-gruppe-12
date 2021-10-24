@@ -12,6 +12,7 @@
 
         <h3>Pasient: ${patient.name[0].given[0]} ${patient.name[0].family}</h3>
         <a href="/funksjonsvurdering/create-questionnaire/${patient.id}">Lag et questionnaire som skal sendes til Legen.</a>
+
         <h3>Innboks</h3>
         <#if questionnaireResponses??>
             <#list questionnaireResponses as questionnaireResponse>
@@ -20,7 +21,24 @@
             </#list>
         <#else>
             <p>Ingen nye meldinger.
+            <br>
         </#if>
+
+        <br>
+
+        <h3>Send forhåndslagde spørsmål</h3>
+        <#list predefinedQuestionnaires as questionnaire>
+            <form action="/funksjonsvurdering/create-predefined-questionnaire" method="post">
+                <p> ${questionnaire.title} </p>
+                <#list questionnaire.item as question>
+                    <p> ${question.text} </p>
+                </#list>
+                <input hidden name="patientId" type="text" value="${patient.id}">
+                <input hidden name="questionnaireId" type="text" value="${questionnaire.id}">
+                <input type="submit" value="Send disse spørsmålene">
+            </form>
+            <br>
+        </#list>
 
     <#else>
 

@@ -19,7 +19,7 @@ class QuestionnaireCommunication(server: String = "public") {
     //the base of the fhir server
     private val baseURL: String = when (server) {
         "public" -> "http://hapi.fhir.org/baseR4"
-        "local" -> "http://localhost:8000/fhir/"
+        "local" -> "http://localhost:8000/fhir"
         else -> throw IllegalArgumentException("server parameter must be either \"public\" or \"local\"")
     }
 
@@ -29,6 +29,47 @@ class QuestionnaireCommunication(server: String = "public") {
 
     //{patientId: [questionnaire]}
     var inbox: MutableMap<String, MutableList<Questionnaire>> = mutableMapOf()
+
+    var predefinedQuestionnaires = mutableListOf<Questionnaire>()
+
+    init {
+        // Create default questionnaires
+
+        // TODO: Figure out a nicer way to do this.
+        //  Find a way to search after the predefined questionnaires and create them if they're not there.
+
+        // For now: Either uncomment function or insert ids of existing Qs.
+        //createDefaultQuestionnaires()
+        runBlocking { predefinedQuestionnaires.add(getQuestionnaire("1721")) }
+        runBlocking { predefinedQuestionnaires.add(getQuestionnaire("1722")) }
+        runBlocking { predefinedQuestionnaires.add(getQuestionnaire("1723")) }
+    }
+
+    fun createDefaultQuestionnaires() {
+        var questions = Parameters.build {
+            append("question1", "Kan pasienten høre?")
+            append("question2", "Kan pasienten se?")
+            append("question3", "Kan pasienten prate?")
+        }
+
+        runBlocking { predefinedQuestionnaires.add(getQuestionnaire(createQuestionnaire(questions))) }
+
+        questions = Parameters.build {
+            append("question1", "Kan pasienten ligge?")
+            append("question2", "Kan pasienten stå?")
+            append("question3", "Kan pasienten gå?")
+        }
+
+        runBlocking { predefinedQuestionnaires.add(getQuestionnaire(createQuestionnaire(questions))) }
+
+        questions = Parameters.build {
+            append("question1", "Kan pasienten spille trompet?")
+            append("question2", "Kan pasienten løse kryssord?")
+            append("question3", "Kan pasienten danse cancan?")
+        }
+
+        runBlocking { predefinedQuestionnaires.add(getQuestionnaire(createQuestionnaire(questions))) }
+    }
 
     /**
      * Function to create a questionnaire and save the questionnaire to fhir server.

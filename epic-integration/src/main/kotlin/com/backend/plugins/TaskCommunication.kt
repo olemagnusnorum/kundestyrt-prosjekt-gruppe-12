@@ -14,7 +14,7 @@ class TaskCommunication(server: String = "public") {
     //the base of the fhir server
     private val baseURL: String = when (server) {
         "public" -> "http://hapi.fhir.org/baseR4"
-        "local" -> "http://localhost:8000/fhir/"
+        "local" -> "http://localhost:8000/fhir"
         else -> throw IllegalArgumentException("server parameter must be either \"public\" or \"local\"")
     }
 
@@ -22,7 +22,7 @@ class TaskCommunication(server: String = "public") {
     private val client = HttpClient()
     private val jsonParser: IParser = ctx.newJsonParser()
 
-    private val questionnaireCommunication = QuestionnaireCommunication()
+    private val questionnaireCommunication = QuestionnaireCommunication("local")
 
     //{patientId: [questionnaire]}
     var inbox: MutableMap<String, MutableList<Task>> = mutableMapOf()
@@ -49,8 +49,6 @@ class TaskCommunication(server: String = "public") {
             body = jsonParser.encodeResourceToString(task)
         }
 
-        println(jsonParser.encodeResourceToString(task))
-
         return response
     }
 
@@ -68,6 +66,5 @@ class TaskCommunication(server: String = "public") {
             var newList = mutableListOf<Task>(task)
             inbox[patientId] = newList
         }
-        println(inbox)
     }
 }
