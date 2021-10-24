@@ -2,12 +2,10 @@ package com.backend.plugins
 
 import io.ktor.routing.*
 import io.ktor.application.*
-import io.ktor.client.call.*
 import io.ktor.freemarker.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.netty.handler.codec.http.HttpResponseStatus
-import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.Questionnaire
 
 
@@ -15,6 +13,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
 
     val questionnaireCommunication = QuestionnaireCommunication("local")
     val patientCommunication = PatientCommunication("local")
+    val taskCommunication = TaskCommunication("local")
 
     routing {
 
@@ -37,6 +36,14 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             println("message received")
             println(body)
             questionnaireResponseCommunication.addToInbox(body)
+            call.respond(HttpResponseStatus.CREATED)
+        }
+        //fhir subscription endpoint for task subscription
+        put("funksjonsvurdering/task-subscription/{...}"){
+            val body = call.receive<String>()
+            println("message received")
+            println(body)
+            taskCommunication.addToInbox(body)
             call.respond(HttpResponseStatus.CREATED)
         }
 
@@ -105,8 +112,10 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             val params = call.receiveParameters()
             val patientId: String = params["patientId"]!!
 
-            val jsonResponse = questionnaireCommunication.createQuestionnaire(params, patientId)
-            val data = mapOf("response" to jsonResponse)
+            val questionnaireId = questionnaireCommunication.createQuestionnaire(params, patientId)
+            taskCommunication.createTask(patientId, questionnaireId)  //Should trigger subscription
+
+            val data = mapOf("response" to questionnaireId)
 
             call.respondTemplate("funksjonsvurdering/create-questionnaire-confirmation.ftl", data)
         }
@@ -125,7 +134,15 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             val patientId: String = call.receiveParameters()["patientId"]!!
             val patient = patientCommunication.readPatient(patientId)
 
-            val questionnaires = questionnaireCommunication.inbox[patientId]
+            // Get all questionnaires related to patient from task-inbox
+            val tasks = taskCommunication.inbox[patientId]
+            val questionnaires = mutableListOf<Questionnaire>()
+
+            if (tasks != null) {
+                for (task in tasks) {
+                    questionnaires.add(questionnaireCommunication.getQuestionnaire(task.focus.reference.substringAfter("/")))
+                }
+            }
 
             val data = mapOf("patient" to patient, "questionnaires" to questionnaires)
             call.respondTemplate("funksjonsvurdering/doctor-inbox.ftl", data)

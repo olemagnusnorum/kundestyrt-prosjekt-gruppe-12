@@ -141,5 +141,19 @@ class SubscriptionCommunication(server: String = "public") {
             println("QuestionnaireResponse subscription creation status code: ${response.status}")
         }
 
+        val taskSubscriptionSearch = runBlocking {
+            searchSubscription(criteria="Task?").receive<String>()
+        }
+
+        if(jsonParser.parseResource(Bundle::class.java, taskSubscriptionSearch).total > 0) {
+            println("Task subscription already exists")
+        } else {
+            val response = runBlocking { createSubscription(
+                    reason = "Listen for new and updated tasks",
+                    criteria = "Task?",
+                    endpoint = "funksjonsvurdering/task-subscription"
+            ) }
+            println("Task subscription creation status code: ${response.status}")
+        }
     }
 }
