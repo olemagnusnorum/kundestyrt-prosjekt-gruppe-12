@@ -37,6 +37,9 @@ class PdfHandler {
         document.close()
     }
 
+    /**
+     *
+     */
     fun addToPdf(text: String, documentName: String){
         val file = File(saveLocation+documentName)
         val document = PDDocument.load(file)
