@@ -1,6 +1,7 @@
 package com.backend.plugins
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
+import ca.uhn.fhir.util.BundleBuilder
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -8,6 +9,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.http.Parameters
 import kotlinx.coroutines.runBlocking
+import org.hl7.fhir.instance.model.api.IBaseResource
 import org.hl7.fhir.r4.model.*
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -33,16 +35,11 @@ class QuestionnaireCommunication(server: String = "public") {
     var predefinedQuestionnaires = mutableListOf<Questionnaire>()
 
     init {
-        // Create default questionnaires
 
-        // TODO: Figure out a nicer way to do this.
-        //  Find a way to search after the predefined questionnaires and create them if they're not there.
 
-        // For now: Either uncomment function or insert ids of existing Qs.
-        //createDefaultQuestionnaires()
-        runBlocking { predefinedQuestionnaires.add(getQuestionnaire("1721")) }
+        /*runBlocking { predefinedQuestionnaires.add(getQuestionnaire("1721")) }
         runBlocking { predefinedQuestionnaires.add(getQuestionnaire("1722")) }
-        runBlocking { predefinedQuestionnaires.add(getQuestionnaire("1723")) }
+        runBlocking { predefinedQuestionnaires.add(getQuestionnaire("1723")) }*/
     }
 
     fun createDefaultQuestionnaires() {
@@ -179,5 +176,15 @@ class QuestionnaireCommunication(server: String = "public") {
             var newList = mutableListOf<Questionnaire>(questionnaire)
             inbox[patientId] = newList
         }
+    }
+
+    /**
+     * Search after questionnaires.
+     */
+    suspend fun searchQuestionnaires() : Bundle {
+        val response: HttpResponse =
+                client.get("$baseURL/Questionnaire?_format=json") {
+                }
+        return jsonParser.parseResource(Bundle::class.java, response.receive<String>())
     }
 }

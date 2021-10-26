@@ -15,9 +15,9 @@ import org.hl7.fhir.r4.model.Patient
 import java.time.format.DateTimeFormatter
 
 
-fun Application.venterBarnRoute() {
+fun Application.venterBarnRoute(questionnaireCommunication: QuestionnaireCommunication) {
 
-    val questionnaireCommunication = QuestionnaireCommunication("local")
+    //val questionnaireCommunication = QuestionnaireCommunication("local")
 
     val navPregnancyMap: MutableMap<String, Condition> = mutableMapOf()
 

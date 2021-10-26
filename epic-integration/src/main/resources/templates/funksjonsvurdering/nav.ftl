@@ -11,7 +11,7 @@
     <#if patient??>
 
         <h3>Pasient: ${patient.name[0].given[0]} ${patient.name[0].family}</h3>
-        <a href="/funksjonsvurdering/create-questionnaire/${patient.id}">Lag et questionnaire som skal sendes til Legen.</a>
+        <#--<a href="/funksjonsvurdering/create-questionnaire/${patient.id}">Lag et questionnaire som skal sendes til Legen.</a>-->
 
         <h3>Innboks</h3>
         <#if questionnaireResponses??>
@@ -34,7 +34,7 @@
                     <p> ${question.text} </p>
                 </#list>
                 <input hidden name="patientId" type="text" value="${patient.id}">
-                <input hidden name="questionnaireId" type="text" value="${questionnaire.id}">
+                <input hidden name="questionnaireId" type="text" value="${(questionnaire.id?split("/"))[5]}">
                 <input type="submit" value="Send disse spørsmålene">
             </form>
             <br>

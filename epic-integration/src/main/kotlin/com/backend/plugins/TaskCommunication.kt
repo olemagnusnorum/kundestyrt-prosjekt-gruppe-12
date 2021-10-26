@@ -22,7 +22,7 @@ class TaskCommunication(server: String = "public") {
     private val client = HttpClient()
     private val jsonParser: IParser = ctx.newJsonParser()
 
-    private val questionnaireCommunication = QuestionnaireCommunication("local")
+    //private val questionnaireCommunication = QuestionnaireCommunication("local")
 
     //{patientId: [questionnaire]}
     var inbox: MutableMap<String, MutableList<Task>> = mutableMapOf()
@@ -49,6 +49,9 @@ class TaskCommunication(server: String = "public") {
             body = jsonParser.encodeResourceToString(task)
         }
 
+        println("$baseURL/Task")
+        println(jsonParser.encodeResourceToString(task))
+
         return response
     }
 
@@ -58,6 +61,8 @@ class TaskCommunication(server: String = "public") {
     fun addToInbox(json: String) {
         val task = jsonParser.parseResource(Task::class.java, json)
         val patientId = task.`for`.reference.substringAfter("/")
+
+        println(patientId)
 
         if (inbox.containsKey(patientId)) {
             inbox[patientId]?.add(task)

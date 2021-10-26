@@ -9,9 +9,9 @@ import io.netty.handler.codec.http.HttpResponseStatus
 import org.hl7.fhir.r4.model.Questionnaire
 
 
-fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: QuestionnaireResponseCommunication) {
+fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: QuestionnaireResponseCommunication, questionnaireCommunication: QuestionnaireCommunication) {
 
-    val questionnaireCommunication = QuestionnaireCommunication("local")
+    //val questionnaireCommunication = QuestionnaireCommunication("local")
     val patientCommunication = PatientCommunication("local")
     val taskCommunication = TaskCommunication("local")
 
@@ -37,7 +37,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             call.respond(HttpResponseStatus.CREATED)
         }
         //fhir subscription endpoint for task subscription
-        put("funksjonsvurdering/task-subscription/{...}"){
+        put("funksjonsvurdering/task-subscription"){
             val body = call.receive<String>()
             println("message received")
             taskCommunication.addToInbox(body)
@@ -107,7 +107,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             call.respondTemplate("funksjonsvurdering/create-questionnaire.ftl", data)
         }
 
-        // Nav create questionnaire confirmation
+/*        // Nav create questionnaire confirmation
         post("/funksjonsvurdering/create-questionnaire"){
 
             val params = call.receiveParameters()
@@ -119,16 +119,18 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             val data = mapOf("response" to questionnaireId)
 
             call.respondTemplate("funksjonsvurdering/create-questionnaire-confirmation.ftl", data)
-        }
+        }*/
 
         // NAV send predefined questionnaire
         post("/funksjonsvurdering/create-predefined-questionnaire") {
 
             val params = call.receiveParameters()
             val patientId: String = params["patientId"]!!.substringAfter("/")
-            val questionnaireId: String = params["questionnaireId"]!!.substringAfter("/")
+            val questionnaireId: String = params["questionnaireId"]!!
 
-            taskCommunication.createTask(patientId, questionnaireId)  //Should trigger subscription
+            println(questionnaireId)
+
+            println(taskCommunication.createTask(patientId, questionnaireId))  //Should trigger subscription
 
             val data = mapOf("response" to questionnaireId)
 
