@@ -19,6 +19,9 @@
         <p>Abatement Date:</p>
         <input name="abatementDate" type="text" placeholder="YYYY-mm-dd"><br><br>
         <input type="submit" value="Registrer graviditet">
+        <#if error??>
+            <p>${error}</p>
+        </#if>
     </form>
     <br>
     <br>

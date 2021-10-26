@@ -7,10 +7,7 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import org.hl7.fhir.r4.model.Coding
-import org.hl7.fhir.r4.model.Questionnaire
-import org.hl7.fhir.r4.model.QuestionnaireResponse
-import org.hl7.fhir.r4.model.Reference
+import org.hl7.fhir.r4.model.*
 
 class QuestionnaireResponseCommunication(server: String = "public") {
 
@@ -71,20 +68,6 @@ class QuestionnaireResponseCommunication(server: String = "public") {
             body = jsonParser.encodeResourceToString(questionnaireResponse)
         }
 
-        if (response.headers["Location"] != null) {
-            var responseId = response.headers["Location"]!!.split("/")[5]
-
-            val newQuestionnaireResponse = getQuestionnaireResponse(responseId)
-
-            if (inbox.containsKey(patientId)) {
-                inbox[patientId]?.add(newQuestionnaireResponse)
-            }
-            else {
-                var newList = mutableListOf<QuestionnaireResponse>(newQuestionnaireResponse)
-                inbox[patientId] = newList
-            }
-        }
-
         return response
     }
 
@@ -99,6 +82,15 @@ class QuestionnaireResponseCommunication(server: String = "public") {
     }
 
     /**
+     * Function to get all QuestionnaireResponses on the server.
+     * @return Bundle resource with QuestionnaireResponses in entry.
+     */
+    suspend fun getAllQuestionnaireResponses(): Bundle {
+        val response: HttpResponse = client.get("$baseURL/QuestionnaireResponse?_format=json") {}
+        return jsonParser.parseResource(Bundle::class.java, response.receive<String>())
+    }
+
+    /**
      * Finds the Answers of a FHIR QuestionnaireResponse object
      * @return listOfAnswers a list of Strings containing the answers
      */
@@ -108,5 +100,21 @@ class QuestionnaireResponseCommunication(server: String = "public") {
             listOfAnswers.add(item.answer[0].valueCoding.code)
         }
         return listOfAnswers
+    }
+
+    /**
+     * Add questionnaireResponse to local inbox when it arrives via subscription
+     */
+    fun addToInbox(json: String) {
+        val questionnaireResponse = jsonParser.parseResource(QuestionnaireResponse::class.java, json)
+        val patientId = questionnaireResponse.subject.reference.substringAfter("/")
+
+        if (inbox.containsKey(patientId)) {
+            inbox[patientId]?.add(questionnaireResponse)
+        }
+        else {
+            var newList = mutableListOf<QuestionnaireResponse>(questionnaireResponse)
+            inbox[patientId] = newList
+        }
     }
 }

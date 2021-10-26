@@ -4,6 +4,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <title>Opprettet questionnaire</title>
 </head>
+
 <body style="font-family: sans-serif">
 <div class="row mb-5">
     <div class="col bg-secondary p-5">
@@ -15,8 +16,7 @@
         <#include "*/sidebar.ftl">
     </div>
     <div class="col">
-        <h3>Du har opprettet en questionnaire</h3>
-        <p>Json questionnaire response: ${response}</p>
+        <h3>Du har opprettet questionnaire ${response}</h3>
         <br>
         <a href="/funksjonsvurdering/nav">Gå tilbake til NAV sin side.</a>
         <br>

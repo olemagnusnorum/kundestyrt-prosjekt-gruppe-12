@@ -24,6 +24,7 @@
                 <input name="question1" type="text" placeholder="Question 1"><br><br>
                 <input name="question2" type="text" placeholder="Question 2"><br><br>
                 <input name="question3" type="text" placeholder="Question 3"><br><br>
+                <input hidden name="patientId" type="text" value="${patientId}">
                 <input type="submit" value="Registrer questionnaire">
             </form>
         </#if>
@@ -32,6 +33,7 @@
         <a href="/funksjonsvurdering">Gå tilbake til navigasjonsiden.</a>
     </div>
     <div class="col"></div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>

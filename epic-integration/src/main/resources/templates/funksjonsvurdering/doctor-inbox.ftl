@@ -23,31 +23,10 @@
             <br>
             <h3>Innboks</h3>
             <#if questionnaires??>
-                <div class="accordion" id="accordion">
-                    <#list questionnaires as questionnaire>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="heading${questionnaire.id.split("/")[1]}">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${questionnaire.id.split("/")[1]}" aria-expanded="true" aria-controls="collapse${questionnaire.id.split("/")[1]}">
-                                ${questionnaire.title}
-                            </button>
-                        </h2>
-                        <div id="collapse${questionnaire.id.split("/")[1]}" class="accordion-collapse collapse show" aria-labelledby="heading${questionnaire.id.split("/")[1]}" data-bs-parent="#accordion">
-                            <div class="accordion-body">
-                                <form action="/funksjonsvurdering/createQuestionnaireResponse/${questionnaire.id.split("/")[1]}" method="post">
-                                    <#list questionnaire.item as question>
-                                        <p> ${question.text} </p>
-                                        <input type="text" name="answer${question.linkId}">
-                                        <br>
-                                    </#list>
-                                    <br>
-                                    <input type="submit" value="Send svarene!">
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    </#list>
-                </div>
-<#--                    <a href="/funksjonsvurdering/doctor-inbox/${questionnaire.id}"> ${questionnaire.title} </a>-->
+                <#list questionnaires as questionnaire>
+                    <a href="/funksjonsvurdering/doctor-inbox/${questionnaire.id}"> ${questionnaire.title} </a>
+                    <br>
+                </#list>
             <#else>
                 <p>Ingen nye meldinger.
             </#if>
@@ -66,8 +45,12 @@
             </div>
 
         </#if>
+        <br>
+        <br>
+        <a href="/funksjonsvurdering">Gå tilbake til navigasjonsiden.</a>
     </div>
     <div class="col"></div>
+
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 </body>

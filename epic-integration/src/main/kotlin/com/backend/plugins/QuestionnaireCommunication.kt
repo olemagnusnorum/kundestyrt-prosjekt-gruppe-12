@@ -59,22 +59,26 @@ class QuestionnaireCommunication(server: String = "public") {
         var items = mutableListOf<Questionnaire.QuestionnaireItemComponent>()
 
         questions.forEach { t, question ->
-            number++
-            var item = Questionnaire.QuestionnaireItemComponent()
-            item.setLinkId(number.toString())
-            item.setText(question[0])
-            item.setType(Questionnaire.QuestionnaireItemType.STRING)
-            items.add(item)
+            if (t == "patientId") {
+                null
+            }
+            else {
+                number++
+                var item = Questionnaire.QuestionnaireItemComponent()
+                item.setLinkId(number.toString())
+                item.setText(question[0])
+                item.setType(Questionnaire.QuestionnaireItemType.STRING)
+                items.add(item)
+            }
         }
 
         questionnaire.setItem(items)
 
         // Set the identifier. Should be on the format UUID/patientID.
         // This allows us to connect a questionnaire to a patient.
-        // TODO: figure out how to search for a questionnaire, this might not work
         val identifier = Identifier()
         val uuid = UUID.randomUUID().toString()
-        identifier.setValue("$uuid/1244780")
+        identifier.setValue("$uuid/$patientId")
         questionnaire.setIdentifier(mutableListOf(identifier))
 
         val questionnaireJson = jsonParser.encodeResourceToString(questionnaire)
@@ -91,16 +95,6 @@ class QuestionnaireCommunication(server: String = "public") {
 
         if (response.headers["Location"] != null) {
             var responseId = response.headers["Location"]!!.split("/")[5]
-
-            val newQuestionnaire = getQuestionnaire(responseId)
-
-            if (inbox.containsKey(patientId)) {
-                inbox[patientId]?.add(newQuestionnaire)
-            }
-            else {
-                var newList = mutableListOf<Questionnaire>(newQuestionnaire)
-                inbox[patientId] = newList
-            }
 
             return responseId
         }
@@ -128,5 +122,21 @@ class QuestionnaireCommunication(server: String = "public") {
             listOfQuestions.add(item.text)
         }
         return listOfQuestions
+    }
+
+    /**
+     * Add questionnaire to local inbox when it arrives via subscription
+     */
+    fun addToInbox(json: String) {
+        val questionnaire = jsonParser.parseResource(Questionnaire::class.java, json)
+        val patientId = questionnaire.identifier[0].value.substringAfter("/")
+
+        if (inbox.containsKey(patientId)) {
+            inbox[patientId]?.add(questionnaire)
+        }
+        else {
+            var newList = mutableListOf<Questionnaire>(questionnaire)
+            inbox[patientId] = newList
+        }
     }
 }

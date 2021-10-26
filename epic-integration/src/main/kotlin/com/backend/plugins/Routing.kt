@@ -6,17 +6,15 @@ import io.ktor.client.call.*
 import io.ktor.freemarker.*
 import io.ktor.response.*
 import io.ktor.request.*
-import io.ktor.util.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
-import org.hl7.fhir.r4.model.Questionnaire
 
 
 @Serializable
 data class Person(val firstName: String?, val lastName: String?, val age: Int?)
 
-val patientCommunication = PatientCommunication()
-val conditionCommunication = ConditionCommunication()
+val patientCommunication = PatientCommunication("local")
+val conditionCommunication = ConditionCommunication("local")
 
 //inboxes for keeping track of messages
 val navInbox = Inbox()
