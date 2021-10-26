@@ -6,27 +6,40 @@
 </head>
 <body style="font-family: sans-serif">
 <div class="row mb-5">
-    <div class="col bg-secondary p-5">
-        <h1>Kundestyrt prosjekt | Demo</h1>
+    <div class="col bg-light shadow p-4">
+        <h1>NAV</h1>
     </div>
 </div>
 <div class="row">
     <div class="col">
         <#include "*/sidebar.ftl"></div>
     <div class="col">
-        <h1>NAV</h1>
         <br>
 
         <#if patient??>
 
             <h3>Pasient: ${patient.name[0].given[0]} ${patient.name[0].family}</h3>
             <a href="/funksjonsvurdering/create-questionnaire/${patient.id}">Lag et questionnaire som skal sendes til Legen</a>
+            <br>
+            <br>
             <h3>Innboks</h3>
             <#if questionnaireResponses??>
+                <ul class="list-group">
                 <#list questionnaireResponses as questionnaireResponse>
-                    <a href="/funksjonsvurdering/nav/${questionnaireResponse.id}"> ${questionnaireTitles[questionnaireResponse?index]} </a>
-                    <br>
+                        <a class="text-white btn-floating btn-fb" href="/funksjonsvurdering/nav/${questionnaireResponse.id}">
+                            <li class="list-group-item d-flex">
+                                <span class="p-2">
+                                    ${questionnaireTitles[questionnaireResponse?index]}
+                                </span>
+                                <span class="ml-auto p-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-right" viewBox="0 0 16 16">
+                                        <path d="M6 12.796V3.204L11.481 8 6 12.796zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753z"/>
+                                    </svg>
+                                </span>
+                            </li>
+                        </a>
                 </#list>
+                </ul>
             <#else>
                 <p>Ingen nye meldinger.
             </#if>
@@ -38,8 +51,9 @@
             <div class="row">
                 <div class="col">
                     <form action="/funksjonsvurdering/nav" method="post">
-                        <input name="patientId" placeholder="Pasientens id" type="text">
-                        <input class="btn rounded border py-1 px-4" type="submit">
+                        <input class="form-control" name="patientId" placeholder="Pasientens id" type="text">
+                        <br>
+                        <input class="btn btn-primary" type="submit">
                     </form>
                 </div>
             </div>

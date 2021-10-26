@@ -7,27 +7,33 @@
 </head>
 <body style="font-family: sans-serif">
 <div class="row mb-5">
-    <div class="col bg-secondary p-5">
-        <h1>Kundestyrt prosjekt | Demo</h1>
+    <div class="col bg-light shadow p-4">
+        <h1>Svar fra legen</h1>
     </div>
 </div>
 <div class="row">
     <div class="col">
         <#include "*/sidebar.ftl"></div>
     <div class="col">
-        <h1>Questionaire-response from Doctor</h1>
 
         <#list questions as question>
-            <p> Question ${question?index+1} : ${question} </p>
-            <p> Answer: ${answers[question?index]} </p>
+            <b>${question} </b>
+            <div class="card">
+                <div class="card-body">${answers[question?index]}</div>
+            </div>
             <br>
         </#list>
 
         <br>
+
+        <div class="row">
+            <a class="btn btn-primary btn-block" href="/funksjonsvurdering/nav">Gå tilbake til NAVs side</a>
+        </div>
         <br>
-        <a href="/funksjonsvurdering/create-questionnaire/Patient/${patientId}/_history/1">Lag et nytt questionnaire som skal sendes til Legen.</a>
+        <div class="row">
+            <a class="btn btn-outline-primary btn-block" href="/funksjonsvurdering/create-questionnaire/Patient/${patientId}/_history/1">Lag et nytt questionnaire som skal sendes til Legen</a>
+        </div>
         <br>
-        <a href="/funksjonsvurdering/nav">Gå tilbake til NAVs side</a>
     </div>
     <div class="col"></div>
 

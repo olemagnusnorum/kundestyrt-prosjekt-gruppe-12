@@ -26,15 +26,5 @@
                 </ul>
             </div>
         </li>
-        <li class="mb-1 border-top">
-            <button class="pl-0 btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#account-collapse" aria-expanded="false">
-                Tredje case
-            </button>
-            <div class="collapse" id="account-collapse">
-                <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                    <li><a href="#" class="link-dark rounded">Etc.</a></li>
-                </ul>
-            </div>
-        </li>
     </ul>
 </div>

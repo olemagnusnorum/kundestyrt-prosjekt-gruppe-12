@@ -5,16 +5,23 @@
     <title>NAV</title>
 </head>
 <body style="font-family: sans-serif">
+<div class="row mb-5">
+    <div class="col bg-light shadow p-4">
+        <h1>Navigasjonsside - Demo Funksjonsvurdering</h1>
+    </div>
+</div>
 <div class="row">
     <div class="col">
         <#include "*/sidebar.ftl">
     </div>
     <div class="col">
-        <h3>Navigasjonsside - Demo Funksjonsvurdering</h3>
-        <br>
-        <a class="button" href="/funksjonsvurdering/doctor-inbox">Gå til legesiden.</a>
-        <br>
-        <a href="/funksjonsvurdering/nav">Gå til NAVs side</a>
+        <div class="row">
+            <a class="btn btn-primary btn-block" href="/funksjonsvurdering/doctor-inbox">Gå til legesiden</a>
+        </div>
+            <br>
+        <div class="row">
+            <a class="btn btn-primary btn-block" href="/funksjonsvurdering/nav">Gå til NAVs side</a>
+        </div>
     </div>
     <div class="col"></div>
 </div>
