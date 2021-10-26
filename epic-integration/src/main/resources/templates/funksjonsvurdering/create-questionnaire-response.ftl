@@ -7,8 +7,8 @@
 </head>
 <body style="font-family: sans-serif">
 <div class="row mb-5">
-    <div class="col bg-secondary p-5">
-        <h1>Kundestyrt prosjekt | Demo</h1>
+    <div class="col bg-light shadow p-4">
+        <h1>Helseplattformen | Lege</h1>
     </div>
 </div>
 <div class="row">
@@ -16,16 +16,18 @@
         <#include "*/sidebar.ftl">
     </div>
     <div class="col">
-        <h1>Questionnaire fra NAV</h1>
+        <h3>Spørsmål fra NAV</h3>
 
         <form action="/funksjonsvurdering/createQuestionnaireResponse/${questionnaire.id}" method="post">
             <#list questionnaire.item as question>
-                <p> ${question.text} </p>
-                <input type="text" name="answer${question.linkId}">
-                <br>
+                <div class="form-group">
+                    <b>${question.text}</b>
+                    <input class="form-control" type="text" name="answer${question.linkId}" placeholder="Svar">
+                    <br>
+                </div>
             </#list>
             <br>
-            <input type="submit" value="Send svarene!">
+            <input type="submit" class="btn btn-primary" value="Send svarene til NAV">
         </form>
 
         <br>

@@ -7,15 +7,14 @@
 </head>
 <body style="font-family: sans-serif">
 <div class="row mb-5">
-    <div class="col bg-secondary p-5">
-        <h1 class="text-light">Kundestyrt prosjekt | Demo</h1>
+    <div class="col bg-light shadow p-4">
+        <h1>Helseplattformen | Lege</h1>
     </div>
 </div>
 <div class="row">
     <div class="col">
         <#include "*/sidebar.ftl"></div>
     <div class="col">
-        <h1>Helseplattformen | Lege</h1>
 
         <#if patient??>
 
@@ -23,10 +22,22 @@
             <br>
             <h3>Innboks</h3>
             <#if questionnaires??>
-                <#list questionnaires as questionnaire>
-                    <a href="/funksjonsvurdering/doctor-inbox/${questionnaire.id}"> ${questionnaire.title} </a>
-                    <br>
-                </#list>
+                <ul class="list-group">
+                    <#list questionnaires as questionnaire>
+                        <a class="text-white btn-floating btn-fb" href="/funksjonsvurdering/doctor-inbox/${questionnaire.id}">
+                            <li class="list-group-item d-flex">
+                                <span class="p-2">
+                                    ${questionnaire.title}
+                                </span>
+                                <span class="ml-auto p-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-right" viewBox="0 0 16 16">
+                                        <path d="M6 12.796V3.204L11.481 8 6 12.796zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753z"/>
+                                    </svg>
+                                </span>
+                            </li>
+                        </a>
+                    </#list>
+                </ul>
             <#else>
                 <p>Ingen nye meldinger.
             </#if>
@@ -38,8 +49,9 @@
             <div class="row">
                 <div class="col">
                     <form action="/funksjonsvurdering/doctor-inbox" method="post">
-                        <input name="patientId" placeholder="Pasientens id" type="text">
-                        <input class="btn rounded border py-1 px-4" type="submit">
+                        <input class="form-control" name="patientId" placeholder="Pasientens id" type="text">
+                        <br>
+                        <input class="btn btn-primary" type="submit" value="Se pasientens side">
                     </form>
                 </div>
             </div>
@@ -47,7 +59,6 @@
         </#if>
         <br>
         <br>
-        <a href="/funksjonsvurdering">Gå tilbake til navigasjonsiden.</a>
     </div>
     <div class="col"></div>
 
