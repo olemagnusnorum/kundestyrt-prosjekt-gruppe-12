@@ -23,7 +23,6 @@ class PatientTest {
             patientId = patientCommunication.latestPatientId
         }
 
-        println("PatientID: $patientId")
         assert(patientId.isNotEmpty())
     }
 
