@@ -17,7 +17,7 @@ class PdfHandler {
     /**
      * Generates a new PDF and writes to it
      * @param text A String of text that can contain newlines
-     * @param documentName name of the document. Has to end in ".pdf"
+     * @param fileName name of the pdf file. Has to end in ".pdf"
      * @return returns Unit
      */
     fun writeToNewPdf(title: String = "", text: String, fileName: String) {
