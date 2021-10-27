@@ -3,6 +3,7 @@ package com.backend
 import com.backend.plugins.PatientCommunication
 import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.Patient
+import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.TestInstance
 import kotlin.test.*
 
@@ -12,44 +13,36 @@ class PatientTest {
 
     private val patientCommunication = PatientCommunication("local")
 
+    private var patientId = ""
 
     @Test
-    fun `getPatientID should return a string`() {
-        val JSONBundle = runBlocking {
-            patientCommunication.patientSearch("Derrick","Lin","1973-06-03")
+    @Order(1)
+    fun `createPatient should return a patient resource`() {
+        runBlocking {
+            patientCommunication.createPatient("Test", "Testest", identifierValue = "123456789",  birthdate = "1-Jan-1990")
+            patientId = patientCommunication.latestPatientId
         }
-        val derrickThePatient = patientCommunication.parseBundleXMLToPatient(JSONBundle, isXML = false)
-        val returnVal = patientCommunication.getPatientID(derrickThePatient!!)
-        val derricksID = "eq081-VQEgP8drUUqCWzHfw3"
 
-        assert(derrickThePatient is Patient)
-        assert(returnVal is String)
-        assert(returnVal == derricksID)
+        println("PatientID: $patientId")
+        assert(patientId.isNotEmpty())
     }
 
     @Test
-    fun `getPatientIDFromDatabase should return a string`() {
-        val returnVal = runBlocking { patientCommunication.getPatientIDFromDatabase(
-            givenName = "Derrick",
-            familyName = "Lin",
-            birthdate = "1973-06-03")
-        }
-        val derricksID = "eq081-VQEgP8drUUqCWzHfw3"
-
-        assert(returnVal is String)
-        assert(returnVal == derricksID)
+    @Order(2)
+    fun `readPatient should return a patient resource`() {
+        val patient = runBlocking { patientCommunication.readPatient(patientId) }
+        assert(patient.idElement.idPart == patientId)
     }
 
     @Test
-    fun `parseBundleXMLToPatient should parse an xml string to a patient object`() {
-        val patientXML = runBlocking { patientCommunication.patientSearch(
-            givenName = "Derrick",
-            familyName = "Lin",
-            birthdate = "1973-06-03",
-            outputFormat = "xml"
-        )}
-        assert(patientXML is String)
-        assert(patientCommunication.parseBundleXMLToPatient(patientXML) is Patient)
+    @Order(3)
+    fun `searchPatient should return a string`() {
+        val patient = runBlocking {
+            val patientResponse = patientCommunication.patientSearch(identifier = "123456789")
+            return@runBlocking patientCommunication.parseBundleXMLToPatient(patientResponse, isXML = false)!!
+        }
+
+        assert(patient.idElement.idPart.isNotEmpty())
     }
 
 }
