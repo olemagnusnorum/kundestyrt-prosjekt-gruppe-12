@@ -30,7 +30,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             questionnaireCommunication.addToInbox(body)
             call.respond(HttpResponseStatus.CREATED)
         }
-        //fhir subscription endpoint for questionnaire subscription
+        //fhir subscription endpoint for questionnaireResponse subscription
         put("funksjonsvurdering/questionnaireResponse-subscription/{...}"){
             val body = call.receive<String>()
             println("message received")
@@ -42,6 +42,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             val body = call.receive<String>()
             println("message received")
             taskCommunication.addToInbox(body)
+            println(taskCommunication.inbox)
             call.respond(HttpResponseStatus.CREATED)
         }
 
