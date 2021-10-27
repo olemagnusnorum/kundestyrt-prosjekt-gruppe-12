@@ -14,6 +14,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
     //val questionnaireCommunication = QuestionnaireCommunication("local")
     val patientCommunication = PatientCommunication("local")
     val taskCommunication = TaskCommunication("local")
+    var lastPatient: String = "5"
 
     routing {
 
@@ -37,7 +38,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             call.respond(HttpResponseStatus.CREATED)
         }
         //fhir subscription endpoint for task subscription
-        put("funksjonsvurdering/task-subscription"){
+        put("funksjonsvurdering/task-subscription/{...}"){
             val body = call.receive<String>()
             println("message received")
             taskCommunication.addToInbox(body)
@@ -149,6 +150,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         post("/funksjonsvurdering/doctor-inbox") {
 
             val patientId: String = call.receiveParameters()["patientId"]!!
+            lastPatient = patientId
             val patient = patientCommunication.readPatient(patientId)
 
             // Get all questionnaires related to patient from task-inbox
@@ -185,12 +187,11 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             answerList.add(params["answer2"]!!)
             answerList.add(params["answer3"]!!)
 
-            val patientId = questionnaire.identifier[0].value.substringAfter("/")
-
-            questionnaireResponseCommunication.createQuestionnaireResponse(questionnaire, answerList, patientId)
+            questionnaireResponseCommunication.createQuestionnaireResponse(questionnaire, answerList, lastPatient)
 
             //This is where q should be deleted
-            questionnaireCommunication.inbox[patientId]?.removeAll {it.id == questionnaire.id}
+            //questionnaireCommunication.inbox[lastPatient]?.removeAll {it.id == questionnaire.id}
+            taskCommunication.inbox[lastPatient]?.removeAll {it.focus.reference == "Questionnaire/$questionnaireId"}
 
             call.respondRedirect("/funksjonsvurdering/doctor-inbox")
         }
