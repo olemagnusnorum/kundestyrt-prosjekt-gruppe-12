@@ -13,7 +13,7 @@
 </div>
 <div class="row">
     <div class="col">
-        <#include "*/sidebar.ftl">
+        <#include "../shared/sidebar.ftl">
     </div>
     <div class="col">
         <h3>Du har opprettet questionnaire ${response}</h3>
