@@ -65,18 +65,6 @@ class SubscriptionCommunication(server: String = "public") {
     }
 
     /**
-     * Function to create a subscription that is triggered by questionnaire resources
-     * @return the HttpResponse returned by the HAPI server
-     */
-    suspend fun createQuestionnaireSubscription(): HttpResponse {
-        return createSubscription(
-                reason = "Listen for new and updated questionnaires",
-                criteria = "Questionnaire?status=active",
-                endpoint = "funksjonsvurdering/questionnaire-subscription"
-        )
-    }
-
-    /**
      * Function to create a subscription that is triggered by questionnaireResponse resources
      * @return the HttpResponse returned by the HAPI server
      */

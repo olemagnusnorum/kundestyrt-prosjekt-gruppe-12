@@ -1,7 +1,7 @@
 package com.backend.plugins
+
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
-import ca.uhn.fhir.util.BundleBuilder
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -9,12 +9,10 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.http.Parameters
 import kotlinx.coroutines.runBlocking
-import org.hl7.fhir.instance.model.api.IBaseResource
 import org.hl7.fhir.r4.model.*
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 class QuestionnaireCommunication(server: String = "public") {
 

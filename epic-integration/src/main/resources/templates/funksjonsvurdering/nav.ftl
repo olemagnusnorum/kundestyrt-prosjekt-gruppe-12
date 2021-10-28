@@ -47,12 +47,12 @@
                 <div class="card">
                     <div class="card-body">
                         <form action="/funksjonsvurdering/create-predefined-questionnaire" method="post">
-                            <h5 class="card-title"> ${questionnaire.title} </h5>
-                            <#list questionnaire.item as question>
+                            <h5 class="card-title"> ${questionnaire.first.title} </h5>
+                            <#list questionnaire.first.item as question>
                                 <p class="card-text mb-1"> ${question.text} </p>
                             </#list>
                             <input hidden name="patientId" type="text" value="${patient.id}">
-                            <input hidden name="questionnaireId" type="text" value="${(questionnaire.id?split("/"))[5]}">
+                            <input hidden name="questionnaireId" type="text" value="${questionnaire.second}">
                             <input class="btn btn-primary mt-3" type="submit" value="Send disse spørsmålene">
                         </form>
                     </div>
