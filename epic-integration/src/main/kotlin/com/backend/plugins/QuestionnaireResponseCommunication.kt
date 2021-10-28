@@ -31,7 +31,7 @@ class QuestionnaireResponseCommunication(server: String = "public") {
      * @param questionnaire Questionnaire the response is related to
      * @return http response, not QuestionnaireResponse
      */
-    suspend fun createQuestionnaireResponse(questionnaire: Questionnaire, questionsList: MutableList<String>, patientId: String = "2559067"): HttpResponse {
+    suspend fun createQuestionnaireResponse(questionnaire: Questionnaire, answerList: MutableList<String>, patientId: String = "2559067"): HttpResponse {
 
         // Create empty template
         val questionnaireResponse = QuestionnaireResponse()
@@ -55,7 +55,7 @@ class QuestionnaireResponseCommunication(server: String = "public") {
             answerComponent.add(QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent())
             answerComponent[0].value = Coding(
                 "some.system",
-                questionsList[i], questionsList[i])
+                answerList[i], answerList[i])
 
             item[i].answer = answerComponent
         }
