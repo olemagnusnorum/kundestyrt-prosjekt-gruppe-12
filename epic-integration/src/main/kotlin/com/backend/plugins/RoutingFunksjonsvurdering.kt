@@ -120,7 +120,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         post("/funksjonsvurdering/create-predefined-questionnaire") {
 
             val params = call.receiveParameters()
-            val patientId: String = params["patientId"]!!.substringAfter("/")
+            val patientId: String = params["patientId"]!!.split("/")[5]
             val questionnaireId: String = params["questionnaireId"]!!
 
             taskCommunication.createTask(patientId, questionnaireId) //Should trigger subscription
