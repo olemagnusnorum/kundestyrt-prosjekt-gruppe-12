@@ -19,7 +19,6 @@
         <#if patient??>
 
             <h3>Pasient: ${patient.name[0].given[0]} ${patient.name[0].family}</h3>
-            <a href="/funksjonsvurdering/create-questionnaire/${patient.id}">Lag et questionnaire som skal sendes til Legen</a>
             <br>
             <br>
             <h3>Innboks</h3>
