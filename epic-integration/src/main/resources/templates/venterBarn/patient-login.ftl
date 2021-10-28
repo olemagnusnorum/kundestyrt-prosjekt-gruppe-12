@@ -14,14 +14,14 @@
 </div>
 <div class="row">
     <div class="col">
-        <#include "../funksjonsvurdering/sidebar.ftl">
+        <#include "../shared/sidebar.ftl">
     </div>
     <div class="col">
         <h3>Innlogging</h3>
         <form action="patient" method="get">
             <input class="form-control" name="id" type="text" placeholder="Personnummer">
             <br>
-            <input class="btn btn-primary" type="submit" value="Login">
+            <input class="btn btn-primary" type="submit" value="Logg inn">
         </form>
         <br>
         <br>

@@ -14,7 +14,7 @@
 </div>
 <div class="row">
     <div class="col">
-        <#include "../funksjonsvurdering/sidebar.ftl">
+        <#include "../shared/sidebar.ftl">
     </div>
     <div class="col">
         <h3>Hei, ${name}!</h3>
@@ -28,6 +28,7 @@
         <#else>
             <p>Du kan ikke søke om foreldrepenger.</p>
         </#if>
+        <br>
         <br>
     </div>
     <div clasS="col"></div>

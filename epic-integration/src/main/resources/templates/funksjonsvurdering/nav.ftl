@@ -14,12 +14,10 @@
     <div class="col">
         <#include "../shared/sidebar.ftl"></div>
     <div class="col">
-        <br>
 
         <#if patient??>
 
             <h3>Pasient: ${patient.name[0].given[0]} ${patient.name[0].family}</h3>
-            <br>
             <br>
             <h3>Innboks</h3>
             <#if questionnaireResponses??>
@@ -43,6 +41,7 @@
                 <p>Ingen nye meldinger.
             </#if>
 
+            <br>
             <h3>Send forhåndslagde spørsmål</h3>
             <#list predefinedQuestionnaires as questionnaire>
                 <form action="/funksjonsvurdering/create-predefined-questionnaire" method="post">
@@ -72,6 +71,8 @@
             </div>
 
         </#if>
+        <br>
+        <br>
     </div>
     <div class="col"></div>
 </div>

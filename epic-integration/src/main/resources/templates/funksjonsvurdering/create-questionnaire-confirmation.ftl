@@ -18,9 +18,7 @@
     <div class="col">
         <h3>Du har opprettet questionnaire ${response}</h3>
         <br>
-        <a href="/funksjonsvurdering/nav">Gå tilbake til NAV sin side.</a>
         <br>
-        <a href="/funksjonsvurdering">Gå tilbake til navigasjonsiden.</a>
     </div>
     <div class="col"></div>
 </div>

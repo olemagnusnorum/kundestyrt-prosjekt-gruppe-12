@@ -30,7 +30,6 @@
         </#if>
         <br>
         <br>
-        <a href="/funksjonsvurdering">Gå tilbake til navigasjonsiden.</a>
     </div>
     <div class="col"></div>
 
