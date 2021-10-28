@@ -34,14 +34,6 @@ class QuestionnaireCommunication(server: String = "public") {
 
     var predefinedQuestionnaires = mutableListOf<Questionnaire>()
 
-    init {
-
-
-        /*runBlocking { predefinedQuestionnaires.add(getQuestionnaire("1721")) }
-        runBlocking { predefinedQuestionnaires.add(getQuestionnaire("1722")) }
-        runBlocking { predefinedQuestionnaires.add(getQuestionnaire("1723")) }*/
-    }
-
     fun createDefaultQuestionnaires() {
         var questions = Parameters.build {
             append("question1", "Kan pasienten høre?")
