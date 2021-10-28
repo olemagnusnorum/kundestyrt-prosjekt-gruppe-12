@@ -146,7 +146,6 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             val patient = patientCommunication.parseBundleXMLToPatient(patientString, false)
             val patientId = patient?.id!!.split("/")[5]
             lastPatient = patientId
-            val patient = patientCommunication.readPatient(patientId)
 
             // Get all questionnaires related to patient from task-inbox
             val tasks = taskCommunication.inbox[patientId]
