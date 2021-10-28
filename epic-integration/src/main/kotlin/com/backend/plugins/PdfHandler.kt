@@ -10,35 +10,28 @@ import java.io.File
 
 class PdfHandler {
 
-    private var saveLocation: String = "src/main/resources/"
+    private var saveLocation: String = "epic-integration/src/main/resources/"
     private val font = PDType1Font.COURIER
     private val boldFont = PDType1Font.COURIER_BOLD
     private val fontSize: Float = 8F
 
     /**
-     * Generates a new PDF and writes to it
+     * Generates a new PDF if it doesn't exist and writes to it
      * @param header header for the text
      * @param text A String of text that can contain newlines
      * @param fileName name of the pdf file. Has to end in ".pdf"
      * @return returns Unit
      */
-    fun writeToNewPdf(header: String = "", text: String, fileName: String) {
-        val document = PDDocument()
-        write(document, fileName, header, text)
-    }
-
-
-    /**
-     * Writes to existing pdf by adding new page to the pdf
-     * @param header header for the text
-     * @param text A String of text that can contain newlines
-     * @param fileName name of the document ending in ".pdf"
-     * @return returns Unit
-     */
-    fun addToPdf(header: String = "", text: String, fileName: String){
+    fun writeToPdf(header: String = "", text: String, fileName: String) {
         val file = File(saveLocation+fileName)
-        val document = PDDocument.load(file)
-        write(document, fileName, header, text)
+
+        if (file.exists()){
+            val document = PDDocument.load(file)
+            write(document, fileName, header, text)
+        } else {
+            val document = PDDocument()
+            write(document, fileName, header, text)
+        }
     }
 
     /**
