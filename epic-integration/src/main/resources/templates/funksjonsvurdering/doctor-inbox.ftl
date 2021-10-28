@@ -38,7 +38,7 @@
             <div class="row">
                 <div class="col">
                     <form action="/funksjonsvurdering/doctor-inbox" method="post">
-                        <input name="patientId" placeholder="Pasientens id" type="text">
+                        <input name="patientId" placeholder="Fødselsnummer" type="text">
                         <input class="btn rounded border py-1 px-4" type="submit">
                     </form>
                 </div>

@@ -58,8 +58,10 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         // Nav landing page after choosing patient
         post("/funksjonsvurdering/nav") {
 
-            val patientId = call.receiveParameters()["patientId"]!!
-            val patient = patientCommunication.readPatient(patientId)
+            val patientIdentifier = call.receiveParameters()["patientId"]!!
+            val bundleString = patientCommunication.patientSearch(identifier = patientIdentifier)
+            val patient = patientCommunication.parseBundleXMLToPatient(bundleString, false)
+            val patientId = patient?.id!!.split("/")[5]
 
             val questionnaireResponses = questionnaireResponseCommunication.inbox[patientId]
 
@@ -72,7 +74,13 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
                 }
             }
 
-            val data = mapOf("patient" to patient, "questionnaireResponses" to questionnaireResponses, "questionnaireTitles" to questionnaireTitles)
+            //println(bundleString)
+            println("patient.id er ${patient?.id}")
+            if (patient != null) {
+                println(patientCommunication.serializePatient(patient))
+            }
+
+            val data = mapOf("patient" to patient, "patientId" to patientId, "questionnaireResponses" to questionnaireResponses, "questionnaireTitles" to questionnaireTitles)
             call.respondTemplate("funksjonsvurdering/nav.ftl", data)
         }
 
@@ -132,8 +140,10 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         // Doctor landing page after choosing patient
         post("/funksjonsvurdering/doctor-inbox") {
 
-            val patientId: String = call.receiveParameters()["patientId"]!!
-            val patient = patientCommunication.readPatient(patientId)
+            val patientIdentifier: String = call.receiveParameters()["patientId"]!!
+            val patientString = patientCommunication.patientSearch(identifier = patientIdentifier)
+            val patient = patientCommunication.parseBundleXMLToPatient(patientString, false)
+            val patientId = patient?.id
 
             // Get all questionnaires related to patient from task-inbox
             val tasks = taskCommunication.inbox[patientId]

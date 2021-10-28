@@ -19,7 +19,7 @@
         <#if patient??>
 
             <h3>Pasient: ${patient.name[0].given[0]} ${patient.name[0].family}</h3>
-            <a href="/funksjonsvurdering/create-questionnaire/${patient.id}">Lag et questionnaire som skal sendes til Legen</a>
+            <a href="/funksjonsvurdering/create-questionnaire/Patient/${patientId}/_history/1">Lag et questionnaire som skal sendes til Legen</a>
             <br>
             <br>
             <h3>Innboks</h3>
@@ -51,7 +51,7 @@
             <div class="row">
                 <div class="col">
                     <form action="/funksjonsvurdering/nav" method="post">
-                        <input class="form-control" name="patientId" placeholder="Pasientens id" type="text">
+                        <input class="form-control" name="patientId" placeholder="Fødselsnummer" type="text">
                         <br>
                         <input class="btn btn-primary" type="submit">
                     </form>
