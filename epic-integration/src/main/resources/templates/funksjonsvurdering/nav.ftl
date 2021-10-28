@@ -12,7 +12,7 @@
 </div>
 <div class="row">
     <div class="col">
-        <#include "*/sidebar.ftl"></div>
+        <#include "../shared/sidebar.ftl"></div>
     <div class="col">
         <br>
 

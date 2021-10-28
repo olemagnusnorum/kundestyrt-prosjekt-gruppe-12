@@ -24,9 +24,11 @@ tasks.test {
 
 repositories {
     mavenCentral()
+    //maven(url = "https://jitpack.io")
 }
 
 dependencies {
+
     implementation("io.ktor:ktor-server-core:$ktor_version")
     implementation("io.ktor:ktor-server-netty:$ktor_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
@@ -56,6 +58,9 @@ dependencies {
     implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:5.4.0")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:5.4.0")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-client:5.4.0")
+
+    //PDFBOX for generating pdfs
+    implementation("org.apache.pdfbox:pdfbox:2.0.4")
 
 
 }
