@@ -39,7 +39,7 @@
                     </#list>
                 </ul>
             <#else>
-                <p>Ingen nye meldinger.
+                <p>Ingen nye meldinger.</p>
             </#if>
 
         <#else>
@@ -49,7 +49,7 @@
             <div class="row">
                 <div class="col">
                     <form action="/funksjonsvurdering/doctor-inbox" method="post">
-                        <input class="form-control" name="patientId" placeholder="Pasientens id" type="text">
+                        <input class="form-control" name="patientId" placeholder="Fødselnummer" type="text">
                         <br>
                         <input class="btn btn-primary" type="submit" value="Se pasientens side">
                     </form>

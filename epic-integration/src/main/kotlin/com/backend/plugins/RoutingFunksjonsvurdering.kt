@@ -46,8 +46,10 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         // Nav landing page after choosing patient
         post("/funksjonsvurdering/nav") {
 
-            val patientId = call.receiveParameters()["patientId"]!!
-            val patient = patientCommunication.readPatient(patientId)
+            val patientIdentifier = call.receiveParameters()["patientId"]!!
+            val bundleString = patientCommunication.patientSearch(identifier = patientIdentifier)
+            val patient = patientCommunication.parseBundleXMLToPatient(bundleString, false)
+            val patientId = patient?.id!!.split("/")[5]
 
             val questionnaireResponses = questionnaireResponseCommunication.inbox[patientId]
 
@@ -61,10 +63,10 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             }
 
             val data = mapOf("patient" to patient,
+                    "patientId" to patientId,
                     "questionnaireResponses" to questionnaireResponses,
                     "questionnaireTitles" to questionnaireTitles,
                     "predefinedQuestionnaires" to questionnaireCommunication.predefinedQuestionnaires)
-
             call.respondTemplate("funksjonsvurdering/nav.ftl", data)
         }
 
@@ -118,7 +120,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         post("/funksjonsvurdering/create-predefined-questionnaire") {
 
             val params = call.receiveParameters()
-            val patientId: String = params["patientId"]!!.substringAfter("/")
+            val patientId: String = params["patientId"]!!.split("/")[5]
             val questionnaireId: String = params["questionnaireId"]!!
 
             taskCommunication.createTask(patientId, questionnaireId) //Should trigger subscription
@@ -139,9 +141,11 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         // Doctor landing page after choosing patient
         post("/funksjonsvurdering/doctor-inbox") {
 
-            val patientId: String = call.receiveParameters()["patientId"]!!
+            val patientIdentifier: String = call.receiveParameters()["patientId"]!!
+            val patientString = patientCommunication.patientSearch(identifier = patientIdentifier)
+            val patient = patientCommunication.parseBundleXMLToPatient(patientString, false)
+            val patientId = patient?.id!!.split("/")[5]
             lastPatient = patientId
-            val patient = patientCommunication.readPatient(patientId)
 
             // Get all questionnaires related to patient from task-inbox
             val tasks = taskCommunication.inbox[patientId]
