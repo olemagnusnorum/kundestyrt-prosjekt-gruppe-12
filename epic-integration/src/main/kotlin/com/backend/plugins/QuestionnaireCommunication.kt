@@ -29,9 +29,6 @@ class QuestionnaireCommunication(server: String = "public") {
     private val client = HttpClient()
     private val jsonParser: IParser = ctx.newJsonParser()
 
-    //{patientId: [questionnaire]}
-    var inbox: MutableMap<String, MutableList<Questionnaire>> = mutableMapOf()
-
     var predefinedQuestionnaires = mutableListOf<Questionnaire>()
 
     fun createDefaultQuestionnaires() {
@@ -41,7 +38,7 @@ class QuestionnaireCommunication(server: String = "public") {
             append("question3", "Kan pasienten prate?")
         }
 
-        runBlocking { predefinedQuestionnaires.add(getQuestionnaire(createQuestionnaire(questions))) }
+        runBlocking { predefinedQuestionnaires.add(getQuestionnaire(createQuestionnaire(questions, "Sanser"))) }
 
         questions = Parameters.build {
             append("question1", "Kan pasienten ligge?")
@@ -49,7 +46,7 @@ class QuestionnaireCommunication(server: String = "public") {
             append("question3", "Kan pasienten gå?")
         }
 
-        runBlocking { predefinedQuestionnaires.add(getQuestionnaire(createQuestionnaire(questions))) }
+        runBlocking { predefinedQuestionnaires.add(getQuestionnaire(createQuestionnaire(questions, "Fysiske evner"))) }
 
         questions = Parameters.build {
             append("question1", "Kan pasienten spille trompet?")
@@ -57,7 +54,7 @@ class QuestionnaireCommunication(server: String = "public") {
             append("question3", "Kan pasienten danse cancan?")
         }
 
-        runBlocking { predefinedQuestionnaires.add(getQuestionnaire(createQuestionnaire(questions))) }
+        runBlocking { predefinedQuestionnaires.add(getQuestionnaire(createQuestionnaire(questions, "Annet"))) }
     }
 
     /**
@@ -68,7 +65,7 @@ class QuestionnaireCommunication(server: String = "public") {
      * the "Register questionnaire" button you receive the params to send in.
      * @return id of the created questionnaire or "EMPTY" if a questionnaire was not created.
      */
-    suspend fun createQuestionnaire(questions: Parameters, patientId: String = "2559067"): String{
+    suspend fun createQuestionnaire(questions: Parameters, title: String): String{
 
         val questionnaire = Questionnaire()
 
@@ -78,7 +75,7 @@ class QuestionnaireCommunication(server: String = "public") {
         val date = SimpleDateFormat("yyyy-MM-dd").parse(dateString)
 
         questionnaire.setName("NavQuestionnaire")
-        questionnaire.setTitle("Nav questionaire: Funksjonsvurdering")
+        questionnaire.setTitle(title)
         questionnaire.setStatus(Enumerations.PublicationStatus.ACTIVE)
         questionnaire.setDate(date)
         questionnaire.setPublisher("NAV")
@@ -103,13 +100,6 @@ class QuestionnaireCommunication(server: String = "public") {
         }
 
         questionnaire.setItem(items)
-
-        // Set the identifier. Should be on the format UUID/patientID.
-        // This allows us to connect a questionnaire to a patient.
-        val identifier = Identifier()
-        val uuid = UUID.randomUUID().toString()
-        identifier.setValue("$uuid/$patientId")
-        questionnaire.setIdentifier(mutableListOf(identifier))
 
         val questionnaireJson = jsonParser.encodeResourceToString(questionnaire)
 
@@ -152,22 +142,6 @@ class QuestionnaireCommunication(server: String = "public") {
             listOfQuestions.add(item.text)
         }
         return listOfQuestions
-    }
-
-    /**
-     * Add questionnaire to local inbox when it arrives via subscription
-     */
-    fun addToInbox(json: String) {
-        val questionnaire = jsonParser.parseResource(Questionnaire::class.java, json)
-        val patientId = questionnaire.identifier[0].value.substringAfter("/")
-
-        if (inbox.containsKey(patientId)) {
-            inbox[patientId]?.add(questionnaire)
-        }
-        else {
-            var newList = mutableListOf<Questionnaire>(questionnaire)
-            inbox[patientId] = newList
-        }
     }
 
     /**

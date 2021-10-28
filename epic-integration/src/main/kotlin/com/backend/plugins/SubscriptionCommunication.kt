@@ -119,17 +119,6 @@ class SubscriptionCommunication(server: String = "public") {
             println("Pregnancy subscription creation status code: ${response.status}")
         }
 
-        val questionnaireSubscriptionSearch = runBlocking {
-            searchSubscription(criteria="Questionnaire?status=active").receive<String>()
-        }
-
-        if(jsonParser.parseResource(Bundle::class.java, questionnaireSubscriptionSearch).total > 0) {
-            println("Questionnaire subscription already exists")
-        } else {
-            val response = runBlocking { createQuestionnaireSubscription() }
-            println("Questionnaire subscription creation status code: ${response.status}")
-        }
-
         val questionnaireResponseSubscriptionSearch = runBlocking {
             searchSubscription(criteria="QuestionnaireResponse?").receive<String>()
         }

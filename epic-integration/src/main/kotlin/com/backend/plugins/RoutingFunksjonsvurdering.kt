@@ -21,14 +21,6 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         get("/funksjonsvurdering") {
             call.respondTemplate("funksjonsvurdering/index.ftl")
         }
-
-        //fhir subscription endpoint for questionnaire subscription
-        put("funksjonsvurdering/questionnaire-subscription/{...}"){
-            val body = call.receive<String>()
-            println("message received")
-            questionnaireCommunication.addToInbox(body)
-            call.respond(HttpResponseStatus.CREATED)
-        }
         //fhir subscription endpoint for questionnaireResponse subscription
         put("funksjonsvurdering/questionnaireResponse-subscription/{...}"){
             val body = call.receive<String>()

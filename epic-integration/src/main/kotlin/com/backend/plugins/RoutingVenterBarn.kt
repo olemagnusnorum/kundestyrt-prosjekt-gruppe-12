@@ -239,7 +239,7 @@ fun Application.venterBarnRoute(questionnaireCommunication: QuestionnaireCommuni
                 val question2 = params["question2"]!!
 
 
-                val jsonResponse = runBlocking { questionnaireCommunication.createQuestionnaire(params) }
+                val jsonResponse = runBlocking { questionnaireCommunication.createQuestionnaire(params, "Title") }
                 val data = mapOf("response" to jsonResponse)
                 //testing inbox function
 
