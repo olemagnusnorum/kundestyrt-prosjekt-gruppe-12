@@ -15,9 +15,7 @@ import org.hl7.fhir.r4.model.Patient
 import java.time.format.DateTimeFormatter
 
 
-fun Application.venterBarnRoute() {
-
-    val questionnaireCommunication = QuestionnaireCommunication("local")
+fun Application.venterBarnRoute(questionnaireCommunication: QuestionnaireCommunication) {
 
     val navPregnancyMap: MutableMap<String, Condition> = mutableMapOf()
 
@@ -121,7 +119,6 @@ fun Application.venterBarnRoute() {
                         val condition = navPregnancyMap[id]
                         conditionCommunication.updateCondition(conditionId = condition?.idElement!!.idPart, note = note, abatementDate = abatementDate)
                     }
-
                 }
 
                 call.respondRedirect("/venter-barn/doctor")
@@ -242,7 +239,7 @@ fun Application.venterBarnRoute() {
                 val question2 = params["question2"]!!
 
 
-                val jsonResponse = runBlocking { questionnaireCommunication.createQuestionnaire(params) }
+                val jsonResponse = runBlocking { questionnaireCommunication.createQuestionnaire(params, "Title") }
                 val data = mapOf("response" to jsonResponse)
                 //testing inbox function
 
