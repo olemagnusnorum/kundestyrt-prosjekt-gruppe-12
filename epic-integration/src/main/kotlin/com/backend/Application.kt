@@ -3,18 +3,13 @@ package com.backend
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
 import com.backend.plugins.*
-
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-
 import freemarker.cache.ClassTemplateLoader
 import io.ktor.application.*
-import io.ktor.client.call.*
-import io.ktor.client.statement.*
 import io.ktor.features.*
 import io.ktor.freemarker.*
 import io.ktor.serialization.*
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.hl7.fhir.instance.model.api.IBaseResource
@@ -37,7 +32,6 @@ fun main() {
             templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
         }
 
-        personRoute()
         venterBarnRoute(questionnaireCommunication)
         funksjonsvurderingRoute(questionnaireResponseCommunication, questionnaireCommunication)
 

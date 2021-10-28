@@ -14,7 +14,7 @@
 </div>
 <div class="row">
     <div class="col">
-        <#include "../funksjonsvurdering/sidebar.ftl">
+        <#include "../shared/sidebar.ftl">
     </div>
     <div class="col">
         <h3>Innlogging</h3>

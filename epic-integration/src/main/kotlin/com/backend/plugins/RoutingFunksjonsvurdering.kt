@@ -8,7 +8,6 @@ import io.ktor.response.*
 import io.netty.handler.codec.http.HttpResponseStatus
 import org.hl7.fhir.r4.model.Questionnaire
 
-
 fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: QuestionnaireResponseCommunication, questionnaireCommunication: QuestionnaireCommunication) {
 
     val patientCommunication = PatientCommunication("local")
@@ -17,6 +16,9 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
     var lastPatient: String = "5"
 
     routing {
+        get("/") {
+            call.respondTemplate("index.ftl")
+        }
 
         // Landing page - navigation
         get("/funksjonsvurdering") {
@@ -103,30 +105,6 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             call.respondTemplate("/funksjonsvurdering/read-questionnaire-response.ftl", data)
         }
 
-        // Nav create questionnaire
-        get("/funksjonsvurdering/create-questionnaire/Patient/{patientId}/_history/1") {
-            val patientId: String = call.parameters["patientId"]!!
-
-            val data = mapOf("patientId" to patientId)
-
-            call.respondTemplate("funksjonsvurdering/create-questionnaire.ftl", data)
-        }
-
-/*      Keeping this in case we want it back
-        // Nav create questionnaire confirmation
-        post("/funksjonsvurdering/create-questionnaire"){
-
-            val params = call.receiveParameters()
-            val patientId: String = params["patientId"]!!
-
-            val questionnaireId = questionnaireCommunication.createQuestionnaire(params, patientId)
-            taskCommunication.createTask(patientId, questionnaireId)  //Should trigger subscription
-
-            val data = mapOf("response" to questionnaireId)
-
-            call.respondTemplate("funksjonsvurdering/create-questionnaire-confirmation.ftl", data)
-        }*/
-
         // NAV send predefined questionnaire
         post("/funksjonsvurdering/create-predefined-questionnaire") {
 
@@ -136,9 +114,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
 
             taskCommunication.createTask(patientId, questionnaireId) //Should trigger subscription
 
-            val data = mapOf("response" to questionnaireId)
-
-            call.respondTemplate("funksjonsvurdering/create-questionnaire-confirmation.ftl", data)
+            call.respondTemplate("funksjonsvurdering/nav.ftl")
         }
 
         //––––––––––––––––– Doctor –––––––––––––––––
