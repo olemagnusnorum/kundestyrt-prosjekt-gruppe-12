@@ -15,11 +15,11 @@
         <div class="col"></div>
         <div class="col">
             <div class="row">
-                <a class="btn btn-primary btn-block" href="/venter-barn">Venter Barn</a>
+                <a class="btn btn-primary btn-block" href="/funksjonsvurdering">Funksjonsvurdering</a>
             </div>
             <br>
             <div class="row">
-                <a class="btn btn-primary btn-block" href="/funksjonsvurdering">Funksjonsvurdering</a>
+                <a class="btn btn-primary btn-block" href="/venter-barn">Venter Barn</a>
             </div>
         </div>
         <div class="col"></div>
