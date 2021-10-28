@@ -10,7 +10,7 @@ import java.io.File
 
 class PdfHandler {
 
-    private var saveLocation: String = "epic-integration/src/main/resources/"
+    private var saveLocation: String = "src/main/resources/"
     private val font = PDType1Font.COURIER
     private val boldFont = PDType1Font.COURIER_BOLD
     private val fontSize: Float = 8F
