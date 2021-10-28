@@ -10,7 +10,7 @@ import kotlin.test.*
 
 // Warning: PER_CLASS Lifecycle means that the same QuestionnaireCommunicationTest class is used for every nested test
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class QuestionnaireResponseCommunicationTest {
+class QuestionnaireResponseTest {
 
     private val qrc = QuestionnaireResponseCommunication("local")
 
