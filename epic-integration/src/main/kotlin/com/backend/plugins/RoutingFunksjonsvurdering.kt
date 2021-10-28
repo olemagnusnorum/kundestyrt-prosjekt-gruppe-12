@@ -75,11 +75,17 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
                 }
             }
 
+            val questionnaireIds = mutableListOf<Pair<Questionnaire, String>>()
+            for (q in questionnaireCommunication.predefinedQuestionnaires) {
+                val tokens = q.id.split("/")
+                questionnaireIds.add(Pair(q, tokens[tokens.lastIndex-2]))
+            }
+
             val data = mapOf("patient" to patient,
                     "patientId" to patientId,
                     "questionnaireResponses" to questionnaireResponses,
                     "questionnaireTitles" to questionnaireTitles,
-                    "predefinedQuestionnaires" to questionnaireCommunication.predefinedQuestionnaires)
+                    "predefinedQuestionnaires" to questionnaireIds)
             call.respondTemplate("funksjonsvurdering/nav.ftl", data)
         }
 
