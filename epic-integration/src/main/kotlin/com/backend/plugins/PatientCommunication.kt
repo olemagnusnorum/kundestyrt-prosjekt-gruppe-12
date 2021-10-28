@@ -192,8 +192,4 @@ class PatientCommunication(server: String = "public") {
         val patientURL = patient.id // on the form "https://someaddress.com/theIdWeWant
         return patientURL.substringAfterLast("/")
     }
-
-    fun serializePatient(patient: Patient): String {
-        return jsonParser.encodeResourceToString(patient)
-    }
 }
