@@ -18,9 +18,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.hl7.fhir.instance.model.api.IBaseResource
+import org.hl7.fhir.r4.model.Questionnaire
 
 val subscriptionCommunication = SubscriptionCommunication("local")
 val questionnaireResponseCommunication = QuestionnaireResponseCommunication("local")
+val questionnaireCommunication = QuestionnaireCommunication("local")
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", watchPaths = listOf("classes", "resources")) {
@@ -36,8 +38,8 @@ fun main() {
         }
 
         personRoute()
-        venterBarnRoute()
-        funksjonsvurderingRoute(questionnaireResponseCommunication)
+        venterBarnRoute(questionnaireCommunication)
+        funksjonsvurderingRoute(questionnaireResponseCommunication, questionnaireCommunication)
 
         // Create required subscriptions if they do not exist
         subscriptionCommunication.createDefaultSubscriptions()
@@ -47,6 +49,19 @@ fun main() {
 
         // Put QRs already in the server in NAV's inbox
         loadNAVInbox()
+
+        // Create default questionnaires
+        val questionnaireBundle = runBlocking { questionnaireCommunication.searchQuestionnaires() }
+
+        if (questionnaireBundle.entry.size >= 3) {
+            for (bundleComponent in questionnaireBundle.entry) {
+                val questionnaire = bundleComponent.resource as Questionnaire
+                questionnaireCommunication.predefinedQuestionnaires.add(questionnaire)
+            }
+        }
+        else {
+            questionnaireCommunication.createDefaultQuestionnaires()
+        }
     }.start(wait = true)
 }
 

@@ -9,11 +9,11 @@ import io.netty.handler.codec.http.HttpResponseStatus
 import org.hl7.fhir.r4.model.Questionnaire
 
 
-fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: QuestionnaireResponseCommunication) {
+fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: QuestionnaireResponseCommunication, questionnaireCommunication: QuestionnaireCommunication) {
 
-    val questionnaireCommunication = QuestionnaireCommunication("local")
     val patientCommunication = PatientCommunication("local")
     val taskCommunication = TaskCommunication("local")
+    var lastPatient: String = "5"
 
     routing {
 
@@ -21,20 +21,10 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         get("/funksjonsvurdering") {
             call.respondTemplate("funksjonsvurdering/index.ftl")
         }
-
-        //fhir subscription endpoint for questionnaire subscription
-        put("funksjonsvurdering/questionnaire-subscription/{...}"){
-            val body = call.receive<String>()
-            println("message received")
-            println(body)
-            questionnaireCommunication.addToInbox(body)
-            call.respond(HttpResponseStatus.CREATED)
-        }
         //fhir subscription endpoint for questionnaireResponse subscription
         put("funksjonsvurdering/questionnaireResponse-subscription/{...}"){
             val body = call.receive<String>()
             println("message received")
-            println(body)
             questionnaireResponseCommunication.addToInbox(body)
             call.respond(HttpResponseStatus.CREATED)
         }
@@ -42,7 +32,6 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         put("funksjonsvurdering/task-subscription/{...}"){
             val body = call.receive<String>()
             println("message received")
-            println(body)
             taskCommunication.addToInbox(body)
             call.respond(HttpResponseStatus.CREATED)
         }
@@ -73,7 +62,11 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
                 }
             }
 
-            val data = mapOf("patient" to patient, "patientId" to patientId, "questionnaireResponses" to questionnaireResponses, "questionnaireTitles" to questionnaireTitles)
+            val data = mapOf("patient" to patient,
+                    "patientId" to patientId,
+                    "questionnaireResponses" to questionnaireResponses,
+                    "questionnaireTitles" to questionnaireTitles,
+                    "predefinedQuestionnaires" to questionnaireCommunication.predefinedQuestionnaires)
             call.respondTemplate("funksjonsvurdering/nav.ftl", data)
         }
 
@@ -108,6 +101,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             call.respondTemplate("funksjonsvurdering/create-questionnaire.ftl", data)
         }
 
+/*      Keeping this in case we want it back
         // Nav create questionnaire confirmation
         post("/funksjonsvurdering/create-questionnaire"){
 
@@ -116,6 +110,20 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
 
             val questionnaireId = questionnaireCommunication.createQuestionnaire(params, patientId)
             taskCommunication.createTask(patientId, questionnaireId)  //Should trigger subscription
+
+            val data = mapOf("response" to questionnaireId)
+
+            call.respondTemplate("funksjonsvurdering/create-questionnaire-confirmation.ftl", data)
+        }*/
+
+        // NAV send predefined questionnaire
+        post("/funksjonsvurdering/create-predefined-questionnaire") {
+
+            val params = call.receiveParameters()
+            val patientId: String = params["patientId"]!!.substringAfter("/")
+            val questionnaireId: String = params["questionnaireId"]!!
+
+            taskCommunication.createTask(patientId, questionnaireId) //Should trigger subscription
 
             val data = mapOf("response" to questionnaireId)
 
@@ -137,6 +145,8 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             val patientString = patientCommunication.patientSearch(identifier = patientIdentifier)
             val patient = patientCommunication.parseBundleXMLToPatient(patientString, false)
             val patientId = patient?.id!!.split("/")[5]
+            lastPatient = patientId
+            val patient = patientCommunication.readPatient(patientId)
 
             // Get all questionnaires related to patient from task-inbox
             val tasks = taskCommunication.inbox[patientId]
@@ -172,12 +182,10 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             answerList.add(params["answer2"]!!)
             answerList.add(params["answer3"]!!)
 
-            val patientId = questionnaire.identifier[0].value.substringAfter("/")
+            questionnaireResponseCommunication.createQuestionnaireResponse(questionnaire, answerList, lastPatient)
 
-            questionnaireResponseCommunication.createQuestionnaireResponse(questionnaire, answerList, patientId)
-
-            //This is where q should be deleted
-            questionnaireCommunication.inbox[patientId]?.removeAll {it.id == questionnaire.id}
+            // Q deleted when answered
+            taskCommunication.inbox[lastPatient]?.removeAll {it.focus.reference == "Questionnaire/$questionnaireId"}
 
             call.respondRedirect("/funksjonsvurdering/doctor-inbox")
         }

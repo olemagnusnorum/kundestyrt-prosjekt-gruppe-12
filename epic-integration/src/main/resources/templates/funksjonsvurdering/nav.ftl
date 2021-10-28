@@ -12,14 +12,13 @@
 </div>
 <div class="row">
     <div class="col">
-        <#include "*/sidebar.ftl"></div>
+        <#include "../shared/sidebar.ftl"></div>
     <div class="col">
         <br>
 
         <#if patient??>
 
             <h3>Pasient: ${patient.name[0].given[0]} ${patient.name[0].family}</h3>
-            <a href="/funksjonsvurdering/create-questionnaire/Patient/${patientId}/_history/1">Lag et questionnaire som skal sendes til Legen</a>
             <br>
             <br>
             <h3>Innboks</h3>
@@ -44,16 +43,30 @@
                 <p>Ingen nye meldinger.
             </#if>
 
+            <h3>Send forhåndslagde spørsmål</h3>
+            <#list predefinedQuestionnaires as questionnaire>
+                <form action="/funksjonsvurdering/create-predefined-questionnaire" method="post">
+                    <p> ${questionnaire.title} </p>
+                    <#list questionnaire.item as question>
+                        <p> ${question.text} </p>
+                    </#list>
+                    <input hidden name="patientId" type="text" value="${patient.id}">
+                    <input hidden name="questionnaireId" type="text" value="${(questionnaire.id?split("/"))[5]}">
+                    <input type="submit" value="Send disse spørsmålene">
+                </form>
+                <br>
+            </#list>
+
         <#else>
 
-            <h3>Velg pasient</h3>
+            <h3>Velg bruker</h3>
             <br>
             <div class="row">
                 <div class="col">
                     <form action="/funksjonsvurdering/nav" method="post">
                         <input class="form-control" name="patientId" placeholder="Fødselsnummer" type="text">
                         <br>
-                        <input class="btn btn-primary" type="submit">
+                        <input class="btn btn-primary" type="submit" value="Se brukerens side">
                     </form>
                 </div>
             </div>

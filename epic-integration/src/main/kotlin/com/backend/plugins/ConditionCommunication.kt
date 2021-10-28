@@ -191,14 +191,18 @@ class ConditionCommunication(server: String = "public") {
      * Function to parse a received bundle containing Condition resources
      * to a hapi condition object.
      * @param jsonMessage is the bundle received from a search as a string
+     * @param [firstNotLast] whether to return the first or the last element in the bundle
      * @return the first condition in the bundle as a hapi condition object
      */
-    fun parseConditionBundleStringToObject(jsonMessage: String): Condition? {
+    fun parseConditionBundleStringToObject(jsonMessage: String, firstNotLast: Boolean = true): Condition? {
         jsonParser.setPrettyPrint(true)
 
         val bundle = jsonParser.parseResource(Bundle::class.java, jsonMessage)
         if (bundle.total > 0)
-            return bundle.entry[0].resource as Condition
+            return if (firstNotLast)
+                bundle.entry.first().resource as Condition
+            else
+                bundle.entry.last().resource as Condition
 
         return null
     }

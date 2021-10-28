@@ -13,7 +13,7 @@
 </div>
 <div class="row">
     <div class="col">
-        <#include "*/sidebar.ftl"></div>
+        <#include "../shared/sidebar.ftl"></div>
     <div class="col">
 
         <#list questions as question>
@@ -28,10 +28,6 @@
 
         <div class="row">
             <a class="btn btn-primary btn-block" href="/funksjonsvurdering/nav">Gå tilbake til NAVs side</a>
-        </div>
-        <br>
-        <div class="row">
-            <a class="btn btn-outline-primary btn-block" href="/funksjonsvurdering/create-questionnaire/Patient/${patientId}/_history/1">Lag et nytt questionnaire som skal sendes til Legen</a>
         </div>
         <br>
     </div>

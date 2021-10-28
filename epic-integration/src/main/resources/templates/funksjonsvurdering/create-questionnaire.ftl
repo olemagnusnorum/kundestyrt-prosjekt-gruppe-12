@@ -13,7 +13,7 @@
 </div>
 <div class="row">
     <div class="col">
-        <#include "*/sidebar.ftl">
+        <#include "../shared/sidebar.ftl">
     </div>
     <div class="col">
         <h1>Questionaire for NAV</h1>

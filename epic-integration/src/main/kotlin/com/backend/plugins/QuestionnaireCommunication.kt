@@ -1,6 +1,7 @@
 package com.backend.plugins
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
+import ca.uhn.fhir.util.BundleBuilder
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -8,6 +9,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.http.Parameters
 import kotlinx.coroutines.runBlocking
+import org.hl7.fhir.instance.model.api.IBaseResource
 import org.hl7.fhir.r4.model.*
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -19,7 +21,7 @@ class QuestionnaireCommunication(server: String = "public") {
     //the base of the fhir server
     private val baseURL: String = when (server) {
         "public" -> "http://hapi.fhir.org/baseR4"
-        "local" -> "http://localhost:8000/fhir/"
+        "local" -> "http://localhost:8000/fhir"
         else -> throw IllegalArgumentException("server parameter must be either \"public\" or \"local\"")
     }
 
@@ -27,8 +29,33 @@ class QuestionnaireCommunication(server: String = "public") {
     private val client = HttpClient()
     private val jsonParser: IParser = ctx.newJsonParser()
 
-    //{patientId: [questionnaire]}
-    var inbox: MutableMap<String, MutableList<Questionnaire>> = mutableMapOf()
+    var predefinedQuestionnaires = mutableListOf<Questionnaire>()
+
+    fun createDefaultQuestionnaires() {
+        var questions = Parameters.build {
+            append("question1", "Kan pasienten høre?")
+            append("question2", "Kan pasienten se?")
+            append("question3", "Kan pasienten prate?")
+        }
+
+        runBlocking { predefinedQuestionnaires.add(getQuestionnaire(createQuestionnaire(questions, "Sanser"))) }
+
+        questions = Parameters.build {
+            append("question1", "Kan pasienten ligge?")
+            append("question2", "Kan pasienten stå?")
+            append("question3", "Kan pasienten gå?")
+        }
+
+        runBlocking { predefinedQuestionnaires.add(getQuestionnaire(createQuestionnaire(questions, "Fysiske evner"))) }
+
+        questions = Parameters.build {
+            append("question1", "Kan pasienten spille trompet?")
+            append("question2", "Kan pasienten løse kryssord?")
+            append("question3", "Kan pasienten danse cancan?")
+        }
+
+        runBlocking { predefinedQuestionnaires.add(getQuestionnaire(createQuestionnaire(questions, "Annet"))) }
+    }
 
     /**
      * Function to create a questionnaire and save the questionnaire to fhir server.
@@ -38,7 +65,7 @@ class QuestionnaireCommunication(server: String = "public") {
      * the "Register questionnaire" button you receive the params to send in.
      * @return id of the created questionnaire or "EMPTY" if a questionnaire was not created.
      */
-    suspend fun createQuestionnaire(questions: Parameters, patientId: String = "2559067"): String{
+    suspend fun createQuestionnaire(questions: Parameters, title: String): String{
 
         val questionnaire = Questionnaire()
 
@@ -48,7 +75,7 @@ class QuestionnaireCommunication(server: String = "public") {
         val date = SimpleDateFormat("yyyy-MM-dd").parse(dateString)
 
         questionnaire.setName("NavQuestionnaire")
-        questionnaire.setTitle("Nav questionaire: Funksjonsvurdering")
+        questionnaire.setTitle(title)
         questionnaire.setStatus(Enumerations.PublicationStatus.ACTIVE)
         questionnaire.setDate(date)
         questionnaire.setPublisher("NAV")
@@ -73,13 +100,6 @@ class QuestionnaireCommunication(server: String = "public") {
         }
 
         questionnaire.setItem(items)
-
-        // Set the identifier. Should be on the format UUID/patientID.
-        // This allows us to connect a questionnaire to a patient.
-        val identifier = Identifier()
-        val uuid = UUID.randomUUID().toString()
-        identifier.setValue("$uuid/$patientId")
-        questionnaire.setIdentifier(mutableListOf(identifier))
 
         val questionnaireJson = jsonParser.encodeResourceToString(questionnaire)
 
@@ -125,18 +145,12 @@ class QuestionnaireCommunication(server: String = "public") {
     }
 
     /**
-     * Add questionnaire to local inbox when it arrives via subscription
+     * Search after questionnaires.
      */
-    fun addToInbox(json: String) {
-        val questionnaire = jsonParser.parseResource(Questionnaire::class.java, json)
-        val patientId = questionnaire.identifier[0].value.substringAfter("/")
-
-        if (inbox.containsKey(patientId)) {
-            inbox[patientId]?.add(questionnaire)
-        }
-        else {
-            var newList = mutableListOf<Questionnaire>(questionnaire)
-            inbox[patientId] = newList
-        }
+    suspend fun searchQuestionnaires() : Bundle {
+        val response: HttpResponse =
+                client.get("$baseURL/Questionnaire?_format=json") {
+                }
+        return jsonParser.parseResource(Bundle::class.java, response.receive<String>())
     }
 }
