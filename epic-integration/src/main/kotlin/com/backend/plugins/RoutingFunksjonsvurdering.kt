@@ -11,7 +11,6 @@ import org.hl7.fhir.r4.model.Questionnaire
 
 fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: QuestionnaireResponseCommunication, questionnaireCommunication: QuestionnaireCommunication) {
 
-    //val questionnaireCommunication = QuestionnaireCommunication("local")
     val patientCommunication = PatientCommunication("local")
     val taskCommunication = TaskCommunication("local")
     var lastPatient: String = "5"
@@ -42,7 +41,6 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             val body = call.receive<String>()
             println("message received")
             taskCommunication.addToInbox(body)
-            println(taskCommunication.inbox)
             call.respond(HttpResponseStatus.CREATED)
         }
 
@@ -109,7 +107,8 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             call.respondTemplate("funksjonsvurdering/create-questionnaire.ftl", data)
         }
 
-/*        // Nav create questionnaire confirmation
+/*      Keeping this in case we want it back
+        // Nav create questionnaire confirmation
         post("/funksjonsvurdering/create-questionnaire"){
 
             val params = call.receiveParameters()
@@ -130,9 +129,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             val patientId: String = params["patientId"]!!.substringAfter("/")
             val questionnaireId: String = params["questionnaireId"]!!
 
-            println(questionnaireId)
-
-            println(taskCommunication.createTask(patientId, questionnaireId))  //Should trigger subscription
+            taskCommunication.createTask(patientId, questionnaireId) //Should trigger subscription
 
             val data = mapOf("response" to questionnaireId)
 
@@ -190,8 +187,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
 
             questionnaireResponseCommunication.createQuestionnaireResponse(questionnaire, answerList, lastPatient)
 
-            //This is where q should be deleted
-            //questionnaireCommunication.inbox[lastPatient]?.removeAll {it.id == questionnaire.id}
+            // Q deleted when answered
             taskCommunication.inbox[lastPatient]?.removeAll {it.focus.reference == "Questionnaire/$questionnaireId"}
 
             call.respondRedirect("/funksjonsvurdering/doctor-inbox")

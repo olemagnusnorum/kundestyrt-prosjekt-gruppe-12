@@ -62,8 +62,6 @@ class TaskCommunication(server: String = "public") {
         val task = jsonParser.parseResource(Task::class.java, json)
         val patientId = task.`for`.reference.substringAfter("/")
 
-        println(patientId)
-
         if (inbox.containsKey(patientId)) {
             inbox[patientId]?.add(task)
         }

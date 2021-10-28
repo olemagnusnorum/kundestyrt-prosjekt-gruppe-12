@@ -17,8 +17,6 @@ import java.time.format.DateTimeFormatter
 
 fun Application.venterBarnRoute(questionnaireCommunication: QuestionnaireCommunication) {
 
-    //val questionnaireCommunication = QuestionnaireCommunication("local")
-
     val navPregnancyMap: MutableMap<String, Condition> = mutableMapOf()
 
     routing {
@@ -121,7 +119,6 @@ fun Application.venterBarnRoute(questionnaireCommunication: QuestionnaireCommuni
                         val condition = navPregnancyMap[id]
                         conditionCommunication.updateCondition(conditionId = condition?.idElement!!.idPart, note = note, abatementDate = abatementDate)
                     }
-
                 }
 
                 call.respondRedirect("/venter-barn/doctor")
