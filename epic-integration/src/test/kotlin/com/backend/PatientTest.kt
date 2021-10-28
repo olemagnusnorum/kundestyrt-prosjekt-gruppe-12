@@ -3,11 +3,14 @@ package com.backend
 import com.backend.plugins.PatientCommunication
 import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.Patient
+import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestMethodOrder
 import kotlin.test.*
 
 // Warning: PER_CLASS Lifecycle means that the same EpicCommunicationTest class is used for every nested test
+@TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PatientTest {
 

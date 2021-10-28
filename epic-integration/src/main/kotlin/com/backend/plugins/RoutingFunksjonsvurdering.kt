@@ -13,6 +13,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
 
     val patientCommunication = PatientCommunication("local")
     val taskCommunication = TaskCommunication("local")
+    val pdfHandler = PdfHandler()
     var lastPatient: String = "5"
 
     routing {
@@ -26,6 +27,16 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             val body = call.receive<String>()
             println("message received")
             questionnaireResponseCommunication.addToInbox(body)
+
+            val questionnaireResponse = questionnaireResponseCommunication.parseQuestionnaireResponse(body)
+            val patient = patientCommunication.readPatient(questionnaireResponse.subject.reference.substringAfter("/"))
+
+            val header = "NAV respons fra Helseplattformen\n" +
+                        "Dato: ${questionnaireResponse.meta.lastUpdated}\n" +
+                        "Pasient: ${patient.name[0].given[0]} ${patient.name[0].family}"
+
+            pdfHandler.writeToPdf(header, questionnaireResponseCommunication.jsonParser.setPrettyPrint(true).encodeResourceToString(questionnaireResponse), "${patient.identifier[0].value}.pdf")
+
             call.respond(HttpResponseStatus.CREATED)
         }
         //fhir subscription endpoint for task subscription
@@ -46,8 +57,10 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         // Nav landing page after choosing patient
         post("/funksjonsvurdering/nav") {
 
-            val patientId = call.receiveParameters()["patientId"]!!
-            val patient = patientCommunication.readPatient(patientId)
+            val patientIdentifier = call.receiveParameters()["patientId"]!!
+            val bundleString = patientCommunication.patientSearch(identifier = patientIdentifier)
+            val patient = patientCommunication.parseBundleXMLToPatient(bundleString, false)
+            val patientId = patient?.id!!.split("/")[5]
 
             val questionnaireResponses = questionnaireResponseCommunication.inbox[patientId]
 
@@ -61,10 +74,10 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             }
 
             val data = mapOf("patient" to patient,
+                    "patientId" to patientId,
                     "questionnaireResponses" to questionnaireResponses,
                     "questionnaireTitles" to questionnaireTitles,
                     "predefinedQuestionnaires" to questionnaireCommunication.predefinedQuestionnaires)
-
             call.respondTemplate("funksjonsvurdering/nav.ftl", data)
         }
 
@@ -118,7 +131,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         post("/funksjonsvurdering/create-predefined-questionnaire") {
 
             val params = call.receiveParameters()
-            val patientId: String = params["patientId"]!!.substringAfter("/")
+            val patientId: String = params["patientId"]!!.split("/")[5]
             val questionnaireId: String = params["questionnaireId"]!!
 
             taskCommunication.createTask(patientId, questionnaireId) //Should trigger subscription
@@ -139,22 +152,30 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         // Doctor landing page after choosing patient
         post("/funksjonsvurdering/doctor-inbox") {
 
-            val patientId: String = call.receiveParameters()["patientId"]!!
+            val patientIdentifier: String = call.receiveParameters()["patientId"]!!
+            val patientString = patientCommunication.patientSearch(identifier = patientIdentifier)
+            val patient = patientCommunication.parseBundleXMLToPatient(patientString, false)
+            val patientId = patient?.id!!.split("/")[5]
             lastPatient = patientId
-            val patient = patientCommunication.readPatient(patientId)
 
             // Get all questionnaires related to patient from task-inbox
             val tasks = taskCommunication.inbox[patientId]
-            val questionnaires = mutableListOf<Questionnaire>()
 
             if (tasks != null) {
+                val questionnaires = mutableListOf<Questionnaire>()
+
                 for (task in tasks) {
                     questionnaires.add(questionnaireCommunication.getQuestionnaire(task.focus.reference.substringAfter("/")))
                 }
+
+                val data = mapOf("patient" to patient, "questionnaires" to questionnaires)
+                call.respondTemplate("funksjonsvurdering/doctor-inbox.ftl", data)
+            } else {
+
+                val data = mapOf("patient" to patient)
+                call.respondTemplate("funksjonsvurdering/doctor-inbox.ftl", data)
             }
 
-            val data = mapOf("patient" to patient, "questionnaires" to questionnaires)
-            call.respondTemplate("funksjonsvurdering/doctor-inbox.ftl", data)
         }
 
         // Doctor choose questionnaire

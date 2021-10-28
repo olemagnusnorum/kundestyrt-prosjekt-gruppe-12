@@ -20,7 +20,7 @@ class QuestionnaireResponseCommunication(server: String = "public") {
 
     private val ctx: FhirContext = FhirContext.forR4()
     private val client = HttpClient()
-    private val jsonParser: IParser = ctx.newJsonParser()
+    val jsonParser: IParser = ctx.newJsonParser()
 
     //{patientId: [questionnaire]}
     var inbox: MutableMap<String, MutableList<QuestionnaireResponse>> = mutableMapOf()
@@ -116,5 +116,12 @@ class QuestionnaireResponseCommunication(server: String = "public") {
             var newList = mutableListOf<QuestionnaireResponse>(questionnaireResponse)
             inbox[patientId] = newList
         }
+    }
+
+    /**
+     * Parse QuestionnaireResponse
+     */
+    fun parseQuestionnaireResponse(json: String): QuestionnaireResponse {
+        return jsonParser.parseResource(QuestionnaireResponse::class.java, json)
     }
 }

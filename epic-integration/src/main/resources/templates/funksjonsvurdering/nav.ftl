@@ -59,14 +59,14 @@
 
         <#else>
 
-            <h3>Velg pasient</h3>
+            <h3>Velg bruker</h3>
             <br>
             <div class="row">
                 <div class="col">
                     <form action="/funksjonsvurdering/nav" method="post">
-                        <input class="form-control" name="patientId" placeholder="Pasientens id" type="text">
+                        <input class="form-control" name="patientId" placeholder="Fødselsnummer" type="text">
                         <br>
-                        <input class="btn btn-primary" type="submit">
+                        <input class="btn btn-primary" type="submit" value="Se brukerens side">
                     </form>
                 </div>
             </div>
