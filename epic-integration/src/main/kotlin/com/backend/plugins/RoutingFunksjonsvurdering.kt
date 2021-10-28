@@ -44,7 +44,6 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             println("message received")
             println(body)
             taskCommunication.addToInbox(body)
-            println(taskCommunication.inbox)
             call.respond(HttpResponseStatus.CREATED)
         }
 
@@ -72,12 +71,6 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
                 for (questionnaireResponse in questionnaireResponses) {
                     questionnaireTitles.add(questionnaireCommunication.getQuestionnaire(questionnaireResponse.questionnaire.substringAfter("/")).title)
                 }
-            }
-
-            //println(bundleString)
-            println("patient.id er ${patient?.id}")
-            if (patient != null) {
-                println(patientCommunication.serializePatient(patient))
             }
 
             val data = mapOf("patient" to patient, "patientId" to patientId, "questionnaireResponses" to questionnaireResponses, "questionnaireTitles" to questionnaireTitles)
@@ -143,7 +136,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             val patientIdentifier: String = call.receiveParameters()["patientId"]!!
             val patientString = patientCommunication.patientSearch(identifier = patientIdentifier)
             val patient = patientCommunication.parseBundleXMLToPatient(patientString, false)
-            val patientId = patient?.id
+            val patientId = patient?.id!!.split("/")[5]
 
             // Get all questionnaires related to patient from task-inbox
             val tasks = taskCommunication.inbox[patientId]

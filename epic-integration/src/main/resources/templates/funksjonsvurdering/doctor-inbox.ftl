@@ -28,7 +28,7 @@
                     <br>
                 </#list>
             <#else>
-                <p>Ingen nye meldinger.
+                <p>Ingen nye meldinger.</p>
             </#if>
 
         <#else>
