@@ -32,7 +32,6 @@ class PatientTest {
     @Test
     @Order(2)
     fun `readPatient should return a patient resource`() {
-        println("PatientID: $patientId")
         val patient = runBlocking { patientCommunication.readPatient(patientId) }
         assert(patient.idElement.idPart == patientId)
     }
