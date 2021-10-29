@@ -30,8 +30,8 @@ class PatientResource(server: String = "public") {
 
     /**
      * Makes an HTTP response request to the fhir server
-     * @param[patientId] the id of the patient resource
-     * @return returns a Patient object
+     * @param [patientId] the id of the patient resource
+     * @return a Patient object
      */
     suspend fun read(patientId: String): Patient {
         if (patientId.isEmpty())
@@ -43,27 +43,29 @@ class PatientResource(server: String = "public") {
     // Functions for search
 
     /**
-     * Makes an HTTP response request to the epic server at fhir.epic.com
-     * Returns an HttpResponse object with a bundle containing 0, 1 or more patient object(s)
-     * As default the format returned is JSON (but XML can be returned by setting format to = "xml")
-     * @param givenName the patient's given name
-     * @param familyName the patient's surname
-     * @param birthdate on the format yyyy-mm-dd
-     * @param identifier is the patient's identifier
-     * @param outputFormat is either "json" or "xml"
-     * @return an http response as a string
+     * Makes an HTTP response request to the fhir server containing a patient search
+     * @param [givenName] the patient's given name
+     * @param [familyName] the patient's surname
+     * @param [birthdate] on the format yyyy-mm-dd
+     * @param [identifier] is the patient's identifier (e.g. SSN)
+     * @return the first registered Patient object that matches the given arguments, else null
      */
-    suspend fun patientSearch(givenName: String? = null, familyName: String? = null, birthdate: String? = null, identifier: String? = null, outputFormat: String = "json"): String {
-        //val token: String = runBlocking { getEpicAccessToken() }
+    suspend fun search(givenName: String? = null, familyName: String? = null, birthdate: String? = null, identifier: String? = null): Patient? {
         val response: HttpResponse =
-            client.get(baseURL + "/Patient?" +
-                    (if (givenName != null) "given=$givenName&" else "") +
-                    (if (familyName != null) "family=$familyName&" else "") +
-                    (if (birthdate != null) "birthdate=$birthdate&" else "") +
-                    (if (identifier != null) "identifier=$identifier&" else "") +
-                    "_format=$outputFormat") {
-            }
-        return response.receive()
+            client.get(
+                "$baseURL/Patient?" +
+                        (givenName?.let { "given=$givenName&" } ?: "") +
+                        (familyName?.let { "family=$familyName&" } ?: "") +
+                        (birthdate?.let { "birthdate=$birthdate&" } ?: "") +
+                        (identifier?.let { "identifier=$identifier&" } ?: "") +
+                        "_format=json"
+            )
+
+        val bundle: Bundle = jsonParser.parseResource(Bundle::class.java, response.receive<String>())
+        if (bundle.entry.size == 0) return null
+
+        // Returns the first registered Patient object in the fhir server that matches the given arguments
+        return bundle.entry.first().resource as Patient
     }
 
     /**
@@ -74,7 +76,7 @@ class PatientResource(server: String = "public") {
      * @return the patients id as a string
      */
     suspend fun getPatientIDFromDatabase(givenName: String, familyName: String, birthdate: String) : String {
-        val JSONBundle = patientSearch(givenName, familyName, birthdate)
+        val JSONBundle = search(givenName, familyName, birthdate)
         val patient : Patient = parseBundleXMLToPatient(JSONBundle, isXML = false)!!
         val patientID = getPatientID(patient)
         return patientID

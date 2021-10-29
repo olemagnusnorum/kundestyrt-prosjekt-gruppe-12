@@ -60,7 +60,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseResource: Questionn
         post("/funksjonsvurdering/nav") {
 
             val patientIdentifier = call.receiveParameters()["patientId"]!!
-            val bundleString = patientResource.patientSearch(identifier = patientIdentifier)
+            val bundleString = patientResource.search(identifier = patientIdentifier)
             val patient = patientResource.parseBundleXMLToPatient(bundleString, false)
             val patientId = patient?.id!!.split("/")[5]
 
@@ -135,7 +135,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseResource: Questionn
         post("/funksjonsvurdering/doctor-inbox") {
 
             val patientIdentifier: String = call.receiveParameters()["patientId"]!!
-            val patientString = patientResource.patientSearch(identifier = patientIdentifier)
+            val patientString = patientResource.search(identifier = patientIdentifier)
             val patient = patientResource.parseBundleXMLToPatient(patientString, false)
             val patientId = patient?.id!!.split("/")[5]
             lastPatient = patientId

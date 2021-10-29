@@ -39,7 +39,7 @@ class PatientTest {
     @Order(3)
     fun `searchPatient should return a string`() {
         val patient = runBlocking {
-            val patientResponse = patientResource.patientSearch(identifier = "123456789")
+            val patientResponse = patientResource.search(identifier = "123456789")
             return@runBlocking patientResource.parseBundleXMLToPatient(patientResponse, isXML = false)!!
         }
 
