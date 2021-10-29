@@ -14,7 +14,7 @@
 <body style="font-family: sans-serif">
 <div class="row mb-5">
     <div class="header">
-        <div class="col bg-light shadow p-4">
+        <div class="col shadow p-4">
             <h1>Lege</h1>
         </div>
     </div>
