@@ -7,7 +7,7 @@
             <a href="/funksjonsvurdering" class="link-dark text-decoration-none"><h5>Funksjonsvurdering</h5></a>
             <div>
                 <ul class="btn-toggle-nav list-unstyled fw-normal pb-1">
-                    <li style="margin: 5px 0 0 15px"><a href="/funksjonsvurdering/doctor-inbox" class="link-dark text-decoration-none">Helseplattformen</a></li>
+                    <li style="margin: 5px 0 0 15px"><a href="/funksjonsvurdering/doctor-inbox" class="link-dark text-decoration-none">Lege</a></li>
                     <li style="margin: 5px 0 0 15px"><a href="/funksjonsvurdering/nav" class="link-dark text-decoration-none">NAV</a></li>
                 </ul>
             </div>

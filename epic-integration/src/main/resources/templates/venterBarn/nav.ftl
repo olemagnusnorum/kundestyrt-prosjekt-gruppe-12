@@ -15,7 +15,7 @@
         <#include "../shared/sidebar.ftl">
     </div>
     <div class="col">
-        <h3>Personer som er gravide:</h3>
+        <h3>Personer som er gravide</h3>
         <br>
         <#if data??>
             <#list data?keys as key>
@@ -27,7 +27,6 @@
             Ingen gravide personer
             <br>
         </#if>
-        <a class="btn btn-primary" href="/venter-barn" role="button">Gå tilbake til navigasjonsiden</a>
     </div>
     <div class="col"></div>
 </div>

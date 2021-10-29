@@ -29,6 +29,7 @@
             <p>Du kan ikke søke om foreldrepenger.</p>
         </#if>
         <br>
+        <br>
     </div>
     <div clasS="col"></div>
 </div>
