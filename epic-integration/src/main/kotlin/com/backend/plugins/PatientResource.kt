@@ -69,22 +69,6 @@ class PatientResource(server: String = "public") {
     }
 
     /**
-     * Searches the database for a Patient with the correct name and birthdate and returns their ID.
-     * @param givenName is the given name of a patient
-     * @param familyName is the patient's surname
-     * @param birthdate is the patient's birthdate on the format yyyy-mm-dd
-     * @return the patients id as a string
-     */
-    suspend fun getPatientIDFromDatabase(givenName: String, familyName: String, birthdate: String) : String {
-        val JSONBundle = search(givenName, familyName, birthdate)
-        val patient : Patient = parseBundleXMLToPatient(JSONBundle, isXML = false)!!
-        val patientID = getPatientID(patient)
-        return patientID
-    }
-
-    // Functions for create
-
-    /**
      * Create a patient and post it to the fhir server
      * @param [givenName] given name of the patient
      * @param [familyName] family name of the patient
