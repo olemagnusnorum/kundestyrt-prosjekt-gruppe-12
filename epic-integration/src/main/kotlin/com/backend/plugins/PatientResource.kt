@@ -85,14 +85,15 @@ class PatientResource(server: String = "public") {
     // Functions for create
 
     /**
-     * Function to create a patient and save the patient to epics server.
-     * @param givenName string
-     * @param familyName string
-     * @param identifierValue on the format "XXX-XX-XXXX" ("028-27-1234")
-     * in epics server, not important in hapi server.
-     * @return an http response as a string.
+     * Create a patient and post it to the fhir server
+     * @param [givenName] given name of the patient
+     * @param [familyName] family name of the patient
+     * @param [identifierValue] personal identification number of the patient, on the format "ddMMYYxxxxx" (01029912345)
+     * @param [birthdate] on the format dd-MMM-yyyy (24-Dec-1999)
+     * @param [gender] an AdministrativeGender enum (MALE, FEMALE, OTHER, UNKNOWN, NULL)
+     * @return the patientId of the created patient if successful, else null
      */
-    suspend fun createPatient(givenName: String, familyName: String, identifierValue: String, birthdate: String = "7-Jun-2013"): String {
+    suspend fun create(givenName: String, familyName: String, identifierValue: String, birthdate: String, gender: Enumerations.AdministrativeGender = Enumerations.AdministrativeGender.FEMALE): String? {
         val patient = Patient()
 
         // Set birthdate
@@ -100,40 +101,42 @@ class PatientResource(server: String = "public") {
         val date = formatter.parse(birthdate)
         patient.birthDate = date
 
-        // set gender
-        patient.setGender(Enumerations.AdministrativeGender.FEMALE)
+        // Set gender
+        patient.gender = gender
 
         // Set identifier (have not figured out how to give the identifier a value)
         val identifier = Identifier()
-        identifier.setValue(identifierValue)
-        identifier.setSystem("urn:oid:2.16.840.1.113883.4.1")
-        identifier.setUse(Identifier.IdentifierUse.OFFICIAL)
-        patient.setIdentifier(mutableListOf(identifier))
+        identifier.value = identifierValue
+        identifier.system = "urn:oid:2.16.840.1.113883.4.1"
+        identifier.use = Identifier.IdentifierUse.OFFICIAL
+        patient.identifier = mutableListOf(identifier)
 
-        // Set name
+        // Set the patient name
         val name = HumanName()
-        name.setFamily(familyName)
-        name.setGiven(mutableListOf(StringType(givenName)))
-        name.setUse(HumanName.NameUse.USUAL)
-        patient.setName(mutableListOf(name))
+        name.family = familyName
+        name.given = mutableListOf(StringType(givenName))
+        name.use = HumanName.NameUse.USUAL
+        patient.name = mutableListOf(name)
 
+        // Create a json-encoded string of the patient
         val patientJson = jsonParser.encodeResourceToString(patient)
 
-        // Post the patient to epic
+        // Post the patient to the fhir server
         val response: HttpResponse = client.post("$baseURL/Patient") {
-
             contentType(ContentType.Application.Json)
             body = patientJson
         }
-        val responseString = response.receive<String>()
 
         if (response.headers["Location"] != null) {
             latestPatientId = response.headers["Location"]!!.split("/")[5]
             conditionResource.latestConditionId = null
             patientCreated = true
+
+            // Return the patientId if a patient was created
+            return latestPatientId
         }
 
-        return responseString
+        return null
     }
 
     // Functions for parsing

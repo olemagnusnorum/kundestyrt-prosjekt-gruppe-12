@@ -21,7 +21,7 @@ class PatientTest {
     @Order(1)
     fun `createPatient should return a patient resource`() {
         runBlocking {
-            patientResource.createPatient("Test", "Testest", identifierValue = "123456789",  birthdate = "1-Jan-1990")
+            patientResource.create("Test", "Testest", identifierValue = "123456789",  birthdate = "1-Jan-1990")
             patientId = patientResource.latestPatientId
         }
 

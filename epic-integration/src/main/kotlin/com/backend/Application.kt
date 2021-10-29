@@ -69,8 +69,8 @@ fun createDefaultPatient() {
     // If the patient doesn't exist, create it
     if (patient == null) {
         runBlocking {
-            patientResource.createPatient("Kari", "Nordmann", identifierValue = "07069012345",  birthdate = "7-Jun-1990")
-            patientResource.createPatient("Ola", "Nordmann", identifierValue = "07069012346",  birthdate = "7-Jun-1991")
+            patientResource.create("Kari", "Nordmann", identifierValue = "07069012345",  birthdate = "7-Jun-1990")
+            patientResource.create("Ola", "Nordmann", identifierValue = "07069012346",  birthdate = "7-Jun-1991")
         }
     }
 }
