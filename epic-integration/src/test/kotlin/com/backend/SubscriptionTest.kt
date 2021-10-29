@@ -4,19 +4,14 @@ import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
 import org.junit.jupiter.api.TestInstance
 import com.backend.plugins.SubscriptionCommunication
-import io.ktor.application.*
-import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.statement.*
-import io.ktor.request.*
-import io.ktor.response.*
 import org.junit.jupiter.api.Test
-import io.ktor.routing.*
-import io.netty.handler.codec.http.HttpResponseStatus
-import junit.framework.Assert.assertTrue
+import org.junit.Assert.assertTrue
 import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.Bundle
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Nested
 
 // Warning: PER_CLASS Lifecycle means that the same QuestionnaireCommunicationTest class is used for every nested test
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -35,15 +30,23 @@ class SubscriptionTest {
         ) }
     }
 
-    @Test
-    fun `createSubscription should return an http response with status value in range 200-299`() {
-        val response = runBlocking {sc.createSubscription(
-            "Location?status=active",
-            "/test",
-            "To test createSubscription"
-        )}
-        assert(response is HttpResponse)
-        assertTrue(response.status.value in 200..299)
+    @Nested
+    inner class createSubscription {
+        val response = runBlocking {
+            sc.createSubscription(
+                "Location?status=active",
+                "/test",
+                "To test createSubscription"
+            )
+        }
+        @Test
+        fun `should return an http response`() {
+            assert(response is HttpResponse)
+        }
+        @Test
+        fun `the http response should have a status value in range 200-299`() {
+            assertTrue(response.status.value in 200..299)
+        }
     }
 
     @Test
@@ -55,10 +58,5 @@ class SubscriptionTest {
         val responseString = runBlocking { response.receive<String>() }
         val bundle: Bundle = jsonParser.parseResource(Bundle::class.java, responseString)
         assert(bundle.entry.size > 0)
-    }
-
-    @Test
-    fun `createDeafultSubscriptions should ensure pregnancy condition, questionnaireResponse and task subscription exist`() {
-
     }
 }
