@@ -31,7 +31,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseResource: Questionn
             questionnaireResponseResource.addToInbox(body)
 
             val questionnaireResponse = questionnaireResponseResource.parseQuestionnaireResponse(body)
-            val patient = patientResource.readPatient(questionnaireResponse.subject.reference.substringAfter("/"))
+            val patient = patientResource.read(questionnaireResponse.subject.reference.substringAfter("/"))
 
             val header = "NAV respons fra Helseplattformen\n" +
                         "Dato: ${questionnaireResponse.meta.lastUpdated}\n" +

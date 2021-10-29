@@ -31,7 +31,7 @@ class PatientTest {
     @Test
     @Order(2)
     fun `readPatient should return a patient resource`() {
-        val patient = runBlocking { patientResource.readPatient(patientId) }
+        val patient = runBlocking { patientResource.read(patientId) }
         assert(patient.idElement.idPart == patientId)
     }
 

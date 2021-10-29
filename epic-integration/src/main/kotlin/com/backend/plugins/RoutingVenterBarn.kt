@@ -127,7 +127,7 @@ fun Application.venterBarnRoute(questionnaireResource: QuestionnaireResource) {
                 val body = call.receive<String>()
                 val condition = conditionResource.parseConditionsStringToObject(body)
 
-                val patient = patientResource.readPatient(condition.subject.reference.split("/")[1])
+                val patient = patientResource.read(condition.subject.reference.split("/")[1])
 
                 navPregnancyMap[patient.identifier[0].value] = condition
 

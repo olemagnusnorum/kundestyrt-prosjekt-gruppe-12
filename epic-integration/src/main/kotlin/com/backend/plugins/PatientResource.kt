@@ -28,24 +28,15 @@ class PatientResource(server: String = "public") {
     var latestPatientId: String = "2591228"
     var patientCreated: Boolean = false
 
-    // Functions for read
-
     /**
-     * Makes an HTTP response request to the epic server at fhir.epic.com
-     * Returns a Patient object
-     * As default the format returned is JSON (but XML can be returned by setting format to = "xml")
-     * Birthdate format yyyy-mm-dd
-     *
-     * @property[patientId] the id of the patient resource
+     * Makes an HTTP response request to the fhir server
+     * @param[patientId] the id of the patient resource
+     * @return returns a Patient object
      */
-    suspend fun readPatient(patientId: String): Patient {
-        val response: HttpResponse =
-            client.get(baseURL + "/Patient/" +
-                    patientId +
-                    "?_format=json") {
-
-            }
-
+    suspend fun read(patientId: String): Patient {
+        if (patientId.isEmpty())
+            throw IllegalArgumentException("Required argument 'patientId' was null.")
+        val response: HttpResponse = client.get("$baseURL/Patient/$patientId?_format=json")
         return jsonParser.parseResource(Patient::class.java, response.receive<String>())
     }
 
