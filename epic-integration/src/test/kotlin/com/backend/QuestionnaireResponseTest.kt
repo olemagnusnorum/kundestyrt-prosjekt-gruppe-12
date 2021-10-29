@@ -1,6 +1,6 @@
 package com.backend
 
-import com.backend.plugins.QuestionnaireResponseCommunication
+import com.backend.plugins.QuestionnaireResponseResource
 import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.QuestionnaireResponse
 import org.junit.jupiter.api.Nested
@@ -12,7 +12,7 @@ import kotlin.test.*
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class QuestionnaireResponseTest {
 
-    private val qrc = QuestionnaireResponseCommunication("local")
+    private val qrc = QuestionnaireResponseResource("local")
 
     @Test
     fun `getQuestionnaireAnswers should return a list of strings`() {

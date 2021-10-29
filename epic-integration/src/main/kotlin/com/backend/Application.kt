@@ -15,9 +15,9 @@ import kotlinx.serialization.json.Json
 import org.hl7.fhir.instance.model.api.IBaseResource
 import org.hl7.fhir.r4.model.Questionnaire
 
-val subscriptionCommunication = SubscriptionCommunication("local")
-val questionnaireResponseCommunication = QuestionnaireResponseCommunication("local")
-val questionnaireCommunication = QuestionnaireCommunication("local")
+val subscriptionResource = SubscriptionResource("local")
+val questionnaireResponseResource = QuestionnaireResponseResource("local")
+val questionnaireResource = QuestionnaireResource("local")
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", watchPaths = listOf("classes", "resources")) {
@@ -32,11 +32,11 @@ fun main() {
             templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
         }
 
-        venterBarnRoute(questionnaireCommunication)
-        funksjonsvurderingRoute(questionnaireResponseCommunication, questionnaireCommunication)
+        venterBarnRoute(questionnaireResource)
+        funksjonsvurderingRoute(questionnaireResponseResource, questionnaireResource)
 
         // Create required subscriptions if they do not exist
-        subscriptionCommunication.createDefaultSubscriptions()
+        subscriptionResource.createDefaultSubscriptions()
 
         // Create a default patient
         createDefaultPatient()
@@ -45,16 +45,16 @@ fun main() {
         loadNAVInbox()
 
         // Create default questionnaires
-        val questionnaireBundle = runBlocking { questionnaireCommunication.searchQuestionnaires() }
+        val questionnaireBundle = runBlocking { questionnaireResource.searchQuestionnaires() }
 
         if (questionnaireBundle.entry.size >= 3) {
             for (bundleComponent in questionnaireBundle.entry) {
                 val questionnaire = bundleComponent.resource as Questionnaire
-                questionnaireCommunication.predefinedQuestionnaires.add(questionnaire)
+                questionnaireResource.predefinedQuestionnaires.add(questionnaire)
             }
         }
         else {
-            questionnaireCommunication.createDefaultQuestionnaires()
+            questionnaireResource.createDefaultQuestionnaires()
         }
     }.start(wait = true)
 }
@@ -62,15 +62,15 @@ fun main() {
 fun createDefaultPatient() {
     // Check if a predetermined patient exists in the fhir server
     val patient = runBlocking {
-        val response = patientCommunication.patientSearch(identifier = "07069012345")
-        patientCommunication.parseBundleXMLToPatient(response, isXML = false)
+        val response = patientResource.patientSearch(identifier = "07069012345")
+        patientResource.parseBundleXMLToPatient(response, isXML = false)
     }
 
     // If the patient doesn't exist, create it
     if (patient == null) {
         runBlocking {
-            patientCommunication.createPatient("Kari", "Nordmann", identifierValue = "07069012345",  birthdate = "7-Jun-1990")
-            patientCommunication.createPatient("Ola", "Nordmann", identifierValue = "07069012346",  birthdate = "7-Jun-1991")
+            patientResource.createPatient("Kari", "Nordmann", identifierValue = "07069012345",  birthdate = "7-Jun-1990")
+            patientResource.createPatient("Ola", "Nordmann", identifierValue = "07069012346",  birthdate = "7-Jun-1991")
         }
     }
 }
@@ -78,10 +78,10 @@ fun createDefaultPatient() {
 fun loadNAVInbox() {
     val ctx: FhirContext = FhirContext.forR4()
     val jsonParser: IParser = ctx.newJsonParser()
-    val bundle = runBlocking { questionnaireResponseCommunication.getAllQuestionnaireResponses() }
+    val bundle = runBlocking { questionnaireResponseResource.getAllQuestionnaireResponses() }
     val resources = bundle.entry
     for (resource in resources) {
         val final = resource.resource as IBaseResource
-        questionnaireResponseCommunication.addToInbox(jsonParser.encodeResourceToString(final))
+        questionnaireResponseResource.addToInbox(jsonParser.encodeResourceToString(final))
     }
 }

@@ -9,7 +9,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import org.hl7.fhir.r4.model.*
 
-class QuestionnaireResponseCommunication(server: String = "public") {
+class QuestionnaireResponseResource(server: String = "public") {
 
     //the base of the fhir server
     private val baseURL: String = when (server) {

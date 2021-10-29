@@ -11,7 +11,7 @@ import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.Bundle
 import org.hl7.fhir.r4.model.Subscription
 
-class SubscriptionCommunication(server: String = "public") {
+class SubscriptionResource(server: String = "public") {
 
     //the base of the fhir server
     private val baseURL: String = when (server) {

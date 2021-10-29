@@ -11,7 +11,7 @@ import org.hl7.fhir.r4.model.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class PatientCommunication(server: String = "public") {
+class PatientResource(server: String = "public") {
 
     //the base of the fhir server
     private val baseURL: String = when (server) {
@@ -136,7 +136,7 @@ class PatientCommunication(server: String = "public") {
 
         if (response.headers["Location"] != null) {
             latestPatientId = response.headers["Location"]!!.split("/")[5]
-            conditionCommunication.latestConditionId = null
+            conditionResource.latestConditionId = null
             patientCreated = true
         }
 

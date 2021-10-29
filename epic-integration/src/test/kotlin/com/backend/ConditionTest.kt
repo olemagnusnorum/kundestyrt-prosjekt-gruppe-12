@@ -1,7 +1,7 @@
 package com.backend
 
-import com.backend.plugins.ConditionCommunication
-import com.backend.plugins.PatientCommunication
+import com.backend.plugins.ConditionResource
+import com.backend.plugins.PatientResource
 import io.ktor.client.call.*
 import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.Condition
@@ -17,8 +17,8 @@ import kotlin.test.*
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ConditionTest {
 
-    private val patientCommunication = PatientCommunication("local")
-    private val conditionCommunication = ConditionCommunication("local")
+    private val patientResource = PatientResource("local")
+    private val conditionResource = ConditionResource("local")
 
     private var patientId = ""
     private var conditionId = ""
@@ -27,9 +27,9 @@ class ConditionTest {
     @Order(1)
     fun `createCondition should create and parse a patient, and create and parse a condition`() {
         val conditionResponse = runBlocking {
-            val patient = patientCommunication.parseBundleXMLToPatient(patientCommunication.patientSearch(identifier = "07069012345"), isXML = false)
+            val patient = patientResource.parseBundleXMLToPatient(patientResource.patientSearch(identifier = "07069012345"), isXML = false)
             patientId = patient?.idElement?.idPart!!
-            return@runBlocking conditionCommunication.createCondition(patientId, "This is a test condition", "2021-10-10", "2022-01-01")
+            return@runBlocking conditionResource.createCondition(patientId, "This is a test condition", "2021-10-10", "2022-01-01")
         }
 
         conditionId = conditionResponse.headers["Location"]!!.split("/")[5]
@@ -39,7 +39,7 @@ class ConditionTest {
     @Test
     @Order(2)
     fun `getCondition should return a condition resource for Kari Nordmann`() {
-        val condition = runBlocking { conditionCommunication.getCondition(conditionId) }
+        val condition = runBlocking { conditionResource.getCondition(conditionId) }
         assert(condition.subject.reference == "Patient/$patientId")
     }
 
@@ -47,8 +47,8 @@ class ConditionTest {
     @Order(3)
     fun `searchCondition should find a pregnancy condition resource for Kari Nordmann`() {
         val condition: Condition = runBlocking {
-            val conditionResponse = conditionCommunication.searchCondition(patientId, outputFormat = "json").receive<String>()
-            return@runBlocking conditionCommunication.parseConditionBundleStringToObject(conditionResponse, firstNotLast = false)!!
+            val conditionResponse = conditionResource.searchCondition(patientId, outputFormat = "json").receive<String>()
+            return@runBlocking conditionResource.parseConditionBundleStringToObject(conditionResponse, firstNotLast = false)!!
         }
         assert(condition.idElement.idPart.isNotEmpty())
         assert(condition.code.coding[0].code == "77386006")
@@ -61,10 +61,10 @@ class ConditionTest {
         val note = "This is an updated test condition"
         val abatementDate = "2022-01-02"
         runBlocking {
-            conditionCommunication.updateCondition(conditionId, note = note, abatementDate = abatementDate)
+            conditionResource.updateCondition(conditionId, note = note, abatementDate = abatementDate)
         }
 
-        val condition = runBlocking { conditionCommunication.getCondition(conditionId) }
+        val condition = runBlocking { conditionResource.getCondition(conditionId) }
         assert(condition.note[0].text == note)
         assert(condition.abatementDateTimeType?.valueAsString == abatementDate)
     }

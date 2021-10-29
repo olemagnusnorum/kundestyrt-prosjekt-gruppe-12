@@ -8,10 +8,10 @@ import io.ktor.response.*
 import io.netty.handler.codec.http.HttpResponseStatus
 import org.hl7.fhir.r4.model.Questionnaire
 
-fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: QuestionnaireResponseCommunication, questionnaireCommunication: QuestionnaireCommunication) {
+fun Application.funksjonsvurderingRoute(questionnaireResponseResource: QuestionnaireResponseResource, questionnaireResource: QuestionnaireResource) {
 
-    val patientCommunication = PatientCommunication("local")
-    val taskCommunication = TaskCommunication("local")
+    val patientResource = PatientResource("local")
+    val taskResource = TaskResource("local")
     val pdfHandler = PdfHandler()
     var lastPatient: String = "5"
 
@@ -28,16 +28,16 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         put("funksjonsvurdering/questionnaireResponse-subscription/{...}"){
             val body = call.receive<String>()
             println("message received")
-            questionnaireResponseCommunication.addToInbox(body)
+            questionnaireResponseResource.addToInbox(body)
 
-            val questionnaireResponse = questionnaireResponseCommunication.parseQuestionnaireResponse(body)
-            val patient = patientCommunication.readPatient(questionnaireResponse.subject.reference.substringAfter("/"))
+            val questionnaireResponse = questionnaireResponseResource.parseQuestionnaireResponse(body)
+            val patient = patientResource.readPatient(questionnaireResponse.subject.reference.substringAfter("/"))
 
             val header = "NAV respons fra Helseplattformen\n" +
                         "Dato: ${questionnaireResponse.meta.lastUpdated}\n" +
                         "Pasient: ${patient.name[0].given[0]} ${patient.name[0].family}"
 
-            pdfHandler.writeToPdf(header, questionnaireResponseCommunication.jsonParser.setPrettyPrint(true).encodeResourceToString(questionnaireResponse), "${patient.identifier[0].value}.pdf")
+            pdfHandler.writeToPdf(header, questionnaireResponseResource.jsonParser.setPrettyPrint(true).encodeResourceToString(questionnaireResponse), "${patient.identifier[0].value}.pdf")
 
             call.respond(HttpResponseStatus.CREATED)
         }
@@ -45,7 +45,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         put("funksjonsvurdering/task-subscription/{...}"){
             val body = call.receive<String>()
             println("message received")
-            taskCommunication.addToInbox(body)
+            taskResource.addToInbox(body)
             call.respond(HttpResponseStatus.CREATED)
         }
 
@@ -60,23 +60,23 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         post("/funksjonsvurdering/nav") {
 
             val patientIdentifier = call.receiveParameters()["patientId"]!!
-            val bundleString = patientCommunication.patientSearch(identifier = patientIdentifier)
-            val patient = patientCommunication.parseBundleXMLToPatient(bundleString, false)
+            val bundleString = patientResource.patientSearch(identifier = patientIdentifier)
+            val patient = patientResource.parseBundleXMLToPatient(bundleString, false)
             val patientId = patient?.id!!.split("/")[5]
 
-            val questionnaireResponses = questionnaireResponseCommunication.inbox[patientId]
+            val questionnaireResponses = questionnaireResponseResource.inbox[patientId]
 
             // Getting questionnaire titles as they are not in questionnaireResponses
             val questionnaireTitles = mutableListOf<String>()
 
             if (questionnaireResponses != null) {
                 for (questionnaireResponse in questionnaireResponses) {
-                    questionnaireTitles.add(questionnaireCommunication.getQuestionnaire(questionnaireResponse.questionnaire.substringAfter("/")).title)
+                    questionnaireTitles.add(questionnaireResource.getQuestionnaire(questionnaireResponse.questionnaire.substringAfter("/")).title)
                 }
             }
 
             val questionnaireIds = mutableListOf<Pair<Questionnaire, String>>()
-            for (q in questionnaireCommunication.predefinedQuestionnaires) {
+            for (q in questionnaireResource.predefinedQuestionnaires) {
                 val tokens = q.id.split("/")
                 questionnaireIds.add(Pair(q, tokens[tokens.lastIndex-2]))
             }
@@ -94,14 +94,14 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
 
             // Getting questionnaireResponse
             val questionnaireResponseId: String = call.parameters["questionnaireResponseId"]!!
-            val questionnaireResponse = questionnaireResponseCommunication.getQuestionnaireResponse(questionnaireResponseId)
+            val questionnaireResponse = questionnaireResponseResource.getQuestionnaireResponse(questionnaireResponseId)
 
             //Getting questionnaire
-            val questionnaire = questionnaireCommunication.getQuestionnaire(questionnaireResponse.questionnaire.substringAfter(("/")))
+            val questionnaire = questionnaireResource.getQuestionnaire(questionnaireResponse.questionnaire.substringAfter(("/")))
 
             // Extract questions and answers
-            val questions = questionnaireCommunication.getQuestionnaireQuestions(questionnaire)
-            val answers = questionnaireResponseCommunication.getQuestionnaireAnswers(questionnaireResponse)
+            val questions = questionnaireResource.getQuestionnaireQuestions(questionnaire)
+            val answers = questionnaireResponseResource.getQuestionnaireAnswers(questionnaireResponse)
 
             // Getting patient
             val patientId = questionnaireResponse.subject.reference.substringAfter("/")
@@ -118,7 +118,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             val patientId: String = params["patientId"]!!.split("/")[5]
             val questionnaireId: String = params["questionnaireId"]!!
 
-            taskCommunication.createTask(patientId, questionnaireId) //Should trigger subscription
+            taskResource.createTask(patientId, questionnaireId) //Should trigger subscription
 
             call.respondTemplate("funksjonsvurdering/nav.ftl")
         }
@@ -135,19 +135,19 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         post("/funksjonsvurdering/doctor-inbox") {
 
             val patientIdentifier: String = call.receiveParameters()["patientId"]!!
-            val patientString = patientCommunication.patientSearch(identifier = patientIdentifier)
-            val patient = patientCommunication.parseBundleXMLToPatient(patientString, false)
+            val patientString = patientResource.patientSearch(identifier = patientIdentifier)
+            val patient = patientResource.parseBundleXMLToPatient(patientString, false)
             val patientId = patient?.id!!.split("/")[5]
             lastPatient = patientId
 
             // Get all questionnaires related to patient from task-inbox
-            val tasks = taskCommunication.inbox[patientId]
+            val tasks = taskResource.inbox[patientId]
 
             if (tasks != null) {
                 val questionnaires = mutableListOf<Questionnaire>()
 
                 for (task in tasks) {
-                    questionnaires.add(questionnaireCommunication.getQuestionnaire(task.focus.reference.substringAfter("/")))
+                    questionnaires.add(questionnaireResource.getQuestionnaire(task.focus.reference.substringAfter("/")))
                 }
 
                 val data = mapOf("patient" to patient, "questionnaires" to questionnaires)
@@ -164,7 +164,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         get("funksjonsvurdering/doctor-inbox/Questionnaire/{questionnaireId}/_history/1") {
             val questionnaireId: String = call.parameters["questionnaireId"]!!
 
-            val data = mapOf("questionnaire" to questionnaireCommunication.getQuestionnaire(questionnaireId))
+            val data = mapOf("questionnaire" to questionnaireResource.getQuestionnaire(questionnaireId))
 
             call.respondTemplate("funksjonsvurdering/create-questionnaire-response.ftl", data)
         }
@@ -172,7 +172,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
         // Doctor create questionnaireResponse
         post("funksjonsvurdering/createQuestionnaireResponse/Questionnaire/{questionnaireId}/_history/1") {
             val questionnaireId: String = call.parameters["questionnaireId"]!!
-            val questionnaire: Questionnaire = questionnaireCommunication.getQuestionnaire(questionnaireId)
+            val questionnaire: Questionnaire = questionnaireResource.getQuestionnaire(questionnaireId)
             val params = call.receiveParameters()
             val answerList = mutableListOf<String>()
 
@@ -180,10 +180,10 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
             answerList.add(params["answer2"]!!)
             answerList.add(params["answer3"]!!)
 
-            questionnaireResponseCommunication.createQuestionnaireResponse(questionnaire, answerList, lastPatient)
+            questionnaireResponseResource.createQuestionnaireResponse(questionnaire, answerList, lastPatient)
 
             // Q deleted when answered
-            taskCommunication.inbox[lastPatient]?.removeAll {it.focus.reference == "Questionnaire/$questionnaireId"}
+            taskResource.inbox[lastPatient]?.removeAll {it.focus.reference == "Questionnaire/$questionnaireId"}
 
             call.respondRedirect("/funksjonsvurdering/doctor-inbox")
         }

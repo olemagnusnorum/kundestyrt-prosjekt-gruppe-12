@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class QuestionnaireCommunication(server: String = "public") {
+class QuestionnaireResource(server: String = "public") {
 
     //the base of the fhir server
     private val baseURL: String = when (server) {

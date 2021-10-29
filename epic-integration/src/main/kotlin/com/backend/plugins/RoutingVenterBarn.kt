@@ -10,10 +10,10 @@ import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.Condition
 import org.hl7.fhir.r4.model.Patient
 
-val patientCommunication = PatientCommunication("local")
-val conditionCommunication = ConditionCommunication("local")
+val patientResource = PatientResource("local")
+val conditionResource = ConditionResource("local")
 
-fun Application.venterBarnRoute(questionnaireCommunication: QuestionnaireCommunication) {
+fun Application.venterBarnRoute(questionnaireResource: QuestionnaireResource) {
 
     val navPregnancyMap: MutableMap<String, Condition> = mutableMapOf()
 
@@ -32,8 +32,8 @@ fun Application.venterBarnRoute(questionnaireCommunication: QuestionnaireCommuni
                 val id = call.parameters["id"]!!
 
                 val patient: Patient? = runBlocking {
-                    val patientResponse = patientCommunication.patientSearch(identifier = id)
-                    return@runBlocking patientCommunication.parseBundleXMLToPatient(patientResponse, isXML = false)
+                    val patientResponse = patientResource.patientSearch(identifier = id)
+                    return@runBlocking patientResource.parseBundleXMLToPatient(patientResponse, isXML = false)
                 }
                 // val condition: Condition? = if (patient == null) null else runBlocking {
                 //     val responseCondition = conditionCommunication.searchCondition(patient.idElement.idPart, "json", code="77386006").receive<String>()
@@ -83,12 +83,12 @@ fun Application.venterBarnRoute(questionnaireCommunication: QuestionnaireCommuni
                 val note: String = params["note"]!!
                 val onsetDate: String = params["onsetDate"]!!
                 val abatementDate: String = params["abatementDate"]!!
-                val patient = runBlocking { patientCommunication.parseBundleXMLToPatient(patientCommunication.patientSearch(identifier = id), isXML = false) }
+                val patient = runBlocking { patientResource.parseBundleXMLToPatient(patientResource.patientSearch(identifier = id), isXML = false) }
                 if (patient != null) {
 
                     // Make sure that the patient doesn't already have a registered pregnancy
                     if (!navPregnancyMap.containsKey(id)) {
-                        conditionCommunication.createCondition(patient.idElement.idPart, note, onsetDate, abatementDate)
+                        conditionResource.createCondition(patient.idElement.idPart, note, onsetDate, abatementDate)
                     } else {
                         val data = mutableMapOf("error" to "Personen er allerede gravid")
                         call.respondTemplate("venterBarn/doctor-form-pregnant.ftl", data)
@@ -106,7 +106,7 @@ fun Application.venterBarnRoute(questionnaireCommunication: QuestionnaireCommuni
                 val id = params["id"]!!
                 val note: String = params["note"]!!
                 val abatementDate: String = params["abatementDate"]!!
-                val patient = runBlocking { patientCommunication.parseBundleXMLToPatient(patientCommunication.patientSearch(identifier = id), isXML = false) }
+                val patient = runBlocking { patientResource.parseBundleXMLToPatient(patientResource.patientSearch(identifier = id), isXML = false) }
                 if (patient != null) {
                     // val condition: Condition? = runBlocking {
                     //     val responseCondition = conditionCommunication.searchCondition(patient.idElement.idPart, "json").receive<String>()
@@ -114,7 +114,7 @@ fun Application.venterBarnRoute(questionnaireCommunication: QuestionnaireCommuni
                     // }
                     if (navPregnancyMap.containsKey(id)) {
                         val condition = navPregnancyMap[id]
-                        conditionCommunication.updateCondition(conditionId = condition?.idElement!!.idPart, note = note, abatementDate = abatementDate)
+                        conditionResource.updateCondition(conditionId = condition?.idElement!!.idPart, note = note, abatementDate = abatementDate)
                     }
                 }
 
@@ -125,9 +125,9 @@ fun Application.venterBarnRoute(questionnaireCommunication: QuestionnaireCommuni
             put("/pregnancy-subscription/{...}"){
                 //this endpoint listens for new pregnancy subscriptions and adds the personnummer and abatement time to a map
                 val body = call.receive<String>()
-                val condition = conditionCommunication.parseConditionsStringToObject(body)
+                val condition = conditionResource.parseConditionsStringToObject(body)
 
-                val patient = patientCommunication.readPatient(condition.subject.reference.split("/")[1])
+                val patient = patientResource.readPatient(condition.subject.reference.split("/")[1])
 
                 navPregnancyMap[patient.identifier[0].value] = condition
 

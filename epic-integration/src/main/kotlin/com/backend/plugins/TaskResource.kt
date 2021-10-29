@@ -9,7 +9,7 @@ import io.ktor.http.*
 import org.hl7.fhir.r4.model.Reference
 import org.hl7.fhir.r4.model.Task
 
-class TaskCommunication(server: String = "public") {
+class TaskResource(server: String = "public") {
 
     //the base of the fhir server
     private val baseURL: String = when (server) {

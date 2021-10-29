@@ -10,7 +10,7 @@ import io.ktor.http.*
 import org.hl7.fhir.r4.model.*
 import org.hl7.fhir.r4.model.Annotation
 
-class ConditionCommunication(server: String = "public") {
+class ConditionResource(server: String = "public") {
 
     //the base of the fhir server
     private val baseURL: String = when (server) {
