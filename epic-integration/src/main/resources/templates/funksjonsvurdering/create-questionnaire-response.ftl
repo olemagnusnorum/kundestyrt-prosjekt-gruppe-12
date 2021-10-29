@@ -32,6 +32,7 @@
 
         <br>
         <br>
+        <br>
         <a href="/">Gå tilbake til navigasjonsiden.</a>
     </div>
     <div class="col"></div>
