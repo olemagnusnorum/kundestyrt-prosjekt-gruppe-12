@@ -43,7 +43,6 @@
             </#if>
 
         <#else>
-            <br>
             <h3>Velg pasient</h3>
             <br>
             <div class="row">

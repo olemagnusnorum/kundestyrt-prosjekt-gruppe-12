@@ -18,6 +18,7 @@
     </div>
     <div class="col">
         <h3>Innlogging</h3>
+        <br>
         <form action="patient" method="get">
             <input class="form-control" name="id" type="text" placeholder="Personnummer">
             <br>
