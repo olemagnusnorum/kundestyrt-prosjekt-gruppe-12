@@ -5,11 +5,18 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <title>Legeside</title>
     <base href="/venter-barn/">
+    <style>
+        .header {
+            background-color: #9CB9E7;
+        }
+    </style>
 </head>
 <body style="font-family: sans-serif">
 <div class="row mb-5">
-    <div class="col bg-light shadow p-4">
-        <h1>Lege</h1>
+    <div class="header">
+        <div class="col bg-light shadow p-4">
+            <h1>Lege</h1>
+        </div>
     </div>
 </div>
 <div class="row">
