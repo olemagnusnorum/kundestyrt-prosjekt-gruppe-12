@@ -79,7 +79,8 @@ class SubscriptionCommunication(server: String = "public") {
     /**
      * Function to create a subscription resource with channel type rest-hook.
      * @param criteria is the criteria of the subscription resource being searched for
-     * @param status is the reason the subscription was created
+     * @param reason is the reason the subscription was created
+     * @param status is one of the following: requested, active, error, off
      * @return the HttpResponse returned by the HAPI server
      */
     suspend fun searchSubscription(criteria: String, reason: String? = null, status: String = "active"): HttpResponse {
