@@ -7,8 +7,10 @@
 </head>
 <body style="font-family: sans-serif">
 <div class="row mb-5">
-    <div class="col bg-light shadow p-4">
-        <h1>Navigasjonsside - Venter Barn</h1>
+    <div>
+        <div class="col bg-light shadow p-4">
+            <h1>Navigasjonsside - Venter Barn</h1>
+        </div>
     </div>
 </div>
 <div class="row">
