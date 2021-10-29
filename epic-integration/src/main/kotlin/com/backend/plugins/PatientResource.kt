@@ -20,13 +20,8 @@ class PatientResource(server: String = "public") {
         else -> throw IllegalArgumentException("server parameter must be either \"public\" or \"local\"")
     }
 
-    private val ctx: FhirContext = FhirContext.forR4()
     private val client = HttpClient()
-    private val jsonParser: IParser = ctx.newJsonParser()
-
-    // For demo purposes
-    var latestPatientId: String = "2591228"
-    var patientCreated: Boolean = false
+    private val jsonParser: IParser = FhirContext.forR4().newJsonParser()
 
     /**
      * Makes an HTTP response request to the fhir server
@@ -112,12 +107,11 @@ class PatientResource(server: String = "public") {
         }
 
         if (response.headers["Location"] != null) {
-            latestPatientId = response.headers["Location"]!!.split("/")[5]
+            val patientId = response.headers["Location"]!!.split("/")[5]
             conditionResource.latestConditionId = null
-            patientCreated = true
 
             // Return the patientId if a patient was created
-            return latestPatientId
+            return patientId
         }
 
         return null
