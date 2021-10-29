@@ -25,10 +25,6 @@
         </#list>
 
         <br>
-
-        <div class="row">
-            <a class="btn btn-primary btn-block" href="/funksjonsvurdering/nav">Gå tilbake til NAVs side</a>
-        </div>
         <br>
     </div>
     <div class="col"></div>

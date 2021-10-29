@@ -8,7 +8,7 @@
 <body style="font-family: sans-serif">
 <div class="row mb-5">
     <div class="col bg-light shadow p-4">
-        <h1>Helseplattformen | Lege</h1>
+        <h1>Lege</h1>
     </div>
 </div>
 <div class="row">
@@ -29,10 +29,8 @@
             <br>
             <input type="submit" class="btn btn-primary" value="Send svarene til NAV">
         </form>
-
         <br>
         <br>
-        <a href="/">Gå tilbake til navigasjonsiden.</a>
     </div>
     <div class="col"></div>
 </div>

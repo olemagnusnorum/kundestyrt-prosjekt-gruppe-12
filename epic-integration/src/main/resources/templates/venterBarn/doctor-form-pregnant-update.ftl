@@ -39,6 +39,7 @@
                 <input class="btn btn-primary" type="submit" value="Oppdater graviditet">
             </form>
         <#else>
+            <br>
             <form action="/venter-barn/doctor-form-pregnant-update" method="get">
                 <b>Personnummer</b>
                 <input class="form-control" name="id" type="text" placeholder="Personnummer">

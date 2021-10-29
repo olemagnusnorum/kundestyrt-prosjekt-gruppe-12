@@ -14,12 +14,10 @@
     <div class="col">
         <#include "../shared/sidebar.ftl"></div>
     <div class="col">
-        <br>
 
         <#if patient??>
 
             <h3>Pasient: ${patient.name[0].given[0]} ${patient.name[0].family}</h3>
-            <br>
             <br>
             <h3>Innboks</h3>
             <#if questionnaireResponses??>
@@ -43,17 +41,22 @@
                 <p>Ingen nye meldinger.
             </#if>
 
+            <br>
             <h3>Send forhåndslagde spørsmål</h3>
             <#list predefinedQuestionnaires as questionnaire>
-                <form action="/funksjonsvurdering/create-predefined-questionnaire" method="post">
-                    <p> ${questionnaire.first.title} </p>
-                    <#list questionnaire.first.item as question>
-                        <p> ${question.text} </p>
-                    </#list>
-                    <input hidden name="patientId" type="text" value="${patient.id}">
-                    <input hidden name="questionnaireId" type="text" value="${questionnaire.second}">
-                    <input type="submit" value="Send disse spørsmålene">
-                </form>
+                <div class="card">
+                    <div class="card-body">
+                        <form action="/funksjonsvurdering/create-predefined-questionnaire" method="post">
+                            <h5 class="card-title"> ${questionnaire.first.title} </h5>
+                            <#list questionnaire.first.item as question>
+                                <p class="card-text mb-1"> ${question.text} </p>
+                            </#list>
+                            <input hidden name="patientId" type="text" value="${patient.id}">
+                            <input hidden name="questionnaireId" type="text" value="${questionnaire.second}">
+                            <input class="btn btn-primary mt-3" type="submit" value="Send disse spørsmålene">
+                        </form>
+                    </div>
+                </div>
                 <br>
             </#list>
 
@@ -72,6 +75,8 @@
             </div>
 
         </#if>
+        <br>
+        <br>
     </div>
     <div class="col"></div>
 </div>
