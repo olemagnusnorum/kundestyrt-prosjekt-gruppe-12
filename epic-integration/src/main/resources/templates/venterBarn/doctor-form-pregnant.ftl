@@ -1,4 +1,5 @@
 <#ftl output_format="HTML">
+<#include "../shared/style.css">
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,8 +9,10 @@
 </head>
 <body style="font-family: sans-serif">
 <div class="row mb-5">
-    <div class="col bg-light shadow p-4">
-        <h1>Lege</h1>
+    <div class="doctor-header">
+        <div class="col bg-light shadow p-4">
+            <h1>Lege</h1>
+        </div>
     </div>
 </div>
 <div class="row">
