@@ -61,10 +61,7 @@ fun main() {
 
 fun createDefaultPatient() {
     // Check if a predetermined patient exists in the fhir server
-    val patient = runBlocking {
-        val response = patientResource.search(identifier = "07069012345")
-        patientResource.parseBundleXMLToPatient(response, isXML = false)
-    }
+    val patient = runBlocking { patientResource.search(identifier = "07069012345") }
 
     // If the patient doesn't exist, create it
     if (patient == null) {

@@ -31,10 +31,7 @@ fun Application.venterBarnRoute(questionnaireResource: QuestionnaireResource) {
             get("/patient") {
                 val id = call.parameters["id"]!!
 
-                val patient: Patient? = runBlocking {
-                    val patientResponse = patientResource.search(identifier = id)
-                    return@runBlocking patientResource.parseBundleXMLToPatient(patientResponse, isXML = false)
-                }
+                val patient: Patient? = runBlocking { patientResource.search(identifier = id) }
                 // val condition: Condition? = if (patient == null) null else runBlocking {
                 //     val responseCondition = conditionCommunication.searchCondition(patient.idElement.idPart, "json", code="77386006").receive<String>()
                 //     println(responseCondition)
@@ -83,7 +80,7 @@ fun Application.venterBarnRoute(questionnaireResource: QuestionnaireResource) {
                 val note: String = params["note"]!!
                 val onsetDate: String = params["onsetDate"]!!
                 val abatementDate: String = params["abatementDate"]!!
-                val patient = runBlocking { patientResource.parseBundleXMLToPatient(patientResource.search(identifier = id), isXML = false) }
+                val patient = runBlocking { patientResource.search(identifier = id) }
                 if (patient != null) {
 
                     // Make sure that the patient doesn't already have a registered pregnancy
@@ -106,7 +103,7 @@ fun Application.venterBarnRoute(questionnaireResource: QuestionnaireResource) {
                 val id = params["id"]!!
                 val note: String = params["note"]!!
                 val abatementDate: String = params["abatementDate"]!!
-                val patient = runBlocking { patientResource.parseBundleXMLToPatient(patientResource.search(identifier = id), isXML = false) }
+                val patient = runBlocking { patientResource.search(identifier = id) }
                 if (patient != null) {
                     // val condition: Condition? = runBlocking {
                     //     val responseCondition = conditionCommunication.searchCondition(patient.idElement.idPart, "json").receive<String>()

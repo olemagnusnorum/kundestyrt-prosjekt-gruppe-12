@@ -15,35 +15,27 @@ class PatientTest {
 
     private val patientResource = PatientResource("local")
 
-    private var patientId = ""
+    private var patientId: String? = ""
 
     @Test
     @Order(1)
     fun `createPatient should return a patient resource`() {
-        runBlocking {
-            patientResource.create("Test", "Testest", identifierValue = "123456789",  birthdate = "1-Jan-1990")
-            patientId = patientResource.latestPatientId
-        }
-
-        assert(patientId.isNotEmpty())
+        patientId = runBlocking { patientResource.create("Test", "Testest", identifierValue = "123456789",  birthdate = "1-Jan-1990") }
+        assert(patientId!!.isNotEmpty())
     }
 
     @Test
     @Order(2)
     fun `readPatient should return a patient resource`() {
-        val patient = runBlocking { patientResource.read(patientId) }
+        val patient = runBlocking { patientResource.read(patientId!!) }
         assert(patient.idElement.idPart == patientId)
     }
 
     @Test
     @Order(3)
     fun `searchPatient should return a string`() {
-        val patient = runBlocking {
-            val patientResponse = patientResource.search(identifier = "123456789")
-            return@runBlocking patientResource.parseBundleXMLToPatient(patientResponse, isXML = false)!!
-        }
-
-        assert(patient.idElement.idPart.isNotEmpty())
+        val patient = runBlocking { patientResource.search(identifier = "123456789") }
+        assert(patient!!.idElement.idPart.isNotEmpty())
     }
 
 }

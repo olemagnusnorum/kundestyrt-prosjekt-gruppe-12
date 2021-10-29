@@ -60,9 +60,8 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseResource: Questionn
         post("/funksjonsvurdering/nav") {
 
             val patientIdentifier = call.receiveParameters()["patientId"]!!
-            val bundleString = patientResource.search(identifier = patientIdentifier)
-            val patient = patientResource.parseBundleXMLToPatient(bundleString, false)
-            val patientId = patient?.id!!.split("/")[5]
+            val patient = patientResource.search(identifier = patientIdentifier)
+            val patientId = patient!!.id.split("/")[5]
 
             val questionnaireResponses = questionnaireResponseResource.inbox[patientId]
 
@@ -135,9 +134,8 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseResource: Questionn
         post("/funksjonsvurdering/doctor-inbox") {
 
             val patientIdentifier: String = call.receiveParameters()["patientId"]!!
-            val patientString = patientResource.search(identifier = patientIdentifier)
-            val patient = patientResource.parseBundleXMLToPatient(patientString, false)
-            val patientId = patient?.id!!.split("/")[5]
+            val patient = patientResource.search(identifier = patientIdentifier)
+            val patientId = patient!!.id.split("/")[5]
             lastPatient = patientId
 
             // Get all questionnaires related to patient from task-inbox

@@ -27,8 +27,8 @@ class ConditionTest {
     @Order(1)
     fun `createCondition should create and parse a patient, and create and parse a condition`() {
         val conditionResponse = runBlocking {
-            val patient = patientResource.parseBundleXMLToPatient(patientResource.search(identifier = "07069012345"), isXML = false)
-            patientId = patient?.idElement?.idPart!!
+            val patient = patientResource.search(identifier = "07069012345")
+            patientId = patient!!.idElement.idPart
             return@runBlocking conditionResource.createCondition(patientId, "This is a test condition", "2021-10-10", "2022-01-01")
         }
 
