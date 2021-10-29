@@ -7,7 +7,7 @@
 <body style="font-family: sans-serif">
 <div class="row mb-5">
     <div class="col bg-light shadow p-4">
-        <h1>Navigasjonsside - Demo Funksjonsvurdering</h1>
+        <h1>Navigasjonsside - Funksjonsvurdering</h1>
     </div>
 </div>
 <div class="row">
