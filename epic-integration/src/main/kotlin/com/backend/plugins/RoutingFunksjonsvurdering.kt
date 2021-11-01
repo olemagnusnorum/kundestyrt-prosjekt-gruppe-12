@@ -12,7 +12,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseCommunication: Ques
 
     val patientCommunication = PatientCommunication("local")
     val taskCommunication = TaskCommunication("local")
-    val pdfHandler = PdfHandler()
+    val pdfHandler = PdfHandler("local")
     var lastPatient: String = "5"
 
     routing {

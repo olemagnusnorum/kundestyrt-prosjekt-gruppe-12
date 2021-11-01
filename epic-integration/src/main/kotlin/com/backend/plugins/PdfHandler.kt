@@ -1,12 +1,31 @@
 package com.backend.plugins
 
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.parser.IParser
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.font.PDType1Font
+import org.hl7.fhir.r4.model.Binary
+import org.hl7.fhir.r4.model.Reference
 import java.io.File
 
-class PdfHandler {
+class PdfHandler(server: String = "public") {
+
+    //the base of the fhir server
+    private val baseURL: String = when (server) {
+        "public" -> "http://hapi.fhir.org/baseR4"
+        "local" -> "http://localhost:8000/fhir"
+        else -> throw IllegalArgumentException("server parameter must be either \"public\" or \"local\"")
+    }
+
+    private val ctx: FhirContext = FhirContext.forR4()
+    private val client = HttpClient()
+    val jsonParser: IParser = ctx.newJsonParser()
 
     private var saveLocation: String = "src/main/resources/"
     private val font = PDType1Font.COURIER
@@ -20,7 +39,7 @@ class PdfHandler {
      * @param fileName name of the pdf file. Has to end in ".pdf"
      * @return returns Unit
      */
-    fun writeToPdf(header: String = "", text: String, fileName: String) {
+    suspend fun writeToPdf(header: String = "", text: String, fileName: String) {
         val file = File(saveLocation+fileName)
 
         if (file.exists()){
@@ -30,6 +49,8 @@ class PdfHandler {
             val document = PDDocument()
             write(document, fileName, header, text)
         }
+        // Also posting FHIR Binary
+        createBinary(file, fileName.substringBefore("."))
     }
 
     /**
@@ -147,5 +168,23 @@ class PdfHandler {
         }
 
         return wrappedListOfString
+    }
+
+    private suspend fun createBinary(file: File, patientId: String) : HttpResponse {
+
+        val binary = Binary()
+
+        binary.data = file.readBytes()
+        binary.contentType = ContentType.Application.Pdf.contentType
+        binary.securityContext = Reference().setReference("Patient/" +
+                "${patientCommunication.parseBundleXMLToPatient(patientCommunication.patientSearch(identifier = patientId), isXML = false)?.identifier?.get(0)?.value}")
+
+        // post the Binary to the server
+        val response: HttpResponse = client.post("$baseURL/Binary"){
+            contentType(ContentType.Application.Json)
+            body = jsonParser.encodeResourceToString(binary)
+        }
+
+        return response
     }
 }
