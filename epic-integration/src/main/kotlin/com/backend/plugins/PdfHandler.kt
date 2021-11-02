@@ -175,9 +175,8 @@ class PdfHandler(server: String = "public") {
         val binary = Binary()
 
         binary.data = file.readBytes()
-        binary.contentType = ContentType.Application.Pdf.contentType
-        binary.securityContext = Reference().setReference("Patient/" +
-                "${patientCommunication.parseBundleXMLToPatient(patientCommunication.patientSearch(identifier = patientId), isXML = false)?.identifier?.get(0)?.value}")
+        binary.contentType = ContentType.Application.Pdf.toString()
+        binary.securityContext = Reference().setReference("Patient/${patientCommunication.parseBundleXMLToPatient(patientCommunication.patientSearch(identifier = patientId), isXML = false)?.id?.split("/")?.get(5)}")
 
         // post the Binary to the server
         val response: HttpResponse = client.post("$baseURL/Binary"){
