@@ -18,35 +18,28 @@ class QuestionnaireResponseResource(server: String = "public") {
         else -> throw IllegalArgumentException("server parameter must be either \"public\" or \"local\"")
     }
 
-    private val ctx: FhirContext = FhirContext.forR4()
     private val client = HttpClient()
-    val jsonParser: IParser = ctx.newJsonParser()
+    val jsonParser: IParser = FhirContext.forR4().newJsonParser()
 
-    //{patientId: [questionnaire]}
+    // {patientId: [questionnaire]}
     var inbox: MutableMap<String, MutableList<QuestionnaireResponse>> = mutableMapOf()
 
     /**
      * Generates a QuestionnaireResponse to a specific Questionnaire
-     * @param
-     * @param questionnaire Questionnaire the response is related to
-     * @return http response, not QuestionnaireResponse
+     * @param [questionnaire] Questionnaire the response is related to
+     * @param [questionsList] Questionnaire the response is related to
+     * @param [patientId] the patientId the questionnaire response should reference
      */
-    suspend fun createQuestionnaireResponse(questionnaire: Questionnaire, questionsList: MutableList<String>, patientId: String = "2559067"): HttpResponse {
-
-        // Create empty template
+    suspend fun create(questionnaire: Questionnaire, questionsList: MutableList<String>, patientId: String = "2559067") {
         val questionnaireResponse = QuestionnaireResponse()
 
-        //Link Questionnaire
+        // Link Questionnaire
         questionnaireResponse.questionnaire = questionnaire.id.substringBeforeLast("/").substringBeforeLast("/")
-
         questionnaireResponse.subject = Reference("Patient/$patientId")
-
 
         //Put answers in Item and add them to QR
         val item = mutableListOf<QuestionnaireResponse.QuestionnaireResponseItemComponent>()
-
-        for (i in 0..questionnaire.item.size-1) {
-
+        for (i in 0 until questionnaire.item.size) {
             item.add(QuestionnaireResponse.QuestionnaireResponseItemComponent())
             item[i].linkId = questionnaire.item[i].id
             item[i].text = questionnaire.item[i].text
@@ -54,21 +47,20 @@ class QuestionnaireResponseResource(server: String = "public") {
             val answerComponent = mutableListOf<QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent>()
             answerComponent.add(QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent())
             answerComponent[0].value = Coding(
-                "some.system",
-                questionsList[i], questionsList[i])
+                "some.system",  // TODO : Configure system code
+                questionsList[i], questionsList[i]
+            )
 
             item[i].answer = answerComponent
         }
 
         questionnaireResponse.item = item
 
-        //post the questionnaireResponse to the server
-        val response: HttpResponse = client.post("$baseURL/QuestionnaireResponse"){
+        // Post the questionnaireResponse to the server
+        client.post("$baseURL/QuestionnaireResponse"){
             contentType(ContentType.Application.Json)
             body = jsonParser.encodeResourceToString(questionnaireResponse)
-        }
-
-        return response
+        } as HttpResponse
     }
 
     /**

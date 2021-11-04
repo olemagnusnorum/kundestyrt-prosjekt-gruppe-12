@@ -178,7 +178,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseResource: Questionn
             answerList.add(params["answer2"]!!)
             answerList.add(params["answer3"]!!)
 
-            questionnaireResponseResource.createQuestionnaireResponse(questionnaire, answerList, lastPatient)
+            questionnaireResponseResource.create(questionnaire, answerList, lastPatient)
 
             // Q deleted when answered
             taskResource.inbox[lastPatient]?.removeAll {it.focus.reference == "Questionnaire/$questionnaireId"}
