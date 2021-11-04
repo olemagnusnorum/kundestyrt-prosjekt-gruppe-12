@@ -1,8 +1,8 @@
 package com.backend
 
-import ca.uhn.fhir.context.FhirContext
-import ca.uhn.fhir.parser.IParser
 import com.backend.plugins.*
+import com.backend.plugins.resources.*
+import com.backend.plugins.venterbarn.venterBarnRoute
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import freemarker.cache.ClassTemplateLoader
@@ -12,8 +12,9 @@ import io.ktor.freemarker.*
 import io.ktor.serialization.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import org.hl7.fhir.instance.model.api.IBaseResource
 
+val patientResource = PatientResource("local")
+val conditionResource = ConditionResource("local")
 val subscriptionResource = SubscriptionResource("local")
 val questionnaireResponseResource = QuestionnaireResponseResource("local")
 val questionnaireResource = QuestionnaireResource("local")
@@ -31,7 +32,7 @@ fun main() {
             templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
         }
 
-        venterBarnRoute(questionnaireResource)
+        venterBarnRoute()
         funksjonsvurderingRoute(questionnaireResponseResource, questionnaireResource)
 
         // Create required subscriptions if they do not exist

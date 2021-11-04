@@ -1,6 +1,6 @@
 package com.backend
 
-import com.backend.plugins.PatientResource
+import com.backend.plugins.resources.PatientResource
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order

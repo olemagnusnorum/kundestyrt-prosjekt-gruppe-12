@@ -1,7 +1,7 @@
 package com.backend
 
-import com.backend.plugins.ConditionResource
-import com.backend.plugins.PatientResource
+import com.backend.plugins.resources.ConditionResource
+import com.backend.plugins.resources.PatientResource
 import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.Condition
 import org.junit.jupiter.api.MethodOrderer

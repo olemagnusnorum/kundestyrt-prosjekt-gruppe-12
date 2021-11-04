@@ -1,6 +1,6 @@
 package com.backend
 
-import com.backend.plugins.QuestionnaireResponseResource
+import com.backend.plugins.resources.QuestionnaireResponseResource
 import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.QuestionnaireResponse
 import org.junit.jupiter.api.Nested

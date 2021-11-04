@@ -1,5 +1,9 @@
 package com.backend.plugins
 
+import com.backend.plugins.resources.PatientResource
+import com.backend.plugins.resources.QuestionnaireResource
+import com.backend.plugins.resources.QuestionnaireResponseResource
+import com.backend.plugins.resources.TaskResource
 import io.ktor.routing.*
 import io.ktor.application.*
 import io.ktor.freemarker.*

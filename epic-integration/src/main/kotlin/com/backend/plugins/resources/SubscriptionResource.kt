@@ -1,4 +1,4 @@
-package com.backend.plugins
+package com.backend.plugins.resources
 
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
