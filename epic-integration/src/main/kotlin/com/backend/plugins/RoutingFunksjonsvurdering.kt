@@ -99,7 +99,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseResource: Questionn
             val questionnaire = questionnaireResource.read(questionnaireResponse.questionnaire.substringAfter(("/")))
 
             // Extract questions and answers
-            val questions = questionnaireResource.getQuestionnaireQuestions(questionnaire)
+            val questions = questionnaireResource.retrieveQuestions(questionnaire)
             val answers = questionnaireResponseResource.getQuestionnaireAnswers(questionnaireResponse)
 
             // Getting patient

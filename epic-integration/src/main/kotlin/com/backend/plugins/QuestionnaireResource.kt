@@ -23,9 +23,8 @@ class QuestionnaireResource(server: String = "public") {
         else -> throw IllegalArgumentException("server parameter must be either \"public\" or \"local\"")
     }
 
-    private val ctx: FhirContext = FhirContext.forR4()
     private val client = HttpClient()
-    private val jsonParser: IParser = ctx.newJsonParser()
+    private val jsonParser: IParser = FhirContext.forR4().newJsonParser()
 
     var predefinedQuestionnaires = mutableListOf<Questionnaire>()
 
@@ -120,13 +119,13 @@ class QuestionnaireResource(server: String = "public") {
 
     /**
      * Finds the Questions of a FHIR Questionnaire object
-     * @return listOfQuestions a list of Strings containing the questions
+     * @param [questionnaire] the questionnaire to retrieve questions from
+     * @return a list of Strings containing the questions
      */
-    fun getQuestionnaireQuestions(questionnaire: Questionnaire) : List<String> {
+    fun retrieveQuestions(questionnaire: Questionnaire) : List<String> {
         val listOfQuestions: MutableList<String> = mutableListOf()
-        for (item in questionnaire.item) {
+        for (item in questionnaire.item)
             listOfQuestions.add(item.text)
-        }
         return listOfQuestions
     }
 

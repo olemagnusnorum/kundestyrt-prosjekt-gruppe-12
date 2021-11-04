@@ -20,7 +20,7 @@ class QuestionnaireTest {
         val questionnaire: Questionnaire = runBlocking { qc.read(questionnaireID) }
         assert(questionnaire is Questionnaire)
 
-        val returnVal = qc.getQuestionnaireQuestions(questionnaire)
+        val returnVal = qc.retrieveQuestions(questionnaire)
         assert(returnVal is MutableList<String>)
     }
 
