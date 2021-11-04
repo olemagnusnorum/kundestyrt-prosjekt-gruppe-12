@@ -2,6 +2,7 @@ package com.backend.plugins
 
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
+import com.backend.questionnaireResource
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -143,12 +144,19 @@ class QuestionnaireResource(server: String = "public") {
     }
 
     /**
-     * Search after questionnaires.
+     * Retrieve all questionnaires in the fhir server
      */
-    suspend fun searchQuestionnaires() : Bundle {
-        val response: HttpResponse =
-                client.get("$baseURL/Questionnaire?_format=json") {
-                }
-        return jsonParser.parseResource(Bundle::class.java, response.receive<String>())
+    suspend fun getAll() : MutableList<Questionnaire> {
+        val response: HttpResponse = client.get("$baseURL/Questionnaire?_format=json")
+        val bundle = jsonParser.parseResource(Bundle::class.java, response.receive<String>())
+        val questionnaires = mutableListOf<Questionnaire>()
+
+        // Convert all questionnaires to resources
+        for (bundleComponent in bundle.entry) {
+            val questionnaire = bundleComponent.resource as Questionnaire
+            questionnaires.add(questionnaire)
+        }
+
+        return questionnaires
     }
 }

@@ -45,17 +45,9 @@ fun main() {
         loadNAVInbox()
 
         // Create default questionnaires
-        val questionnaireBundle = runBlocking { questionnaireResource.searchQuestionnaires() }
-
-        if (questionnaireBundle.entry.size >= 3) {
-            for (bundleComponent in questionnaireBundle.entry) {
-                val questionnaire = bundleComponent.resource as Questionnaire
-                questionnaireResource.predefinedQuestionnaires.add(questionnaire)
-            }
-        }
-        else {
+        questionnaireResource.predefinedQuestionnaires = runBlocking { questionnaireResource.getAll() }
+        if (questionnaireResource.predefinedQuestionnaires.isEmpty())
             questionnaireResource.createDefaultQuestionnaires()
-        }
     }.start(wait = true)
 }
 
