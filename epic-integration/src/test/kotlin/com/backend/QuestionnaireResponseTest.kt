@@ -24,7 +24,7 @@ class QuestionnaireResponseTest {
     private val questionnaireResource = QuestionnaireResource("local")
     private val questionnaireResponseResource = QuestionnaireResponseResource("local")
     private var questionnairesGenerated = false
-    private var testPatientID : String = ""
+    private var testPatientID: String = ""
 
     @BeforeAll
     fun `Create default questionnaires`(){
@@ -56,20 +56,19 @@ class QuestionnaireResponseTest {
     }
 
     @Nested
-    inner class createQuestionnaireResponse {
+    inner class CreateQuestionnaireResponse {
         @Test
         fun `should return a 201 http-response`() {
             val quest: Questionnaire = questionnaireResource.predefinedQuestionnaires[0]
-            val response : HttpResponse = runBlocking {
+            val response: HttpResponse = runBlocking {
                 questionnaireResponseResource.create(quest, mutableListOf("Ja", "Nei", "Ja"), testPatientID)
             }
-            assert(response is HttpResponse)
             assert(response.status == HttpStatusCode.Created)
         }
     }
 
     @Nested
-    inner class getQuestionnaireResponse {
+    inner class GetQuestionnaireResponse {
         @Test
         fun `should return a QuestionnaireResponse`() {
             // Create a questionnaire response
@@ -92,7 +91,7 @@ class QuestionnaireResponseTest {
     }
 
     @Nested
-    inner class getAllQuestionnaireResponses {
+    inner class GetAllQuestionnaireResponses {
         @Test
         fun `should return more than one resource`() {
             val quest: Questionnaire = questionnaireResource.predefinedQuestionnaires[0]
@@ -106,7 +105,7 @@ class QuestionnaireResponseTest {
     }
 
     @Nested
-    inner class getQuestionnaireAnswers {
+    inner class GetQuestionnaireAnswers {
         @Test
         fun `getQuestionnaireAnswers should return a list of strings`() {
             // Create empty template
@@ -139,9 +138,9 @@ class QuestionnaireResponseTest {
     }
 
     @Nested
-    inner class addToInbox {
+    inner class AddToInbox {
         @Test
-        fun `addToInbox`() {
+        fun `Add to inbox`() {
             // TODO: test inbox
         }
     }

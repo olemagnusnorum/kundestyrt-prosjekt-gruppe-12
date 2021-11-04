@@ -24,7 +24,7 @@ class QuestionnaireTest {
     fun `createDefaultQuestionnaires should generate 3 default Questionnaires`() {
         qc.createDefaultQuestionnaires()
         val questionnaires = runBlocking { qc.readAll() }
-        assert(questionnaires.size > 3)
+        assert(questionnaires.size >= 3)
     }
 
     @Test
@@ -33,8 +33,8 @@ class QuestionnaireTest {
         val questionnaires: MutableList<Questionnaire> = runBlocking { qc.readAll() }
 
         // First and last resources should be Questionnaires
-        val firstResource = questionnaires.first().resource
-        val lastResource = questionnaires.last().resource
+        val firstResource = questionnaires.first()
+        val lastResource = questionnaires.last()
         assert(firstResource is Questionnaire)
         assert(lastResource is Questionnaire)
     }
@@ -50,7 +50,7 @@ class QuestionnaireTest {
         }
 
         // Generate a questionnaire
-        val questionnaireID: String = runBlocking { qc.create(questions, "Sanser") }
+        val questionnaireID: String = runBlocking { qc.create(questions, "Sanser") }!!
 
         // Get questionnaires back from server and check if they contain correct questions
         val questionnaire: Questionnaire = runBlocking { qc.read(questionnaireID) }
@@ -71,7 +71,7 @@ class QuestionnaireTest {
         }
 
         // Generate a questionnaire
-        val questionnaireID: String = runBlocking { qc.create(questions, "Sanser") }
+        val questionnaireID: String = runBlocking { qc.create(questions, "Sanser") }!!
 
         // Get questionnaires back from server
         val questionnaire: Questionnaire = runBlocking { qc.read(questionnaireID) }

@@ -30,7 +30,7 @@ class QuestionnaireResponseResource(server: String = "public") {
      * @param [questionsList] Questionnaire the response is related to
      * @param [patientId] the patientId the questionnaire response should reference
      */
-    suspend fun create(questionnaire: Questionnaire, answerList: MutableList<String>, patientId: String = "2559067") {
+    suspend fun create(questionnaire: Questionnaire, answerList: MutableList<String>, patientId: String = "2559067") : HttpResponse {
         val questionnaireResponse = QuestionnaireResponse()
 
         // Link Questionnaire
@@ -57,7 +57,7 @@ class QuestionnaireResponseResource(server: String = "public") {
         questionnaireResponse.item = item
 
         // Post the questionnaireResponse to the server
-        client.post("$baseURL/QuestionnaireResponse"){
+        return client.post("$baseURL/QuestionnaireResponse"){
             contentType(ContentType.Application.Json)
             body = jsonParser.encodeResourceToString(questionnaireResponse)
         } as HttpResponse
