@@ -36,7 +36,7 @@ class QuestionnaireResource(server: String = "public") {
             append("question3", "Kan pasienten prate?")
         }
 
-        runBlocking { predefinedQuestionnaires.add(read(createQuestionnaire(questions, "Sanser"))) }
+        runBlocking { predefinedQuestionnaires.add(read(create(questions, "Sanser")!!)) }
 
         questions = Parameters.build {
             append("question1", "Kan pasienten ligge?")
@@ -44,7 +44,7 @@ class QuestionnaireResource(server: String = "public") {
             append("question3", "Kan pasienten gå?")
         }
 
-        runBlocking { predefinedQuestionnaires.add(read(createQuestionnaire(questions, "Fysiske evner"))) }
+        runBlocking { predefinedQuestionnaires.add(read(create(questions, "Fysiske evner")!!)) }
 
         questions = Parameters.build {
             append("question1", "Kan pasienten spille trompet?")
@@ -52,7 +52,7 @@ class QuestionnaireResource(server: String = "public") {
             append("question3", "Kan pasienten danse cancan?")
         }
 
-        runBlocking { predefinedQuestionnaires.add(read(createQuestionnaire(questions, "Annet"))) }
+        runBlocking { predefinedQuestionnaires.add(read(create(questions, "Annet")!!)) }
     }
 
     /**
@@ -66,15 +66,13 @@ class QuestionnaireResource(server: String = "public") {
     }
 
     /**
-     * Function to create a questionnaire and save the questionnaire to fhir server.
-     * In the future, this function should take in parameters, for the
-     * different values.
-     * @param questions Params of the questions. Get these from navigation. When you click
+     * Function to create a questionnaire and save the questionnaire to the fhir server.
+     * In the future, this function should take in parameters, for the different values.
+     * @param [questions] params of the questions. Get these from navigation. When you click
      * the "Register questionnaire" button you receive the params to send in.
-     * @return id of the created questionnaire or "EMPTY" if a questionnaire was not created.
+     * @return the questionnaireId of the created questionnaire if successful, else null
      */
-    suspend fun createQuestionnaire(questions: Parameters, title: String): String{
-
+    suspend fun create(questions: Parameters, title: String): String? {
         val questionnaire = Questionnaire()
 
         // The date is set to the current date
@@ -82,52 +80,42 @@ class QuestionnaireResource(server: String = "public") {
         val dateString = LocalDate.now().format(formatter)
         val date = SimpleDateFormat("yyyy-MM-dd").parse(dateString)
 
-        questionnaire.setName("NavQuestionnaire")
-        questionnaire.setTitle(title)
-        questionnaire.setStatus(Enumerations.PublicationStatus.ACTIVE)
-        questionnaire.setDate(date)
-        questionnaire.setPublisher("NAV")
-        questionnaire.setDescription("Questions about funksjonsvurdering")
+        questionnaire.name = "NavQuestionnaire"
+        questionnaire.title = title
+        questionnaire.status = Enumerations.PublicationStatus.ACTIVE
+        questionnaire.date = date
+        questionnaire.publisher = "NAV"
+        questionnaire.description = "Questions about funksjonsvurdering"
 
         // Set the items for the questionnaire (the questions)
-        var number: Int = 0
-        var items = mutableListOf<Questionnaire.QuestionnaireItemComponent>()
+        var number = 0
+        val items = mutableListOf<Questionnaire.QuestionnaireItemComponent>()
 
         questions.forEach { t, question ->
-            if (t == "patientId") {
-                null
-            }
-            else {
+            if (t != "patientId") {
                 number++
-                var item = Questionnaire.QuestionnaireItemComponent()
-                item.setLinkId(number.toString())
-                item.setText(question[0])
-                item.setType(Questionnaire.QuestionnaireItemType.STRING)
+                val item = Questionnaire.QuestionnaireItemComponent()
+                item.linkId = number.toString()
+                item.text = question[0]
+                item.type = Questionnaire.QuestionnaireItemType.STRING
                 items.add(item)
             }
         }
 
-        questionnaire.setItem(items)
+        questionnaire.item = items
 
-        val questionnaireJson = jsonParser.encodeResourceToString(questionnaire)
-
-
-        //post the questionnaire to the server
+        // Post the questionnaire to the server
         val response: HttpResponse = client.post("$baseURL/Questionnaire"){
-
             contentType(ContentType.Application.Json)
-            body = questionnaireJson
+            body = jsonParser.encodeResourceToString(questionnaire)
         }
-
-        val responseString = response.receive<String>()
 
         if (response.headers["Location"] != null) {
-            var responseId = response.headers["Location"]!!.split("/")[5]
-
-            return responseId
+            // Return the questionnaireId if a questionnaire was created
+            return response.headers["Location"]!!.split("/")[5]
         }
 
-        return "EMPTY"
+        return null
     }
 
     /**
