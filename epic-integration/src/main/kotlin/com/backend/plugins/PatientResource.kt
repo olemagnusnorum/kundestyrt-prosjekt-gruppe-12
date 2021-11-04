@@ -30,12 +30,10 @@ class PatientResource(server: String = "public") {
      */
     suspend fun read(patientId: String): Patient {
         if (patientId.isEmpty())
-            throw IllegalArgumentException("Required argument 'patientId' was null.")
+            throw IllegalArgumentException("Required argument 'patientId' was empty.")
         val response: HttpResponse = client.get("$baseURL/Patient/$patientId?_format=json")
         return jsonParser.parseResource(Patient::class.java, response.receive<String>())
     }
-
-    // Functions for search
 
     /**
      * Makes an HTTP response request to the fhir server containing a patient search
