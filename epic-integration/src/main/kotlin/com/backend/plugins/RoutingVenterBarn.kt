@@ -122,7 +122,7 @@ fun Application.venterBarnRoute(questionnaireResource: QuestionnaireResource) {
             put("/pregnancy-subscription/{...}"){
                 //this endpoint listens for new pregnancy subscriptions and adds the personnummer and abatement time to a map
                 val body = call.receive<String>()
-                val condition = conditionResource.parseConditionsStringToObject(body)
+                val condition = conditionResource.parse(body)
 
                 val patient = patientResource.read(condition.subject.reference.split("/")[1])
 

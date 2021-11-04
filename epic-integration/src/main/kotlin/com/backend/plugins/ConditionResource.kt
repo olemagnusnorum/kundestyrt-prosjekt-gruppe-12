@@ -165,7 +165,12 @@ class ConditionResource(server: String = "public") {
         } as HttpResponse
     }
 
-    fun parseConditionsStringToObject(jsonMessage: String): Condition {
-        return jsonParser.parseResource(Condition::class.java, jsonMessage)
+    /**
+     * Parse a json formatted condition-string to a Condition object
+     * [conditionJson] the json formatted condition-string
+     * @return the parsed Condition object
+     */
+    fun parse(conditionJson: String): Condition {
+        return jsonParser.parseResource(Condition::class.java, conditionJson)
     }
 }
