@@ -13,7 +13,6 @@ import io.ktor.serialization.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.hl7.fhir.instance.model.api.IBaseResource
-import org.hl7.fhir.r4.model.Questionnaire
 
 val subscriptionResource = SubscriptionResource("local")
 val questionnaireResponseResource = QuestionnaireResponseResource("local")
@@ -45,7 +44,7 @@ fun main() {
         loadNAVInbox()
 
         // Create default questionnaires
-        questionnaireResource.predefinedQuestionnaires = runBlocking { questionnaireResource.getAll() }
+        questionnaireResource.predefinedQuestionnaires = runBlocking { questionnaireResource.readAll() }
         if (questionnaireResource.predefinedQuestionnaires.isEmpty())
             questionnaireResource.createDefaultQuestionnaires()
     }.start(wait = true)
@@ -65,12 +64,8 @@ fun createDefaultPatient() {
 }
 
 fun loadNAVInbox() {
-    val ctx: FhirContext = FhirContext.forR4()
-    val jsonParser: IParser = ctx.newJsonParser()
-    val bundle = runBlocking { questionnaireResponseResource.getAllQuestionnaireResponses() }
-    val resources = bundle.entry
-    for (resource in resources) {
-        val final = resource.resource as IBaseResource
-        questionnaireResponseResource.addToInbox(jsonParser.encodeResourceToString(final))
+    val questionnaireResponses = runBlocking { questionnaireResponseResource.readAll() }
+    questionnaireResponses.forEach {
+        questionnaireResponseResource.addToInbox(questionnaireResponseResource.jsonParser.encodeResourceToString(it))
     }
 }

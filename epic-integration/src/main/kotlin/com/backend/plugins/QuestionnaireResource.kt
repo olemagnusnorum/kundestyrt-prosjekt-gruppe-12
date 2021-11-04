@@ -134,7 +134,7 @@ class QuestionnaireResource(server: String = "public") {
      * Retrieve all questionnaires in the fhir server
      * @return a list of all questionnaires
      */
-    suspend fun getAll() : MutableList<Questionnaire> {
+    suspend fun readAll() : MutableList<Questionnaire> {
         val response: HttpResponse = client.get("$baseURL/Questionnaire?_format=json")
         val bundle = jsonParser.parseResource(Bundle::class.java, response.receive<String>())
         val questionnaires = mutableListOf<Questionnaire>()
