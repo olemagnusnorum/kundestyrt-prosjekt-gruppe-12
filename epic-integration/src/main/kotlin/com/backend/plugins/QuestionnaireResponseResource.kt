@@ -64,12 +64,12 @@ class QuestionnaireResponseResource(server: String = "public") {
     }
 
     /**
-     * Function to get a QuestionnaireResponse resource.
-     * @param id is the id of the QR to get.
+     * Function to read a QuestionnaireResponse resource from the fhir server
+     * @param [questionnaireResponseId] the id of the QuestionnaireResponse to read
      * @return QuestionnaireResponse resource
      */
-    suspend fun getQuestionnaireResponse(id: String, format: String = "json"): QuestionnaireResponse {
-        val response: HttpResponse = client.get("$baseURL/QuestionnaireResponse/$id?_format=$format") {}
+    suspend fun read(questionnaireResponseId: String): QuestionnaireResponse {
+        val response: HttpResponse = client.get("$baseURL/QuestionnaireResponse/$questionnaireResponseId?_format=json") {}
         return jsonParser.parseResource(QuestionnaireResponse::class.java, response.receive<String>())
     }
 

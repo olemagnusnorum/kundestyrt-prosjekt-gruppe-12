@@ -17,7 +17,7 @@ class QuestionnaireResponseTest {
     @Test
     fun `getQuestionnaireAnswers should return a list of strings`() {
         val questionnaireResponseID = "2644277" // Mathias made a questionnaire with this ID
-        val questionnaireResponse: QuestionnaireResponse = runBlocking { qrc.getQuestionnaireResponse(questionnaireResponseID) }
+        val questionnaireResponse: QuestionnaireResponse = runBlocking { qrc.read(questionnaireResponseID) }
         assert(questionnaireResponse is QuestionnaireResponse)
 
         val returnVal = qrc.getQuestionnaireAnswers(questionnaireResponse)
@@ -38,7 +38,7 @@ class QuestionnaireResponseTest {
             val questionnaireResponseID = "2644277"
 
             // We should be able to find this on the server with the following test
-            val qr: QuestionnaireResponse = runBlocking { qrc.getQuestionnaireResponse(questionnaireResponseID) }
+            val qr: QuestionnaireResponse = runBlocking { qrc.read(questionnaireResponseID) }
             assert(qr.item[0].text == itemText1)
             assert(qr.item[1].text == itemText2)
         }

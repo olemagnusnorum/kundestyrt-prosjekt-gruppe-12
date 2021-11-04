@@ -93,7 +93,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseResource: Questionn
 
             // Getting questionnaireResponse
             val questionnaireResponseId: String = call.parameters["questionnaireResponseId"]!!
-            val questionnaireResponse = questionnaireResponseResource.getQuestionnaireResponse(questionnaireResponseId)
+            val questionnaireResponse = questionnaireResponseResource.read(questionnaireResponseId)
 
             //Getting questionnaire
             val questionnaire = questionnaireResource.read(questionnaireResponse.questionnaire.substringAfter(("/")))
