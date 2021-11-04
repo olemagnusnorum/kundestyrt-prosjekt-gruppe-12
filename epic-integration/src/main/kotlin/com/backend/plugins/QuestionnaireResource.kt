@@ -2,7 +2,6 @@ package com.backend.plugins
 
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
-import com.backend.questionnaireResource
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -37,7 +36,7 @@ class QuestionnaireResource(server: String = "public") {
             append("question3", "Kan pasienten prate?")
         }
 
-        runBlocking { predefinedQuestionnaires.add(getQuestionnaire(createQuestionnaire(questions, "Sanser"))) }
+        runBlocking { predefinedQuestionnaires.add(read(createQuestionnaire(questions, "Sanser"))) }
 
         questions = Parameters.build {
             append("question1", "Kan pasienten ligge?")
@@ -45,7 +44,7 @@ class QuestionnaireResource(server: String = "public") {
             append("question3", "Kan pasienten gå?")
         }
 
-        runBlocking { predefinedQuestionnaires.add(getQuestionnaire(createQuestionnaire(questions, "Fysiske evner"))) }
+        runBlocking { predefinedQuestionnaires.add(read(createQuestionnaire(questions, "Fysiske evner"))) }
 
         questions = Parameters.build {
             append("question1", "Kan pasienten spille trompet?")
@@ -53,7 +52,17 @@ class QuestionnaireResource(server: String = "public") {
             append("question3", "Kan pasienten danse cancan?")
         }
 
-        runBlocking { predefinedQuestionnaires.add(getQuestionnaire(createQuestionnaire(questions, "Annet"))) }
+        runBlocking { predefinedQuestionnaires.add(read(createQuestionnaire(questions, "Annet"))) }
+    }
+
+    /**
+     * Function to retrieve a Questionnaire resource.
+     * @param [questionnaireId] the id of the Questionnaire to retrieve.
+     * @return Questionnaire resource
+     */
+    suspend fun read(questionnaireId: String): Questionnaire {
+        val response: HttpResponse = client.get("$baseURL/Questionnaire/$questionnaireId?_format=json") {}
+        return jsonParser.parseResource(Questionnaire::class.java, response.receive<String>())
     }
 
     /**
@@ -119,16 +128,6 @@ class QuestionnaireResource(server: String = "public") {
         }
 
         return "EMPTY"
-    }
-
-    /**
-     * Function to get a Questionnaire resource.
-     * @param id is the id of the Questionnaire to get.
-     * @return QuestionnaireResponse resource
-     */
-    suspend fun getQuestionnaire(id: String, format: String = "json"): Questionnaire {
-        val response: HttpResponse = client.get("$baseURL/Questionnaire/$id?_format=$format") {}
-        return jsonParser.parseResource(Questionnaire::class.java, response.receive<String>())
     }
 
     /**

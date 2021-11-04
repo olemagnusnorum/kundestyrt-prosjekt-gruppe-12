@@ -70,7 +70,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseResource: Questionn
 
             if (questionnaireResponses != null) {
                 for (questionnaireResponse in questionnaireResponses) {
-                    questionnaireTitles.add(questionnaireResource.getQuestionnaire(questionnaireResponse.questionnaire.substringAfter("/")).title)
+                    questionnaireTitles.add(questionnaireResource.read(questionnaireResponse.questionnaire.substringAfter("/")).title)
                 }
             }
 
@@ -96,7 +96,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseResource: Questionn
             val questionnaireResponse = questionnaireResponseResource.getQuestionnaireResponse(questionnaireResponseId)
 
             //Getting questionnaire
-            val questionnaire = questionnaireResource.getQuestionnaire(questionnaireResponse.questionnaire.substringAfter(("/")))
+            val questionnaire = questionnaireResource.read(questionnaireResponse.questionnaire.substringAfter(("/")))
 
             // Extract questions and answers
             val questions = questionnaireResource.getQuestionnaireQuestions(questionnaire)
@@ -145,7 +145,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseResource: Questionn
                 val questionnaires = mutableListOf<Questionnaire>()
 
                 for (task in tasks) {
-                    questionnaires.add(questionnaireResource.getQuestionnaire(task.focus.reference.substringAfter("/")))
+                    questionnaires.add(questionnaireResource.read(task.focus.reference.substringAfter("/")))
                 }
 
                 val data = mapOf("patient" to patient, "questionnaires" to questionnaires)
@@ -162,7 +162,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseResource: Questionn
         get("funksjonsvurdering/doctor-inbox/Questionnaire/{questionnaireId}/_history/1") {
             val questionnaireId: String = call.parameters["questionnaireId"]!!
 
-            val data = mapOf("questionnaire" to questionnaireResource.getQuestionnaire(questionnaireId))
+            val data = mapOf("questionnaire" to questionnaireResource.read(questionnaireId))
 
             call.respondTemplate("funksjonsvurdering/create-questionnaire-response.ftl", data)
         }
@@ -170,7 +170,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseResource: Questionn
         // Doctor create questionnaireResponse
         post("funksjonsvurdering/createQuestionnaireResponse/Questionnaire/{questionnaireId}/_history/1") {
             val questionnaireId: String = call.parameters["questionnaireId"]!!
-            val questionnaire: Questionnaire = questionnaireResource.getQuestionnaire(questionnaireId)
+            val questionnaire: Questionnaire = questionnaireResource.read(questionnaireId)
             val params = call.receiveParameters()
             val answerList = mutableListOf<String>()
 
