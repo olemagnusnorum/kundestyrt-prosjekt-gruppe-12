@@ -111,7 +111,7 @@ fun Application.venterBarnRoute(questionnaireResource: QuestionnaireResource) {
                     // }
                     if (navPregnancyMap.containsKey(id)) {
                         val condition = navPregnancyMap[id]
-                        conditionResource.updateCondition(conditionId = condition?.idElement!!.idPart, note = note, abatementDate = abatementDate)
+                        conditionResource.update(conditionId = condition?.idElement!!.idPart, note = note, abatementDate = abatementDate)
                     }
                 }
 

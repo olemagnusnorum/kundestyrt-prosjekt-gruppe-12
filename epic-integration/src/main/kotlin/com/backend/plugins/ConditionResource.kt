@@ -148,20 +148,21 @@ class ConditionResource(server: String = "public") {
     }
 
     /**
-     * Function to patch note and abatementDate of a condition
-     * @param conditionId is a reference to a Condition resource (the id field in a Condition)
-     * @param note is a free text comment
-     * @param abatementDate is the date the condition ends/ended on the format "YYYY-MM-DD"
-     * Guide: https://fhirblog.com/2019/08/13/updating-a-resource-using-patch/
+     * Function to patch (update) note and abatementDate of a condition
+     * @param [conditionId] reference to a Condition resource (the id field in a Condition)
+     * @param [note] a free text comment
+     * @param [abatementDate] the date the condition ends/ended on the format "YYYY-MM-DD"
      */
-    suspend fun updateCondition(conditionId: String, note: String, abatementDate: String) {
+    suspend fun update(conditionId: String, note: String, abatementDate: String) {
+        // Source: https://fhirblog.com/2019/08/13/updating-a-resource-using-patch/
+        // TODO : Escape the strings before patching them to the fhir server
         val conditionPatch = "[{ \"op\": \"replace\", \"path\": \"/note/0\", \"value\": { \"text\": \"$note\" } }," +
                              " { \"op\": \"replace\", \"path\": \"/abatementDateTime\", \"value\": \"$abatementDate\" }]"
 
-        val response: HttpResponse = client.patch("$baseURL/Condition/$conditionId") {
+        client.patch("$baseURL/Condition/$conditionId") {
             contentType(ContentType("application", "json-patch+json"))
             body = conditionPatch
-        }
+        } as HttpResponse
     }
 
     fun parseConditionsStringToObject(jsonMessage: String): Condition {

@@ -57,7 +57,7 @@ class ConditionTest {
         val note = "This is an updated test condition"
         val abatementDate = "2022-01-02"
         runBlocking {
-            conditionResource.updateCondition(conditionId, note = note, abatementDate = abatementDate)
+            conditionResource.update(conditionId, note = note, abatementDate = abatementDate)
         }
 
         val condition = runBlocking { conditionResource.read(conditionId) }
