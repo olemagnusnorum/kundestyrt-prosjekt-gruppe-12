@@ -1,6 +1,7 @@
 package com.backend
 
 import com.backend.plugins.*
+import com.backend.plugins.funksjonsvurdering.funksjonsvurderingRoute
 import com.backend.plugins.resources.*
 import com.backend.plugins.venterbarn.venterBarnRoute
 import io.ktor.server.engine.*
@@ -18,6 +19,8 @@ val conditionResource = ConditionResource("local")
 val subscriptionResource = SubscriptionResource("local")
 val questionnaireResponseResource = QuestionnaireResponseResource("local")
 val questionnaireResource = QuestionnaireResource("local")
+val taskResource = TaskResource("local")
+val pdfHandler = PdfHandler()
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", watchPaths = listOf("classes", "resources")) {
@@ -33,7 +36,7 @@ fun main() {
         }
 
         venterBarnRoute()
-        funksjonsvurderingRoute(questionnaireResponseResource, questionnaireResource)
+        funksjonsvurderingRoute()
 
         // Create required subscriptions if they do not exist
         subscriptionResource.createDefaultSubscriptions()
