@@ -20,6 +20,7 @@ val subscriptionResource = SubscriptionResource("local")
 val questionnaireResponseResource = QuestionnaireResponseResource("local")
 val questionnaireResource = QuestionnaireResource("local")
 val taskResource = TaskResource("local")
+val binaryResource = BinaryResource("local")
 val pdfHandler = PdfHandler()
 
 fun main() {

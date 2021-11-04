@@ -1,31 +1,13 @@
 package com.backend.plugins
 
-import ca.uhn.fhir.context.FhirContext
-import ca.uhn.fhir.parser.IParser
-import io.ktor.client.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import com.backend.binaryResource
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.font.PDType1Font
-import org.hl7.fhir.r4.model.Binary
-import org.hl7.fhir.r4.model.Reference
 import java.io.File
 
-class PdfHandler(server: String = "public") {
-
-    //the base of the fhir server
-    private val baseURL: String = when (server) {
-        "public" -> "http://hapi.fhir.org/baseR4"
-        "local" -> "http://localhost:8000/fhir"
-        else -> throw IllegalArgumentException("server parameter must be either \"public\" or \"local\"")
-    }
-
-    private val ctx: FhirContext = FhirContext.forR4()
-    private val client = HttpClient()
-    val jsonParser: IParser = ctx.newJsonParser()
+class PdfHandler {
 
     private var saveLocation: String = "src/main/resources/"
     private val font = PDType1Font.COURIER
@@ -43,14 +25,12 @@ class PdfHandler(server: String = "public") {
         val file = File(saveLocation+fileName)
 
         if (file.exists()){
-            val document = PDDocument.load(file)
-            write(document, fileName, header, text)
+            write(PDDocument.load(file), fileName, header, text)
         } else {
-            val document = PDDocument()
-            write(document, fileName, header, text)
+            write(PDDocument(), fileName, header, text)
         }
         // Also posting FHIR Binary
-        createBinary(file, fileName.substringBefore("."))
+        binaryResource.create(file, fileName.substringBefore("."))
     }
 
     /**
@@ -62,7 +42,7 @@ class PdfHandler(server: String = "public") {
      * @return returns Unit
      */
     private fun write(document: PDDocument, fileName: String, header: String = "", text: String){
-        //write title here with an if statement
+        // Write title here with an if statement
         var lines = 0
         var page = PDPage()
         document.addPage(page)
@@ -76,7 +56,7 @@ class PdfHandler(server: String = "public") {
             val headerList = cleanText(header)
             contentStream.setLeading(12.0)
             contentStream.setFont(boldFont, fontSize)
-            headerList.forEach { it ->
+            headerList.forEach {
                 if (lines > 60){
                     lines = 0
                     //close curren contentStream
@@ -106,7 +86,7 @@ class PdfHandler(server: String = "public") {
             contentStream.newLine()
             lines += 2
         }
-        textList.forEach { it ->
+        textList.forEach {
             if (lines > 60){
                 lines = 0
                 //close curren contentStream
@@ -143,25 +123,25 @@ class PdfHandler(server: String = "public") {
      * @param text String to be cleaned
      * @return returns list of strings, each representing a line in the pdf
      */
-    private fun cleanText(text: String): MutableList<String>{
-        //remove newline
-        var listOfStrings = text.split("\n").toMutableList()
+    private fun cleanText(text: String): MutableList<String> {
+        // Remove newline
+        val listOfStrings = text.split("\n").toMutableList()
         for (i in 0 until listOfStrings.size){
             if (listOfStrings[i] == ""){
                 listOfStrings[i] = "\\n"
             }
         }
-        var wrappedListOfString = mutableListOf<String>()
+        val wrappedListOfString = mutableListOf<String>()
         for (i in 0 until listOfStrings.size){
             val currentLine = listOfStrings[i]
             var s = ""
-            //greedy line wrapping
+            // Greedy line wrapping
             for (j in currentLine.split(" ")){
-                if ((s + j).length < 115){
-                    s = s+" "+ j
+                s = if ((s + j).length < 115){
+                    "$s $j"
                 } else {
                     wrappedListOfString.add(s)
-                    s = j
+                    j
                 }
             }
             wrappedListOfString.add(s)
@@ -170,20 +150,4 @@ class PdfHandler(server: String = "public") {
         return wrappedListOfString
     }
 
-    private suspend fun createBinary(file: File, patientId: String) : HttpResponse {
-
-        val binary = Binary()
-
-        binary.data = file.readBytes()
-        binary.contentType = ContentType.Application.Pdf.toString()
-        binary.securityContext = Reference().setReference("Patient/${patientCommunication.parseBundleXMLToPatient(patientCommunication.patientSearch(identifier = patientId), isXML = false)?.id?.split("/")?.get(5)}")
-
-        // post the Binary to the server
-        val response: HttpResponse = client.post("$baseURL/Binary"){
-            contentType(ContentType.Application.Json)
-            body = jsonParser.encodeResourceToString(binary)
-        }
-
-        return response
-    }
 }
