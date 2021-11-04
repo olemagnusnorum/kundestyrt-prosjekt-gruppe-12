@@ -93,36 +93,34 @@ class QuestionnaireResponseResource(server: String = "public") {
 
     /**
      * Finds the Answers of a FHIR QuestionnaireResponse object
-     * @return listOfAnswers a list of Strings containing the answers
+     * @param [questionnaireResponse] the QuestionnaireResponse to retrieve answers from
+     * @return a list of Strings containing the answers
      */
-    fun getQuestionnaireAnswers(questionnaireResponse: QuestionnaireResponse) : List<String> {
+    fun retrieveAnswers(questionnaireResponse: QuestionnaireResponse) : List<String> {
         val listOfAnswers: MutableList<String> = mutableListOf()
-        for (item in questionnaireResponse.item) {
+        for (item in questionnaireResponse.item)
             listOfAnswers.add(item.answer[0].valueCoding.code)
-        }
         return listOfAnswers
     }
 
     /**
      * Add questionnaireResponse to local inbox when it arrives via subscription
+     * @param [questionnaireResponseJson] the json formatted QuestionnaireResponse-string
      */
-    fun addToInbox(json: String) {
-        val questionnaireResponse = jsonParser.parseResource(QuestionnaireResponse::class.java, json)
+    fun addToInbox(questionnaireResponseJson: String) {
+        val questionnaireResponse = parse(questionnaireResponseJson)
         val patientId = questionnaireResponse.subject.reference.substringAfter("/")
 
-        if (inbox.containsKey(patientId)) {
-            inbox[patientId]?.add(questionnaireResponse)
-        }
-        else {
-            var newList = mutableListOf<QuestionnaireResponse>(questionnaireResponse)
-            inbox[patientId] = newList
-        }
+        if (inbox.containsKey(patientId)) inbox[patientId]?.add(questionnaireResponse)
+        else inbox[patientId] = mutableListOf(questionnaireResponse)
     }
 
     /**
      * Parse QuestionnaireResponse
+     * @param [questionnaireResponseJson] the json formatted QuestionnaireResponse-string
+     * @return the parsed QuestionnaireResponse object
      */
-    fun parseQuestionnaireResponse(json: String): QuestionnaireResponse {
-        return jsonParser.parseResource(QuestionnaireResponse::class.java, json)
+    fun parse(questionnaireResponseJson: String): QuestionnaireResponse {
+        return jsonParser.parseResource(QuestionnaireResponse::class.java, questionnaireResponseJson)
     }
 }

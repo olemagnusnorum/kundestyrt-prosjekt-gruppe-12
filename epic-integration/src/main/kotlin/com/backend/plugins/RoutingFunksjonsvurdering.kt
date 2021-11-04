@@ -30,7 +30,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseResource: Questionn
             println("message received")
             questionnaireResponseResource.addToInbox(body)
 
-            val questionnaireResponse = questionnaireResponseResource.parseQuestionnaireResponse(body)
+            val questionnaireResponse = questionnaireResponseResource.parse(body)
             val patient = patientResource.read(questionnaireResponse.subject.reference.substringAfter("/"))
 
             val header = "NAV respons fra Helseplattformen\n" +
@@ -100,7 +100,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseResource: Questionn
 
             // Extract questions and answers
             val questions = questionnaireResource.retrieveQuestions(questionnaire)
-            val answers = questionnaireResponseResource.getQuestionnaireAnswers(questionnaireResponse)
+            val answers = questionnaireResponseResource.retrieveAnswers(questionnaireResponse)
 
             // Getting patient
             val patientId = questionnaireResponse.subject.reference.substringAfter("/")

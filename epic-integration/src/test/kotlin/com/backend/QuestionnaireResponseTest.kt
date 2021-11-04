@@ -20,7 +20,7 @@ class QuestionnaireResponseTest {
         val questionnaireResponse: QuestionnaireResponse = runBlocking { qrc.read(questionnaireResponseID) }
         assert(questionnaireResponse is QuestionnaireResponse)
 
-        val returnVal = qrc.getQuestionnaireAnswers(questionnaireResponse)
+        val returnVal = qrc.retrieveAnswers(questionnaireResponse)
         assert(returnVal is MutableList<String>)
         assert(returnVal[0] == "fwjnkjefn")
         assert(returnVal[1] == "gknlwfe")
