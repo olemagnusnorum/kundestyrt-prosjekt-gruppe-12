@@ -63,21 +63,6 @@ class ConditionResource(server: String = "public") {
         return null
     }
 
-    /**
-     * Function to search a patient and pregnancy condition.
-     * @param conditionId String the id of pregnancy condition
-     * @return an http response as a string.
-     */
-    suspend fun searchPregnantPatient(conditionId: String, outputFormat: String = "json"): String {
-        val response: HttpResponse =
-            client.get(baseURL + "/Condition?" +
-                    "_id=$conditionId&" +
-                    "_include=Condition:patient&" +
-                    "_format=$outputFormat") {
-            }
-        return response.receive()
-    }
-
     // Functions for create
 
     /**
