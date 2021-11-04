@@ -39,7 +39,7 @@ class ConditionTest {
     @Test
     @Order(2)
     fun `getCondition should return a condition resource for Kari Nordmann`() {
-        val condition = runBlocking { conditionResource.getCondition(conditionId) }
+        val condition = runBlocking { conditionResource.read(conditionId) }
         assert(condition.subject.reference == "Patient/$patientId")
     }
 
@@ -64,7 +64,7 @@ class ConditionTest {
             conditionResource.updateCondition(conditionId, note = note, abatementDate = abatementDate)
         }
 
-        val condition = runBlocking { conditionResource.getCondition(conditionId) }
+        val condition = runBlocking { conditionResource.read(conditionId) }
         assert(condition.note[0].text == note)
         assert(condition.abatementDateTimeType?.valueAsString == abatementDate)
     }

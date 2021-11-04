@@ -26,18 +26,15 @@ class ConditionResource(server: String = "public") {
     // For demo purposes
     var latestConditionId: String? = "2591225"  // Georges condition
 
-    // Functions for read
-
     /**
-     * Function to get a Condition resource.
-     * @param conditionId is the id of the condition to read
-     * @return a hapi condition resource
+     * Retrieves a Condition from the fhir server
+     * @param [conditionId] the id of the condition to read
+     * @return a Condition object
      */
-    suspend fun getCondition(conditionId: String): Condition {
-        val response: HttpResponse =
-            client.get(baseURL + "/Condition/${conditionId}?_format=json") {
-
-            }
+    suspend fun read(conditionId: String): Condition {
+        if (conditionId.isEmpty())
+            throw IllegalArgumentException("Required argument 'conditionId' was empty.")
+        val response: HttpResponse = client.get("$baseURL/Condition/${conditionId}?_format=json")
         return jsonParser.parseResource(Condition::class.java, response.receive<String>())
     }
 
