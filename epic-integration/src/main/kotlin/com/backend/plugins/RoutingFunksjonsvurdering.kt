@@ -117,7 +117,7 @@ fun Application.funksjonsvurderingRoute(questionnaireResponseResource: Questionn
             val patientId: String = params["patientId"]!!.split("/")[5]
             val questionnaireId: String = params["questionnaireId"]!!
 
-            taskResource.createTask(patientId, questionnaireId) //Should trigger subscription
+            taskResource.create(patientId, questionnaireId) //Should trigger subscription
 
             call.respondTemplate("funksjonsvurdering/nav.ftl")
         }
