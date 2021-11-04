@@ -46,10 +46,7 @@ class ConditionTest {
     @Test
     @Order(3)
     fun `searchCondition should find a pregnancy condition resource for Kari Nordmann`() {
-        val condition: Condition = runBlocking {
-            val conditionResponse = conditionResource.searchCondition(patientId, outputFormat = "json").receive<String>()
-            return@runBlocking conditionResource.parseConditionBundleStringToObject(conditionResponse, firstNotLast = false)!!
-        }
+        val condition: Condition = runBlocking { conditionResource.search(patientId = patientId)!! }
         assert(condition.idElement.idPart.isNotEmpty())
         assert(condition.code.coding[0].code == "77386006")
         assert(condition.subject.reference == "Patient/$patientId")

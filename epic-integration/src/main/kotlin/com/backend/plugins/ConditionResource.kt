@@ -38,23 +38,29 @@ class ConditionResource(server: String = "public") {
         return jsonParser.parseResource(Condition::class.java, response.receive<String>())
     }
 
-    // Functions for search
-
     /**
-     * Function to search for one or more condition resource(s).
-     * @param patientId is the id of the patient who has the condition
-     * @param outputFormat is either "json" or "xml"
+     * Search for a condition resource
+     * @param [patientId] the id of the patient who has the condition
      * @param [code] searchable condition code (for e.g. Pregnancy: 77386006)
-     * @return an http response
+     * @param [clinicalStatus] e.g. "active" / "inactive"
+     * @param [firstNotLast] whether to return the first or the last condition in the bundle ordered by time of creation
+     * @return the first/last registered Condition object that matches the given parameters, else null
      */
-    suspend fun searchCondition(patientId: String, outputFormat: String, code: String? = null, clinicalStatus: String? = "active"): HttpResponse {
+    suspend fun search(patientId: String, code: String? = null, clinicalStatus: String? = "active", firstNotLast: Boolean = true): Condition? {
         val response: HttpResponse =
-            client.get(baseURL + "/Condition?patient=$patientId&" +
-                    (if (code != null) "_include=$code&" else "") +
-                    (if (code != null) "clinical-status=$clinicalStatus" else "") +
-                    "_format=$outputFormat") {
-            }
-        return response
+            client.get( "$baseURL/Condition?patient=$patientId&" +
+                    (code?.let { "_include=$code&" } ?: "") +
+                    (clinicalStatus?.let { "clinical-status=$clinicalStatus" } ?: "") +
+                    "_format=json")
+
+        val bundle = jsonParser.parseResource(Bundle::class.java, response.receive<String>())
+        if (bundle.total > 0)
+            return if (firstNotLast)
+                bundle.entry.first().resource as Condition
+            else
+                bundle.entry.last().resource as Condition
+
+        return null
     }
 
     /**
@@ -179,28 +185,6 @@ class ConditionResource(server: String = "public") {
             contentType(ContentType("application", "json-patch+json"))
             body = conditionPatch
         }
-    }
-
-    // Functions for parsing
-
-    /**
-     * Function to parse a received bundle containing Condition resources
-     * to a hapi condition object.
-     * @param jsonMessage is the bundle received from a search as a string
-     * @param [firstNotLast] whether to return the first or the last element in the bundle
-     * @return the first condition in the bundle as a hapi condition object
-     */
-    fun parseConditionBundleStringToObject(jsonMessage: String, firstNotLast: Boolean = true): Condition? {
-        jsonParser.setPrettyPrint(true)
-
-        val bundle = jsonParser.parseResource(Bundle::class.java, jsonMessage)
-        if (bundle.total > 0)
-            return if (firstNotLast)
-                bundle.entry.first().resource as Condition
-            else
-                bundle.entry.last().resource as Condition
-
-        return null
     }
 
     fun parseConditionsStringToObject(jsonMessage: String): Condition {
