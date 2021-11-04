@@ -25,13 +25,12 @@ class ConditionTest {
     @Test
     @Order(1)
     fun `createCondition should create and parse a patient, and create and parse a condition`() {
-        val conditionResponse = runBlocking {
+        conditionId = runBlocking {
             val patient = patientResource.search(identifier = "07069012345")
             patientId = patient!!.idElement.idPart
-            return@runBlocking conditionResource.create(patientId, "This is a test condition", "2021-10-10", "2022-01-01")
+            return@runBlocking conditionResource.create(patientId, "This is a test condition", "2021-10-10", "2022-01-01")!!
         }
 
-        conditionId = conditionResponse.headers["Location"]!!.split("/")[5]
         assert(conditionId.isNotEmpty())
     }
 
