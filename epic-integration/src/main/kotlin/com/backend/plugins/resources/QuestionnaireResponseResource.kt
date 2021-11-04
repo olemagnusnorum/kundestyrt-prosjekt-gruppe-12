@@ -30,14 +30,14 @@ class QuestionnaireResponseResource(server: String = "public") {
      * @param [questionsList] Questionnaire the response is related to
      * @param [patientId] the patientId the questionnaire response should reference
      */
-    suspend fun create(questionnaire: Questionnaire, questionsList: MutableList<String>, patientId: String = "2559067") {
+    suspend fun create(questionnaire: Questionnaire, answerList: MutableList<String>, patientId: String = "2559067") {
         val questionnaireResponse = QuestionnaireResponse()
 
         // Link Questionnaire
         questionnaireResponse.questionnaire = questionnaire.id.substringBeforeLast("/").substringBeforeLast("/")
         questionnaireResponse.subject = Reference("Patient/$patientId")
 
-        //Put answers in Item and add them to QR
+        // Put answers in Item and add them to QR
         val item = mutableListOf<QuestionnaireResponse.QuestionnaireResponseItemComponent>()
         for (i in 0 until questionnaire.item.size) {
             item.add(QuestionnaireResponse.QuestionnaireResponseItemComponent())
@@ -48,7 +48,7 @@ class QuestionnaireResponseResource(server: String = "public") {
             answerComponent.add(QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent())
             answerComponent[0].value = Coding(
                 "some.system",  // TODO : Configure system code
-                questionsList[i], questionsList[i]
+                answerList[i], answerList[i]
             )
 
             item[i].answer = answerComponent
