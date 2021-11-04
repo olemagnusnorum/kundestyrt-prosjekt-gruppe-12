@@ -75,7 +75,7 @@ class QuestionnaireResponseResource(server: String = "public") {
 
     /**
      * Function to get all QuestionnaireResponses on the server.
-     * @return Bundle resource with QuestionnaireResponses in entry.
+     * @return list of all questionnaire responses.
      */
     suspend fun readAll(): MutableList<QuestionnaireResponse> {
         val response: HttpResponse = client.get("$baseURL/QuestionnaireResponse?_format=json") {}
