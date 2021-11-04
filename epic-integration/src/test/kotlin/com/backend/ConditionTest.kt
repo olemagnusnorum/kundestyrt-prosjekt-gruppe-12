@@ -2,7 +2,6 @@ package com.backend
 
 import com.backend.plugins.ConditionResource
 import com.backend.plugins.PatientResource
-import io.ktor.client.call.*
 import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.Condition
 import org.junit.jupiter.api.MethodOrderer
@@ -29,7 +28,7 @@ class ConditionTest {
         val conditionResponse = runBlocking {
             val patient = patientResource.search(identifier = "07069012345")
             patientId = patient!!.idElement.idPart
-            return@runBlocking conditionResource.createCondition(patientId, "This is a test condition", "2021-10-10", "2022-01-01")
+            return@runBlocking conditionResource.create(patientId, "This is a test condition", "2021-10-10", "2022-01-01")
         }
 
         conditionId = conditionResponse.headers["Location"]!!.split("/")[5]

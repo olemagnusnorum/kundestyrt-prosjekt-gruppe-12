@@ -41,7 +41,7 @@ class PatientResource(server: String = "public") {
      * @param [familyName] the patient's surname
      * @param [birthdate] on the format yyyy-mm-dd
      * @param [identifier] is the patient's identifier (e.g. SSN)
-     * @return the first registered Patient object that matches the given arguments, else null
+     * @return the first registered Patient object that matches the given parameters, else null
      */
     suspend fun search(givenName: String? = null, familyName: String? = null, birthdate: String? = null, identifier: String? = null): Patient? {
         val response: HttpResponse =
@@ -95,21 +95,16 @@ class PatientResource(server: String = "public") {
         name.use = HumanName.NameUse.USUAL
         patient.name = mutableListOf(name)
 
-        // Create a json-encoded string of the patient
-        val patientJson = jsonParser.encodeResourceToString(patient)
-
         // Post the patient to the fhir server
         val response: HttpResponse = client.post("$baseURL/Patient") {
             contentType(ContentType.Application.Json)
-            body = patientJson
+            // Create a json-encoded string of the patient
+            body = jsonParser.encodeResourceToString(patient)
         }
 
         if (response.headers["Location"] != null) {
-            val patientId = response.headers["Location"]!!.split("/")[5]
-            conditionResource.latestConditionId = null
-
             // Return the patientId if a patient was created
-            return patientId
+            return response.headers["Location"]!!.split("/")[5]
         }
 
         return null

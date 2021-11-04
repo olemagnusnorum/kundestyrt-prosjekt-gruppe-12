@@ -85,7 +85,7 @@ fun Application.venterBarnRoute(questionnaireResource: QuestionnaireResource) {
 
                     // Make sure that the patient doesn't already have a registered pregnancy
                     if (!navPregnancyMap.containsKey(id)) {
-                        conditionResource.createCondition(patient.idElement.idPart, note, onsetDate, abatementDate)
+                        conditionResource.create(patient.idElement.idPart, note, onsetDate, abatementDate)
                     } else {
                         val data = mutableMapOf("error" to "Personen er allerede gravid")
                         call.respondTemplate("venterBarn/doctor-form-pregnant.ftl", data)
