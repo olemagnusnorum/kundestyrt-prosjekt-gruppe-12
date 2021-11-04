@@ -45,9 +45,10 @@ class ConditionResource(server: String = "public") {
     suspend fun search(patientId: String, code: String? = null, clinicalStatus: String? = "active", firstNotLast: Boolean = true): Condition? {
         val response: HttpResponse =
             client.get( "$baseURL/Condition?patient=$patientId&" +
-                    (code?.let { "_include=$code&" } ?: "") +
-                    (clinicalStatus?.let { "clinical-status=$clinicalStatus" } ?: "") +
-                    "_format=json")
+                    (if (code != null && code.isNotEmpty()) "_include=$code&" else "") +
+                    (if (clinicalStatus != null && clinicalStatus.isNotEmpty()) "clinical-status=$clinicalStatus&" else "") +
+                    "_format=json"
+            )
 
         val bundle = jsonParser.parseResource(Bundle::class.java, response.receive<String>())
         if (bundle.total > 0)
