@@ -69,6 +69,7 @@ class QuestionnaireResource(server: String = "public") {
      * In the future, this function should take in parameters, for the different values.
      * @param [questions] params of the questions. Get these from navigation. When you click
      * the "Register questionnaire" button you receive the params to send in.
+     * @param [title] the title of the questionnaire
      * @return the questionnaireId of the created questionnaire if successful, else null
      */
     suspend fun create(questions: Parameters, title: String): String? {
@@ -131,6 +132,7 @@ class QuestionnaireResource(server: String = "public") {
 
     /**
      * Retrieve all questionnaires in the fhir server
+     * @return a list of all questionnaires
      */
     suspend fun getAll() : MutableList<Questionnaire> {
         val response: HttpResponse = client.get("$baseURL/Questionnaire?_format=json")
