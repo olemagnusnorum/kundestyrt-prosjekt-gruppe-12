@@ -1,8 +1,8 @@
 package com.backend
 
-import com.backend.plugins.PatientCommunication
-import com.backend.plugins.QuestionnaireCommunication
-import com.backend.plugins.QuestionnaireResponseCommunication
+import com.backend.plugins.resources.PatientResource
+import com.backend.plugins.resources.QuestionnaireResource
+import com.backend.plugins.resources.QuestionnaireResponseResource
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
@@ -20,13 +20,11 @@ import kotlin.test.*
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class QuestionnaireResponseTest {
 
-    private val qrc = QuestionnaireResponseCommunication("local")
-    private val patientCommunication = PatientCommunication("local")
-    private val questionnaireCommunication = QuestionnaireCommunication("local")
+    private val patientResource = PatientResource("local")
+    private val questionnaireResource = QuestionnaireResource("local")
+    private val questionnaireResponseResource = QuestionnaireResponseResource("local")
     private var questionnairesGenerated = false
-    private var testPatientID : String = ""
-
-
+    private var testPatientID: String = ""
 
     @BeforeAll
     fun `Create default questionnaires`(){
@@ -36,77 +34,56 @@ class QuestionnaireResponseTest {
         }
 
         // No predefined questionnaires, so make em
-        val questionnaireBundle = runBlocking { questionnaireCommunication.searchQuestionnaires() }
-
-        if (questionnaireBundle.entry.size >= 3) {
-            for (bundleComponent in questionnaireBundle.entry) {
-                val questionnaire = bundleComponent.resource as Questionnaire
-                questionnaireCommunication.predefinedQuestionnaires.add(questionnaire)
-            }
-        }
-        else {
-            questionnaireCommunication.createDefaultQuestionnaires()
-        }
+        questionnaireResource.predefinedQuestionnaires = runBlocking { questionnaireResource.readAll() }
+        if (questionnaireResource.predefinedQuestionnaires.isEmpty())
+            questionnaireResource.createDefaultQuestionnaires()
         questionnairesGenerated = true
-
     }
 
     @BeforeAll
     fun `Create default patient`(){
-        val patient = runBlocking {
-            val response = patientCommunication.patientSearch(identifier = "04048012345")
-            patientCommunication.parseBundleXMLToPatient(response, isXML = false)
-        }
+        val patient = runBlocking { patientResource.search(identifier = "04048012345") }
 
         // If the patient doesn't exist, create it
         if (patient == null) {
             runBlocking {
-                patientCommunication.createPatient("Test", "Pasient", identifierValue = "04048012345",  birthdate = "7-Jun-1990")
+                patientResource.create("Test", "Pasient", identifierValue = "04048012345",  birthdate = "7-Jun-1990")
             }
         }
 
-        val testPatient = runBlocking {
-            val response = patientCommunication.patientSearch(identifier = "04048012345")
-            patientCommunication.parseBundleXMLToPatient(response, isXML = false)
-        }
+        val testPatient = runBlocking { patientResource.search(identifier = "04048012345") }
         testPatientID = testPatient!!.id.split("/")[5]
     }
 
     @Nested
-    inner class createQuestionnaireResponse {
+    inner class CreateQuestionnaireResponse {
         @Test
         fun `should return a 201 http-response`() {
-            val quest: Questionnaire = questionnaireCommunication.predefinedQuestionnaires[0]
-            val response : HttpResponse = runBlocking {
-                qrc.createQuestionnaireResponse(quest, mutableListOf("Ja", "Nei", "Ja"), testPatientID)
+            val quest: Questionnaire = questionnaireResource.predefinedQuestionnaires[0]
+            val response: HttpResponse = runBlocking {
+                questionnaireResponseResource.create(quest, mutableListOf("Ja", "Nei", "Ja"), testPatientID)
             }
-            assert(response is HttpResponse)
             assert(response.status == HttpStatusCode.Created)
         }
     }
 
     @Nested
-    inner class getQuestionnaireResponse {
+    inner class GetQuestionnaireResponse {
         @Test
         fun `should return a QuestionnaireResponse`() {
             // Create a questionnaire response
-            val quest: Questionnaire = questionnaireCommunication.predefinedQuestionnaires[0]
-            val response : HttpResponse = runBlocking {
-                qrc.createQuestionnaireResponse(quest, mutableListOf("Ja", "Nei", "Ja"), testPatientID)
-            }
+            val quest: Questionnaire = questionnaireResource.predefinedQuestionnaires[0]
+            runBlocking { questionnaireResponseResource.create(quest, mutableListOf("Ja", "Nei", "Ja"), testPatientID) }
 
-            // Get all Questionnaireresponses
-            val qrBundle = runBlocking { qrc.getAllQuestionnaireResponses() }
+            // Get all QuestionnaireResponses
+            val responses = runBlocking { questionnaireResponseResource.readAll() }
 
             // Get the id of the last QuestionnaireResponse
-            val lastQR = qrBundle.entry.last()
-            val qrId = lastQR.fullUrl.split("/")[5]
+            val qrId = responses.last().idElement.idPart
 
             // Now get the same QuestionnaireResponse by ID
-            val qResponse = runBlocking { qrc.getQuestionnaireResponse(qrId)}
-
-            assert(qResponse is QuestionnaireResponse)
-            val listOfAnswers = qrc.getQuestionnaireAnswers(qResponse)
+            val qResponse: QuestionnaireResponse = runBlocking { questionnaireResponseResource.read(qrId)}
+            val listOfAnswers = questionnaireResponseResource.retrieveAnswers(qResponse)
             assert(listOfAnswers[0]== "Ja")
             assert(listOfAnswers[1]== "Nei")
             assert(listOfAnswers[2]== "Ja")
@@ -114,38 +91,35 @@ class QuestionnaireResponseTest {
     }
 
     @Nested
-    inner class getAllQuestionnaireResponses {
+    inner class GetAllQuestionnaireResponses {
         @Test
         fun `should return more than one resource`() {
-            val quest: Questionnaire = questionnaireCommunication.predefinedQuestionnaires[0]
-            val response1 : HttpResponse = runBlocking {
-                qrc.createQuestionnaireResponse(quest, mutableListOf("Ja", "Nei", "Ja"), testPatientID)
-            }
-            val response2 : HttpResponse = runBlocking {
-                qrc.createQuestionnaireResponse(quest, mutableListOf("Ja2", "Nei2", "Ja2"), testPatientID)
-            }
-            val qrBundle = runBlocking { qrc.getAllQuestionnaireResponses() }
+            val quest: Questionnaire = questionnaireResource.predefinedQuestionnaires[0]
+            runBlocking { questionnaireResponseResource.create(quest, mutableListOf("Ja", "Nei", "Ja"), testPatientID) }
+            runBlocking { questionnaireResponseResource.create(quest, mutableListOf("Ja2", "Nei2", "Ja2"), testPatientID) }
+            val responses = runBlocking { questionnaireResponseResource.readAll() }
+
             // Assert that at least 2 QuestionnaireResponses exist
-            assert(qrBundle.total > 1)
+            assert(responses.size > 1)
         }
     }
 
     @Nested
-    inner class getQuestionnaireAnswers {
+    inner class GetQuestionnaireAnswers {
         @Test
         fun `getQuestionnaireAnswers should return a list of strings`() {
             // Create empty template
             val qr = QuestionnaireResponse()
 
             // Generate test answers
-            val testAnswers = listOf<String>("A", "B", "C")
+            val testAnswers = listOf("A", "B", "C")
 
             // Make an item component for the QuestionnaireResposne
             val item = mutableListOf<QuestionnaireResponse.QuestionnaireResponseItemComponent>()
 
             // Stuff answers into the item
             for (answer in testAnswers) {
-                var component = QuestionnaireResponse.QuestionnaireResponseItemComponent()
+                val component = QuestionnaireResponse.QuestionnaireResponseItemComponent()
                 component.answer = mutableListOf(QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent())
                 component.answer[0].value = Coding(
                     "some.system",
@@ -158,16 +132,15 @@ class QuestionnaireResponseTest {
             qr.item = item
 
             // Check if getQuestionnaireAnswers returns the correct answers
-            val outputList = qrc.getQuestionnaireAnswers(qr)
-            assert(outputList is List<String>)
+            val outputList = questionnaireResponseResource.retrieveAnswers(qr)
             assert(outputList == testAnswers)
         }
     }
 
     @Nested
-    inner class addToInbox {
+    inner class AddToInbox {
         @Test
-        fun `addToInbox`() {
+        fun `Add to inbox`() {
             // TODO: test inbox
         }
     }

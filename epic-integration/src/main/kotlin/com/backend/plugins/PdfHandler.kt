@@ -1,5 +1,6 @@
 package com.backend.plugins
 
+import com.backend.binaryResource
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
@@ -20,16 +21,16 @@ class PdfHandler {
      * @param fileName name of the pdf file. Has to end in ".pdf"
      * @return returns Unit
      */
-    fun writeToPdf(header: String = "", text: String, fileName: String) {
+    suspend fun writeToPdf(header: String = "", text: String, fileName: String) {
         val file = File(saveLocation+fileName)
 
         if (file.exists()){
-            val document = PDDocument.load(file)
-            write(document, fileName, header, text)
+            write(PDDocument.load(file), fileName, header, text)
         } else {
-            val document = PDDocument()
-            write(document, fileName, header, text)
+            write(PDDocument(), fileName, header, text)
         }
+        // Also posting FHIR Binary
+        binaryResource.create(file, fileName.substringBefore("."))
     }
 
     /**
@@ -41,7 +42,7 @@ class PdfHandler {
      * @return returns Unit
      */
     private fun write(document: PDDocument, fileName: String, header: String = "", text: String){
-        //write title here with an if statement
+        // Write title here with an if statement
         var lines = 0
         var page = PDPage()
         document.addPage(page)
@@ -55,7 +56,7 @@ class PdfHandler {
             val headerList = cleanText(header)
             contentStream.setLeading(12.0)
             contentStream.setFont(boldFont, fontSize)
-            headerList.forEach { it ->
+            headerList.forEach {
                 if (lines > 60){
                     lines = 0
                     //close curren contentStream
@@ -85,7 +86,7 @@ class PdfHandler {
             contentStream.newLine()
             lines += 2
         }
-        textList.forEach { it ->
+        textList.forEach {
             if (lines > 60){
                 lines = 0
                 //close curren contentStream
@@ -122,25 +123,25 @@ class PdfHandler {
      * @param text String to be cleaned
      * @return returns list of strings, each representing a line in the pdf
      */
-    private fun cleanText(text: String): MutableList<String>{
-        //remove newline
-        var listOfStrings = text.split("\n").toMutableList()
+    private fun cleanText(text: String): MutableList<String> {
+        // Remove newline
+        val listOfStrings = text.split("\n").toMutableList()
         for (i in 0 until listOfStrings.size){
             if (listOfStrings[i] == ""){
                 listOfStrings[i] = "\\n"
             }
         }
-        var wrappedListOfString = mutableListOf<String>()
+        val wrappedListOfString = mutableListOf<String>()
         for (i in 0 until listOfStrings.size){
             val currentLine = listOfStrings[i]
             var s = ""
-            //greedy line wrapping
+            // Greedy line wrapping
             for (j in currentLine.split(" ")){
-                if ((s + j).length < 115){
-                    s = s+" "+ j
+                s = if ((s + j).length < 115){
+                    "$s $j"
                 } else {
                     wrappedListOfString.add(s)
-                    s = j
+                    j
                 }
             }
             wrappedListOfString.add(s)
@@ -148,4 +149,5 @@ class PdfHandler {
 
         return wrappedListOfString
     }
+
 }

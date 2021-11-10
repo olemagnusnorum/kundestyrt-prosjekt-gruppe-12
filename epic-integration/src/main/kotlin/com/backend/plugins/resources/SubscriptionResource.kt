@@ -1,4 +1,4 @@
-package com.backend.plugins
+package com.backend.plugins.resources
 
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.IParser
@@ -11,28 +11,26 @@ import kotlinx.coroutines.runBlocking
 import org.hl7.fhir.r4.model.Bundle
 import org.hl7.fhir.r4.model.Subscription
 
-class SubscriptionCommunication(server: String = "public") {
+class SubscriptionResource(server: String = "public") {
 
-    //the base of the fhir server
+    // The base of the fhir server
     private val baseURL: String = when (server) {
         "public" -> "http://hapi.fhir.org/baseR4"
         "local" -> "http://localhost:8000/fhir"
         else -> throw IllegalArgumentException("server parameter must be either \"public\" or \"local\"")
     }
 
-    private val ctx: FhirContext = FhirContext.forR4()
     private val client = HttpClient()
-    private val jsonParser: IParser = ctx.newJsonParser()
+    private val jsonParser: IParser = FhirContext.forR4().newJsonParser()
 
     /**
      * Function to create a subscription resource with channel type rest-hook.
-     * @param criteria is the criteria that triggers the subscription. Should be on the form "Resource?searchParam1=value1..."
-     * @param endpoint is the relative url of the endpoint that messages should be sent to
-     * @param reason is the reason the subscription was created
+     * @param [criteria] the criteria that triggers the subscription. Should be on the form "Resource?searchParam1=value1..."
+     * @param [endpoint] the relative url of the endpoint that messages should be sent to
+     * @param [reason] the reason the subscription was created
      * @return the HttpResponse returned by the HAPI server
      */
-    suspend fun createSubscription(criteria: String, endpoint: String, reason: String): HttpResponse {
-
+    suspend fun create(criteria: String, endpoint: String, reason: String): HttpResponse {
         val subscription = Subscription()
         subscription.status = Subscription.SubscriptionStatus.ACTIVE
         subscription.reason = reason
@@ -56,8 +54,8 @@ class SubscriptionCommunication(server: String = "public") {
      * Function to create a subscription that is triggered by pregnancy condition resources
      * @return the HttpResponse returned by the HAPI server
      */
-    suspend fun createPregnancySubscription(): HttpResponse {
-        return createSubscription(
+    private suspend fun createPregnancySubscription(): HttpResponse {
+        return create(
             reason = "Listen for new and updated pregnancy conditions",
             criteria = "Condition?code=77386006",
             endpoint = "venter-barn/pregnancy-subscription"
@@ -68,8 +66,8 @@ class SubscriptionCommunication(server: String = "public") {
      * Function to create a subscription that is triggered by questionnaireResponse resources
      * @return the HttpResponse returned by the HAPI server
      */
-    suspend fun createQuestionnaireResponseSubscription(): HttpResponse {
-        return createSubscription(
+    private suspend fun createQuestionnaireResponseSubscription(): HttpResponse {
+        return create(
                 reason = "Listen for new and updated questionnaireResponses",
                 criteria = "QuestionnaireResponse?",
                 endpoint = "funksjonsvurdering/questionnaireResponse-subscription"
@@ -78,12 +76,12 @@ class SubscriptionCommunication(server: String = "public") {
 
     /**
      * Function to create a subscription resource with channel type rest-hook.
-     * @param criteria is the criteria of the subscription resource being searched for
-     * @param reason is the reason the subscription was created
-     * @param status is one of the following: requested, active, error, off
+     * @param [criteria] the criteria of the subscription resource being searched for
+     * @param [reason] the reason the subscription was created
+     * @param [status] the status of the subscription resource being searched for
      * @return the HttpResponse returned by the HAPI server
      */
-    suspend fun searchSubscription(criteria: String, reason: String? = null, status: String = "active"): HttpResponse {
+    suspend fun search(criteria: String, reason: String? = null, status: String = "active"): HttpResponse {
         return client.get(
             "$baseURL/Subscription?" +
                     "criteria=$criteria&" +
@@ -98,7 +96,7 @@ class SubscriptionCommunication(server: String = "public") {
      */
     fun createDefaultSubscriptions() {
         val pregnancySubscriptionSearch = runBlocking {
-            searchSubscription(criteria="Condition?code=77386006").receive<String>()
+            search(criteria="Condition?code=77386006").receive<String>()
         }
 
         if(jsonParser.parseResource(Bundle::class.java, pregnancySubscriptionSearch).total > 0) {
@@ -109,7 +107,7 @@ class SubscriptionCommunication(server: String = "public") {
         }
 
         val questionnaireResponseSubscriptionSearch = runBlocking {
-            searchSubscription(criteria="QuestionnaireResponse?").receive<String>()
+            search(criteria="QuestionnaireResponse?").receive<String>()
         }
 
         if(jsonParser.parseResource(Bundle::class.java, questionnaireResponseSubscriptionSearch).total > 0) {
@@ -120,13 +118,13 @@ class SubscriptionCommunication(server: String = "public") {
         }
 
         val taskSubscriptionSearch = runBlocking {
-            searchSubscription(criteria="Task?").receive<String>()
+            search(criteria="Task?").receive<String>()
         }
 
         if(jsonParser.parseResource(Bundle::class.java, taskSubscriptionSearch).total > 0) {
             println("Task subscription already exists")
         } else {
-            val response = runBlocking { createSubscription(
+            val response = runBlocking { create(
                     reason = "Listen for new and updated tasks",
                     criteria = "Task?",
                     endpoint = "funksjonsvurdering/task-subscription"
