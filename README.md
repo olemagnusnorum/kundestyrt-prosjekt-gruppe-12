@@ -30,7 +30,7 @@ docker pull hapiproject/hapi:latest
 2. To start a new container running the server, run the command 
         
 ```bash
-docker run -p 8000:8080 hapiproject/hapi:latest.
+docker run -p 8000:8080 hapiproject/hapi:latest
 ```
 
 
