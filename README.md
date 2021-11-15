@@ -31,7 +31,7 @@ docker pull hapiproject/hapi:latest
 2. To start a new container running the server, run the command
 
 ```bash
-docker run -p 8000:8080 hapiproject/hapi:latest.
+docker run -p 8000:8080 hapiproject/hapi:latest
 ```
 
 To enable the subscription resource for the local HAPI server we have to edit the application.yaml file.
@@ -47,7 +47,11 @@ in another terminal window. “name-of-docker-container” is found in the Docke
 4. Since this docker container does not come with a terminal based text editor, we have to download one before we can edit the application.yaml file. Run the commands
 
 ```bash
-apt-get update and apt-get install vim
+apt-get update 
+```
+and
+```bash
+apt-get install vim 
 ```
 
 5. Now navigate and open the application.yaml file with vim by running
