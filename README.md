@@ -70,10 +70,10 @@ The HAPI server should now be able to use the subscription resource.
 
 ## Installing the application
 
-1.  Clone our repository usingg 
+1.  Clone our repository using 
 
 ```bash
-vim webapps/ROOT/WEB-INF/classes/application.yaml 
+git clone https://github.com/olemagnusnorum/kundestyrt-prosjekt-gruppe-12.git
 ```
 2. Run the Application.kt file within Intellij with the server running in a docker container. The file is located in epic-integration/src/main/kotlin/com/backend
 
