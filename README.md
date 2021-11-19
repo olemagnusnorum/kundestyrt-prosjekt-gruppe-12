@@ -77,6 +77,7 @@ git clone https://github.com/olemagnusnorum/kundestyrt-prosjekt-gruppe-12.git
 ```
 2. Run the Application.kt file within Intellij with the server running in a docker container. The file is located in epic-integration/src/main/kotlin/com/backend
 
+Note: It is important that the HAPI server is done starting up before the kotlin server is run.
 
 ## Usage
 
